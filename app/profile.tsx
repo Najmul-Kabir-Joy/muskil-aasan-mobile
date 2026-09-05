@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { View } from "react-native";
-import { ActionButton, AppHeader, Badge, EmptyState, PrimaryButton, RoleSwitch, Screen, SectionHeader, SelectableChip } from "@/components/ui";
+import {
+  ActionButton,
+  AppHeader,
+  Badge,
+  EmptyState,
+  PrimaryButton,
+  RoleSwitch,
+  Screen,
+  SectionHeader,
+  SelectableChip,
+} from "@/shared/components/ui";
 
 export default function ProfileScreen() {
   const [phoneVerified, setPhoneVerified] = useState(false);
@@ -9,33 +19,62 @@ export default function ProfileScreen() {
   const jobSeekerCategories = ["Repair", "Tutor", "Delivery", "Design", "Photo", "Admin"];
 
   function toggleCategory(category: string) {
-    setCategories((value) => (value.includes(category) ? value.filter((item) => item !== category) : [...value, category]));
+    setCategories((value) =>
+      value.includes(category) ? value.filter((item) => item !== category) : [...value, category],
+    );
   }
 
   return (
     <Screen>
-      <AppHeader title="Nadia Rahman" subtitle="Mirpur · two modes enabled · switch anytime" trailing={<RoleSwitch active="poster" />} />
+      <AppHeader
+        title="Nadia Rahman"
+        subtitle="Mirpur · two modes enabled · switch anytime"
+        trailing={<RoleSwitch active="poster" />}
+      />
 
       <SectionHeader title="Trust profile" />
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-        <Badge label={phoneVerified ? "Phone verified" : "Phone pending"} tone={phoneVerified ? "success" : "warning"} />
+        <Badge
+          label={phoneVerified ? "Phone verified" : "Phone pending"}
+          tone={phoneVerified ? "success" : "warning"}
+        />
         <Badge label="Poster mode" tone="success" />
-        <Badge label={jobSeekerSetup ? "Job seeker setup complete" : "Job seeker setup available"} tone={jobSeekerSetup ? "success" : "neutral"} />
+        <Badge
+          label={jobSeekerSetup ? "Job seeker setup complete" : "Job seeker setup available"}
+          tone={jobSeekerSetup ? "success" : "neutral"}
+        />
       </View>
 
       <View style={{ gap: 12 }}>
-        <ActionButton label={phoneVerified ? "Phone verified" : "Mark phone verified"} onPress={() => setPhoneVerified(true)} disabled={phoneVerified} />
-        <ActionButton label={jobSeekerSetup ? "Job seeker setup complete" : "Complete job seeker setup"} onPress={() => setJobSeekerSetup(true)} tone="secondary" disabled={jobSeekerSetup} />
+        <ActionButton
+          label={phoneVerified ? "Phone verified" : "Mark phone verified"}
+          onPress={() => setPhoneVerified(true)}
+          disabled={phoneVerified}
+        />
+        <ActionButton
+          label={jobSeekerSetup ? "Job seeker setup complete" : "Complete job seeker setup"}
+          onPress={() => setJobSeekerSetup(true)}
+          tone="secondary"
+          disabled={jobSeekerSetup}
+        />
       </View>
 
       <SectionHeader title="Job seeker categories" />
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
         {jobSeekerCategories.map((category) => (
-          <SelectableChip key={category} label={category} selected={categories.includes(category)} onPress={() => toggleCategory(category)} />
+          <SelectableChip
+            key={category}
+            label={category}
+            selected={categories.includes(category)}
+            onPress={() => toggleCategory(category)}
+          />
         ))}
       </View>
 
-      <EmptyState title="Job seeker setup" body={`Selected categories: ${categories.join(", ") || "none"}. Verification prompts, portfolio proof, and service areas belong here before job seekers can send high-risk offers.`} />
+      <EmptyState
+        title="Job seeker setup"
+        body={`Selected categories: ${categories.join(", ") || "none"}. Verification prompts, portfolio proof, and service areas belong here before job seekers can send high-risk offers.`}
+      />
 
       <PrimaryButton label="Contact support" href="/support" tone="secondary" />
     </Screen>

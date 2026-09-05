@@ -11,7 +11,8 @@ export type TaskStatus =
   | "cancelled"
   | "disputed";
 
-export type OfferStatus = "submitted" | "viewed" | "withdrawn" | "rejected" | "accepted" | "expired";
+export type OfferStatus =
+  "submitted" | "viewed" | "withdrawn" | "rejected" | "accepted" | "expired";
 
 export type VerificationStatus = "unverified" | "pending" | "verified" | "rejected";
 

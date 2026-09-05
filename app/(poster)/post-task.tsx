@@ -1,14 +1,24 @@
 import { useMemo, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import { ActionButton, AppHeader, Badge, PrimaryButton, Screen, SectionHeader, SelectableChip } from "@/components/ui";
+import {
+  ActionButton,
+  AppHeader,
+  Badge,
+  PrimaryButton,
+  Screen,
+  SectionHeader,
+  SelectableChip,
+} from "@/shared/components/ui";
 import { categories } from "@/data/mock";
-import { colors, radius, spacing } from "@/theme/tokens";
+import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
 export default function PostTaskScreen() {
   const [step, setStep] = useState(0);
   const [title, setTitle] = useState("Need AC servicing today");
   const [category, setCategory] = useState(categories[0].label);
-  const [description, setDescription] = useState("Split AC needs cleaning and cooling check before evening.");
+  const [description, setDescription] = useState(
+    "Split AC needs cleaning and cooling check before evening.",
+  );
   const [budget, setBudget] = useState("1200");
   const [area, setArea] = useState("Mirpur");
   const [timing, setTiming] = useState("Today");
@@ -29,17 +39,31 @@ export default function PostTaskScreen() {
 
   return (
     <Screen>
-      <AppHeader title="Post a task in under a minute." subtitle="Progressive fields keep the first version fast while still collecting enough detail for useful offers." />
+      <AppHeader
+        title="Post a task in under a minute."
+        subtitle="Progressive fields keep the first version fast while still collecting enough detail for useful offers."
+      />
 
       <View style={styles.stepCard}>
         <Badge label={`Step ${step + 1} of 4`} tone="success" />
         {step === 0 ? (
           <>
             <SectionHeader title="What do you need?" />
-            <TextInput value={title} onChangeText={setTitle} placeholder="Example: Need AC servicing today" placeholderTextColor={colors.muted} style={styles.input} />
+            <TextInput
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Example: Need AC servicing today"
+              placeholderTextColor={colors.muted}
+              style={styles.input}
+            />
             <View style={styles.chips}>
               {categories.map((item) => (
-                <SelectableChip key={item.id} label={item.label} selected={category === item.label} onPress={() => setCategory(item.label)} />
+                <SelectableChip
+                  key={item.id}
+                  label={item.label}
+                  selected={category === item.label}
+                  onPress={() => setCategory(item.label)}
+                />
               ))}
             </View>
           </>
@@ -47,26 +71,65 @@ export default function PostTaskScreen() {
         {step === 1 ? (
           <>
             <SectionHeader title="Details and photos" />
-            <TextInput value={description} onChangeText={setDescription} multiline placeholder="Describe the task" placeholderTextColor={colors.muted} style={[styles.input, styles.textArea]} />
+            <TextInput
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              placeholder="Describe the task"
+              placeholderTextColor={colors.muted}
+              style={[styles.input, styles.textArea]}
+            />
             <Badge label="Photo uploader placeholder" tone="warning" />
           </>
         ) : null}
         {step === 2 ? (
           <>
             <SectionHeader title="Budget and timing" />
-            <TextInput value={budget} onChangeText={setBudget} keyboardType="numeric" placeholder="Budget amount" placeholderTextColor={colors.muted} style={styles.input} />
-            <TextInput value={timing} onChangeText={setTiming} placeholder="Preferred time" placeholderTextColor={colors.muted} style={styles.input} />
-            <SelectableChip label="Urgent" selected={urgent} onPress={() => setUrgent((value) => !value)} />
+            <TextInput
+              value={budget}
+              onChangeText={setBudget}
+              keyboardType="numeric"
+              placeholder="Budget amount"
+              placeholderTextColor={colors.muted}
+              style={styles.input}
+            />
+            <TextInput
+              value={timing}
+              onChangeText={setTiming}
+              placeholder="Preferred time"
+              placeholderTextColor={colors.muted}
+              style={styles.input}
+            />
+            <SelectableChip
+              label="Urgent"
+              selected={urgent}
+              onPress={() => setUrgent((value) => !value)}
+            />
           </>
         ) : null}
         {step === 3 ? (
           <>
             <SectionHeader title="Location and review" />
-            <SelectableChip label="Remote task" selected={remote} onPress={() => setRemote((value) => !value)} />
-            {!remote ? <TextInput value={area} onChangeText={setArea} placeholder="Area in Dhaka" placeholderTextColor={colors.muted} style={styles.input} /> : null}
+            <SelectableChip
+              label="Remote task"
+              selected={remote}
+              onPress={() => setRemote((value) => !value)}
+            />
+            {!remote ? (
+              <TextInput
+                value={area}
+                onChangeText={setArea}
+                placeholder="Area in Dhaka"
+                placeholderTextColor={colors.muted}
+                style={styles.input}
+              />
+            ) : null}
             <View style={styles.reviewCard}>
               <Text style={styles.stepTitle}>{title}</Text>
-              <Text style={styles.helpText}>{category} · ৳{budget} · {remote ? "Remote" : area} · {timing}{urgent ? " · Urgent" : ""}</Text>
+              <Text style={styles.helpText}>
+                {category} · ৳{budget} · {remote ? "Remote" : area} · {timing}
+                {urgent ? " · Urgent" : ""}
+              </Text>
               <Text style={styles.helpText}>{description}</Text>
             </View>
           </>
@@ -74,18 +137,38 @@ export default function PostTaskScreen() {
       </View>
 
       <View style={styles.actions}>
-        {step > 0 ? <ActionButton label="Back" onPress={() => setStep((value) => value - 1)} tone="secondary" /> : null}
-        {step < 3 ? <ActionButton label="Next" onPress={() => setStep((value) => value + 1)} /> : <ActionButton label={canPublish ? "Mock publish ready" : "Complete checklist"} onPress={() => undefined} disabled={!canPublish} />}
+        {step > 0 ? (
+          <ActionButton
+            label="Back"
+            onPress={() => setStep((value) => value - 1)}
+            tone="secondary"
+          />
+        ) : null}
+        {step < 3 ? (
+          <ActionButton label="Next" onPress={() => setStep((value) => value + 1)} />
+        ) : (
+          <ActionButton
+            label={canPublish ? "Mock publish ready" : "Complete checklist"}
+            onPress={() => undefined}
+            disabled={!canPublish}
+          />
+        )}
       </View>
 
       <View style={styles.stepCard}>
         <SectionHeader title="Publish checklist" />
         {checks.map((item) => (
-          <Text key={item.label} style={[styles.checkItem, !item.done && styles.incompleteCheck]}>{item.done ? "✓" : "○"} {item.label}</Text>
+          <Text key={item.label} style={[styles.checkItem, !item.done && styles.incompleteCheck]}>
+            {item.done ? "✓" : "○"} {item.label}
+          </Text>
         ))}
       </View>
 
-      <PrimaryButton label="Save draft and review offers" href="/(poster)/tasks" tone={canPublish ? "primary" : "secondary"} />
+      <PrimaryButton
+        label="Save draft and review offers"
+        href="/(poster)/tasks"
+        tone={canPublish ? "primary" : "secondary"}
+      />
     </Screen>
   );
 }
@@ -121,7 +204,7 @@ const styles = StyleSheet.create({
   stepTitle: {
     color: colors.text,
     fontSize: 18,
-    fontWeight: "900",
+    fontFamily: fonts.extraBold,
   },
   helpText: {
     color: colors.muted,
@@ -131,7 +214,7 @@ const styles = StyleSheet.create({
   checkItem: {
     color: colors.text,
     fontSize: 15,
-    fontWeight: "700",
+    fontFamily: fonts.semiBold,
   },
   incompleteCheck: {
     color: colors.muted,

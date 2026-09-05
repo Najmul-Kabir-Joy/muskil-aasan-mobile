@@ -1,7 +1,17 @@
 import { StyleSheet, Text, View } from "react-native";
-import { AppHeader, Badge, CategoryTile, EmptyState, PrimaryButton, RoleSwitch, Screen, SectionHeader, TaskCard } from "@/components/ui";
+import {
+  AppHeader,
+  Badge,
+  CategoryTile,
+  EmptyState,
+  PrimaryButton,
+  RoleSwitch,
+  Screen,
+  SectionHeader,
+  TaskCard,
+} from "@/shared/components/ui";
 import { categories, tasks } from "@/data/mock";
-import { colors, radius, spacing } from "@/theme/tokens";
+import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
 export default function PosterHomeScreen() {
   const activeTasks = tasks.filter((task) => task.status !== "completed");
@@ -9,12 +19,18 @@ export default function PosterHomeScreen() {
 
   return (
     <Screen>
-      <AppHeader title="Hi, Nadia" subtitle="Mirpur · ready to post or track a task" trailing={<RoleSwitch active="poster" />} />
+      <AppHeader
+        title="Hi, Nadia"
+        subtitle="Mirpur · ready to post or track a task"
+        trailing={<RoleSwitch active="poster" />}
+      />
 
       <View style={styles.actionCard}>
         <Badge label="Poster mode" tone="success" />
         <Text style={styles.actionTitle}>What do you need help with today?</Text>
-        <Text style={styles.actionBody}>Create one clear task. Add budget, timing, and area so job seekers can send better offers.</Text>
+        <Text style={styles.actionBody}>
+          Create one clear task. Add budget, timing, and area so job seekers can send better offers.
+        </Text>
         <PrimaryButton label="Post a new task" href="/(poster)/post-task" />
       </View>
 
@@ -40,7 +56,10 @@ export default function PosterHomeScreen() {
         ))}
       </View>
 
-      <SectionHeader title="Needs your attention" action={<PrimaryButton label="All tasks" href="/(poster)/tasks" tone="secondary" />} />
+      <SectionHeader
+        title="Needs your attention"
+        action={<PrimaryButton label="All tasks" href="/(poster)/tasks" tone="secondary" />}
+      />
       {activeTasks.slice(0, 2).map((task) => (
         <TaskCard key={task.id} task={task} />
       ))}
@@ -63,11 +82,11 @@ const styles = StyleSheet.create({
   actionTitle: {
     color: colors.card,
     fontSize: 28,
-    fontWeight: "900",
+    fontFamily: fonts.extraBold,
     lineHeight: 34,
   },
   actionBody: {
-    color: colors.emeraldSoft,
+    color: colors.primarySoft,
     fontSize: 15,
     lineHeight: 23,
   },
@@ -86,12 +105,12 @@ const styles = StyleSheet.create({
   statValue: {
     color: colors.primary,
     fontSize: 24,
-    fontWeight: "900",
+    fontFamily: fonts.extraBold,
   },
   statLabel: {
     color: colors.muted,
     fontSize: 12,
-    fontWeight: "700",
+    fontFamily: fonts.semiBold,
     lineHeight: 16,
   },
 });

@@ -1,7 +1,15 @@
 import { useMemo, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import { ActionButton, AppHeader, Badge, PrimaryButton, Screen, SectionHeader, SelectableChip } from "@/components/ui";
-import { colors, radius, spacing } from "@/theme/tokens";
+import {
+  ActionButton,
+  AppHeader,
+  Badge,
+  PrimaryButton,
+  Screen,
+  SectionHeader,
+  SelectableChip,
+} from "@/shared/components/ui";
+import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
 const steps = ["Phone number", "OTP verification", "Basic profile", "Choose mode"];
 const roles = ["Poster mode", "Job seeker mode", "Both modes"];
@@ -31,7 +39,9 @@ export default function OnboardingScreen() {
         {steps.map((stepLabel, index) => (
           <View key={stepLabel} style={styles.stepRow}>
             <Badge label={`Step ${index + 1}`} tone={index <= step ? "success" : "neutral"} />
-            <Text style={[styles.stepText, index === step && styles.activeStepText]}>{stepLabel}</Text>
+            <Text style={[styles.stepText, index === step && styles.activeStepText]}>
+              {stepLabel}
+            </Text>
           </View>
         ))}
       </View>
@@ -40,35 +50,77 @@ export default function OnboardingScreen() {
         <SectionHeader title={steps[step]} />
         {step === 0 ? (
           <>
-            <TextInput value={phone} onChangeText={setPhone} keyboardType="phone-pad" style={styles.input} />
+            <TextInput
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              style={styles.input}
+            />
             <Text style={styles.helpText}>We use your number to protect jobs and offers.</Text>
           </>
         ) : null}
         {step === 1 ? (
           <>
-            <TextInput value={otp} onChangeText={setOtp} keyboardType="number-pad" placeholder="Enter 4 digit OTP" placeholderTextColor={colors.muted} style={styles.input} />
-            <Text style={styles.helpText}>Mock OTP accepts any 4 digits. Resend and expired states can be checked in this step.</Text>
+            <TextInput
+              value={otp}
+              onChangeText={setOtp}
+              keyboardType="number-pad"
+              placeholder="Enter 4 digit OTP"
+              placeholderTextColor={colors.muted}
+              style={styles.input}
+            />
+            <Text style={styles.helpText}>
+              Mock OTP accepts any 4 digits. Resend and expired states can be checked in this step.
+            </Text>
           </>
         ) : null}
         {step === 2 ? (
           <>
-            <TextInput value={name} onChangeText={setName} placeholder="Your name" placeholderTextColor={colors.muted} style={styles.input} />
-            <TextInput placeholder="Area in Dhaka" placeholderTextColor={colors.muted} style={styles.input} />
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder="Your name"
+              placeholderTextColor={colors.muted}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Area in Dhaka"
+              placeholderTextColor={colors.muted}
+              style={styles.input}
+            />
           </>
         ) : null}
         {step === 3 ? (
           <View style={styles.chips}>
             {roles.map((item) => (
-              <SelectableChip key={item} label={item} selected={role === item} onPress={() => setRole(item)} />
+              <SelectableChip
+                key={item}
+                label={item}
+                selected={role === item}
+                onPress={() => setRole(item)}
+              />
             ))}
           </View>
         ) : null}
         <View style={styles.actions}>
-          {step > 0 ? <ActionButton label="Back" onPress={() => setStep((value) => value - 1)} tone="secondary" /> : null}
+          {step > 0 ? (
+            <ActionButton
+              label="Back"
+              onPress={() => setStep((value) => value - 1)}
+              tone="secondary"
+            />
+          ) : null}
           {step < steps.length - 1 ? (
-            <ActionButton label="Continue" onPress={() => setStep((value) => value + 1)} disabled={!canContinue} />
+            <ActionButton
+              label="Continue"
+              onPress={() => setStep((value) => value + 1)}
+              disabled={!canContinue}
+            />
           ) : (
-            <PrimaryButton label="Enter prototype" href={role === "Job seeker mode" ? "/(worker)/jobs" : "/(poster)"} />
+            <PrimaryButton
+              label="Enter prototype"
+              href={role === "Job seeker mode" ? "/(worker)/jobs" : "/(poster)"}
+            />
           )}
         </View>
       </View>
@@ -88,7 +140,7 @@ const styles = StyleSheet.create({
   stepText: {
     color: colors.text,
     fontSize: 15,
-    fontWeight: "800",
+    fontFamily: fonts.bold,
   },
   activeStepText: {
     color: colors.primary,
@@ -107,7 +159,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     color: colors.text,
     fontSize: 18,
-    fontWeight: "800",
+    fontFamily: fonts.bold,
     minHeight: 52,
     paddingHorizontal: spacing.lg,
   },

@@ -1,0 +1,26 @@
+---
+description: Core engineering standards for the Muskil Aasan mobile app
+globs:
+alwaysApply: true
+---
+
+This repository's engineering rules live in [AGENTS.md](../../AGENTS.md) and
+`docs/engineering/` (architecture, code-style, testing, security,
+accessibility, git-workflow). Read AGENTS.md before making changes — it is
+the canonical, tool-agnostic contract that Claude, Codex, Cursor, and human
+contributors all follow. Do not restate or fork these rules; if you find
+yourself wanting a different convention, update AGENTS.md instead of
+diverging in Cursor-only behavior.
+
+Cursor-specific notes:
+
+- Inspect neighboring files in the editor context before generating new code
+  for a screen/component/feature — this repo has established patterns
+  (`src/shared/components/ui.tsx` for primitives, `src/theme/tokens.ts` for
+  design tokens, `src/types/domain.ts` for shared domain types).
+- Do not invent undefined Muskil Aasan product behavior (payments,
+  verification/NID, escrow, job lifecycle, cancellation, ratings, matching,
+  location privacy, fees) — see AGENTS.md's "Do not invent product behavior"
+  section. Ask instead of guessing.
+- Before finishing a change, the equivalents of `npm run format:check`,
+  `npm run lint`, `npm run typecheck`, and `npm test` should pass.

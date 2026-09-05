@@ -1,6 +1,13 @@
 import { useMemo, useState } from "react";
 import { View } from "react-native";
-import { ActionButton, AppHeader, EmptyState, PrimaryButton, Screen, Timeline } from "@/components/ui";
+import {
+  ActionButton,
+  AppHeader,
+  EmptyState,
+  PrimaryButton,
+  Screen,
+  Timeline,
+} from "@/shared/components/ui";
 import { taskTimeline } from "@/data/mock";
 
 export default function TaskStatusScreen() {
@@ -9,9 +16,11 @@ export default function TaskStatusScreen() {
   const timeline = useMemo(
     () =>
       taskTimeline.map((event) => {
-        if (event.label === "Completion requested") return { ...event, completed: completionConfirmed };
+        if (event.label === "Completion requested")
+          return { ...event, completed: completionConfirmed };
         if (event.label === "Payment tracked") return { ...event, completed: paymentTracked };
-        if (event.label === "Reviewed") return { ...event, completed: completionConfirmed && paymentTracked };
+        if (event.label === "Reviewed")
+          return { ...event, completed: completionConfirmed && paymentTracked };
         return event;
       }),
     [completionConfirmed, paymentTracked],
@@ -19,7 +28,10 @@ export default function TaskStatusScreen() {
 
   return (
     <Screen>
-      <AppHeader title="One shared source of truth." subtitle="After hiring, both sides need the same timeline, next action, payment status, and report entry point." />
+      <AppHeader
+        title="One shared source of truth."
+        subtitle="After hiring, both sides need the same timeline, next action, payment status, and report entry point."
+      />
 
       <Timeline events={timeline} />
 
@@ -29,8 +41,17 @@ export default function TaskStatusScreen() {
       />
 
       <View style={{ gap: 12 }}>
-        <ActionButton label={completionConfirmed ? "Completion confirmed" : "Confirm completion"} onPress={() => setCompletionConfirmed(true)} disabled={completionConfirmed} />
-        <ActionButton label={paymentTracked ? "Payment tracked" : "Mark payment tracked"} onPress={() => setPaymentTracked(true)} tone="secondary" disabled={paymentTracked} />
+        <ActionButton
+          label={completionConfirmed ? "Completion confirmed" : "Confirm completion"}
+          onPress={() => setCompletionConfirmed(true)}
+          disabled={completionConfirmed}
+        />
+        <ActionButton
+          label={paymentTracked ? "Payment tracked" : "Mark payment tracked"}
+          onPress={() => setPaymentTracked(true)}
+          tone="secondary"
+          disabled={paymentTracked}
+        />
         <PrimaryButton label="Go to profile" href="/profile" tone="secondary" />
         <PrimaryButton label="Report issue" href="/support" tone="secondary" />
       </View>

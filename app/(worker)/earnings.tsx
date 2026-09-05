@@ -1,6 +1,13 @@
 import { useMemo, useState } from "react";
 import { View } from "react-native";
-import { AppHeader, EmptyState, PrimaryButton, Screen, SectionHeader, SelectableChip } from "@/components/ui";
+import {
+  AppHeader,
+  EmptyState,
+  PrimaryButton,
+  Screen,
+  SectionHeader,
+  SelectableChip,
+} from "@/shared/components/ui";
 
 const periods = [
   { label: "This week", amount: 0, jobs: 0 },
@@ -10,15 +17,26 @@ const periods = [
 
 export default function WorkerEarningsScreen() {
   const [period, setPeriod] = useState(periods[0].label);
-  const selectedPeriod = useMemo(() => periods.find((item) => item.label === period) ?? periods[0], [period]);
+  const selectedPeriod = useMemo(
+    () => periods.find((item) => item.label === period) ?? periods[0],
+    [period],
+  );
 
   return (
     <Screen>
-      <AppHeader title="Job seeker earnings." subtitle="Pilot earnings stay honest: do not imply wallet, withdrawal, or escrow until those systems exist." />
+      <AppHeader
+        title="Job seeker earnings."
+        subtitle="Pilot earnings stay honest: do not imply wallet, withdrawal, or escrow until those systems exist."
+      />
 
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
         {periods.map((item) => (
-          <SelectableChip key={item.label} label={item.label} selected={period === item.label} onPress={() => setPeriod(item.label)} />
+          <SelectableChip
+            key={item.label}
+            label={item.label}
+            selected={period === item.label}
+            onPress={() => setPeriod(item.label)}
+          />
         ))}
       </View>
 

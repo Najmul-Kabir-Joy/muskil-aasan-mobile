@@ -1,9 +1,11 @@
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 import { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { colors, radius, shadows, spacing } from "@/theme/tokens";
+import { colors, fonts, radius, shadows, spacing } from "@/theme/tokens";
 import type { Category, Offer, Task, TaskStatus, VerificationStatus } from "@/types/domain";
+
+type ButtonTone = "primary" | "secondary" | "inverted" | "outlined";
 
 export function Screen({ children }: { children: ReactNode }) {
   return (
@@ -15,7 +17,15 @@ export function Screen({ children }: { children: ReactNode }) {
   );
 }
 
-export function AppHeader({ title, subtitle, trailing }: { title: string; subtitle?: string; trailing?: ReactNode }) {
+export function AppHeader({
+  title,
+  subtitle,
+  trailing,
+}: {
+  title: string;
+  subtitle?: string;
+  trailing?: ReactNode;
+}) {
   return (
     <View style={styles.header}>
       <View style={{ flex: 1 }}>
@@ -29,29 +39,57 @@ export function AppHeader({ title, subtitle, trailing }: { title: string; subtit
 }
 
 export function RoleSwitch({ active }: { active: "poster" | "jobSeeker" }) {
+  const router = useRouter();
   return (
     <View style={styles.roleSwitch}>
-      <Link href="/(poster)" asChild>
-        <Pressable style={[styles.rolePill, active === "poster" && styles.rolePillActive]}>
-          <Text style={[styles.roleText, active === "poster" && styles.roleTextActive]}>Poster mode</Text>
-        </Pressable>
-      </Link>
-      <Link href="/(worker)/jobs" asChild>
-        <Pressable style={[styles.rolePill, active === "jobSeeker" && styles.rolePillActive]}>
-          <Text style={[styles.roleText, active === "jobSeeker" && styles.roleTextActive]}>Job seeker</Text>
-        </Pressable>
-      </Link>
+      <Pressable
+        onPress={() => router.push("/(poster)")}
+        style={[styles.rolePill, active === "poster" && styles.rolePillActive]}
+      >
+        <Text style={[styles.roleText, active === "poster" && styles.roleTextActive]}>
+          Poster mode
+        </Text>
+      </Pressable>
+      <Pressable
+        onPress={() => router.push("/(worker)/jobs")}
+        style={[styles.rolePill, active === "jobSeeker" && styles.rolePillActive]}
+      >
+        <Text style={[styles.roleText, active === "jobSeeker" && styles.roleTextActive]}>
+          Job seeker
+        </Text>
+      </Pressable>
     </View>
   );
 }
 
-export function PrimaryButton({ label, href, tone = "primary" }: { label: string; href: string; tone?: "primary" | "secondary" }) {
+const buttonToneStyles = StyleSheet.create({
+  primary: {},
+  secondary: { backgroundColor: colors.surface },
+  inverted: { backgroundColor: colors.inverted },
+  outlined: { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 },
+});
+
+const buttonToneTextStyles = StyleSheet.create({
+  primary: { color: colors.card },
+  secondary: { color: colors.text },
+  inverted: { color: colors.card },
+  outlined: { color: colors.text },
+});
+
+export function PrimaryButton({
+  label,
+  href,
+  tone = "primary",
+}: {
+  label: string;
+  href: string;
+  tone?: ButtonTone;
+}) {
+  const router = useRouter();
   return (
-    <Link href={href} asChild>
-      <Pressable style={[styles.button, tone === "secondary" && styles.secondaryButton]}>
-        <Text style={[styles.buttonText, tone === "secondary" && styles.secondaryButtonText]}>{label}</Text>
-      </Pressable>
-    </Link>
+    <Pressable onPress={() => router.push(href)} style={[styles.button, buttonToneStyles[tone]]}>
+      <Text style={[styles.buttonText, buttonToneTextStyles[tone]]}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -63,16 +101,22 @@ export function ActionButton({
 }: {
   label: string;
   onPress: () => void;
-  tone?: "primary" | "secondary";
+  tone?: ButtonTone;
   disabled?: boolean;
 }) {
   return (
     <Pressable
       disabled={disabled}
       onPress={onPress}
-      style={[styles.button, tone === "secondary" && styles.secondaryButton, disabled && styles.disabledButton]}
+      style={[styles.button, buttonToneStyles[tone], disabled && styles.disabledButton]}
     >
-      <Text style={[styles.buttonText, tone === "secondary" && styles.secondaryButtonText, disabled && styles.disabledButtonText]}>
+      <Text
+        style={[
+          styles.buttonText,
+          buttonToneTextStyles[tone],
+          disabled && styles.disabledButtonText,
+        ]}
+      >
         {label}
       </Text>
     </Pressable>
@@ -89,8 +133,13 @@ export function SelectableChip({
   onPress: () => void;
 }) {
   return (
-    <Pressable onPress={onPress} style={[styles.selectableChip, selected && styles.selectableChipActive]}>
-      <Text style={[styles.selectableChipText, selected && styles.selectableChipTextActive]}>{label}</Text>
+    <Pressable
+      onPress={onPress}
+      style={[styles.selectableChip, selected && styles.selectableChipActive]}
+    >
+      <Text style={[styles.selectableChipText, selected && styles.selectableChipTextActive]}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -104,7 +153,13 @@ export function SectionHeader({ title, action }: { title: string; action?: React
   );
 }
 
-export function Badge({ label, tone = "neutral" }: { label: string; tone?: "neutral" | "success" | "warning" | "danger" }) {
+export function Badge({
+  label,
+  tone = "neutral",
+}: {
+  label: string;
+  tone?: "neutral" | "success" | "warning" | "danger" | "info";
+}) {
   return (
     <View style={[styles.badge, toneStyles[tone]]}>
       <Text style={[styles.badgeText, toneTextStyles[tone]]}>{label}</Text>
@@ -132,7 +187,10 @@ export function InteractiveCategoryTile({
   onPress: () => void;
 }) {
   return (
-    <Pressable onPress={onPress} style={[styles.categoryTile, selected && styles.categoryTileActive]}>
+    <Pressable
+      onPress={onPress}
+      style={[styles.categoryTile, selected && styles.categoryTileActive]}
+    >
       <Text style={styles.categoryIcon}>{category.icon}</Text>
       <Text style={styles.cardTitle}>{category.label}</Text>
       <Text style={styles.cardMeta}>{category.example}</Text>
@@ -173,7 +231,10 @@ export function OfferCard({ offer }: { offer: Offer }) {
             {offer.worker.rating} rating · {offer.worker.completedJobs} jobs · {offer.worker.area}
           </Text>
         </View>
-        <Badge label={verificationLabel(offer.worker.verification)} tone={offer.worker.verification === "verified" ? "success" : "warning"} />
+        <Badge
+          label={verificationLabel(offer.worker.verification)}
+          tone={offer.worker.verification === "verified" ? "success" : "warning"}
+        />
       </View>
       <Text style={styles.offerMessage}>{offer.message}</Text>
       <View style={styles.signalRow}>
@@ -185,7 +246,15 @@ export function OfferCard({ offer }: { offer: Offer }) {
   );
 }
 
-export function EmptyState({ title, body, action }: { title: string; body: string; action?: ReactNode }) {
+export function EmptyState({
+  title,
+  body,
+  action,
+}: {
+  title: string;
+  body: string;
+  action?: ReactNode;
+}) {
   return (
     <View style={styles.emptyState}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -195,7 +264,11 @@ export function EmptyState({ title, body, action }: { title: string; body: strin
   );
 }
 
-export function Timeline({ events }: { events: { label: string; detail: string; completed: boolean }[] }) {
+export function Timeline({
+  events,
+}: {
+  events: { label: string; detail: string; completed: boolean }[];
+}) {
   return (
     <View style={styles.card}>
       {events.map((event, index) => (
@@ -212,14 +285,14 @@ export function Timeline({ events }: { events: { label: string; detail: string; 
   );
 }
 
-function statusTone(status: TaskStatus) {
+export function statusTone(status: TaskStatus) {
   if (status === "completed") return "success";
   if (status === "cancelled" || status === "disputed") return "danger";
   if (status === "completion requested" || status === "hired") return "warning";
   return "neutral";
 }
 
-function verificationLabel(status: VerificationStatus) {
+export function verificationLabel(status: VerificationStatus) {
   if (status === "verified") return "Verified";
   if (status === "pending") return "Pending";
   return "Unverified";
@@ -227,16 +300,18 @@ function verificationLabel(status: VerificationStatus) {
 
 const toneStyles = StyleSheet.create({
   neutral: { backgroundColor: colors.surface },
-  success: { backgroundColor: colors.emeraldSoft },
-  warning: { backgroundColor: "#FEF3C7" },
-  danger: { backgroundColor: "#FEE2E2" },
+  success: { backgroundColor: colors.primarySoft },
+  warning: { backgroundColor: colors.secondarySoft },
+  danger: { backgroundColor: colors.dangerSoft },
+  info: { backgroundColor: colors.tertiarySoft },
 });
 
 const toneTextStyles = StyleSheet.create({
   neutral: { color: colors.muted },
   success: { color: colors.primaryDark },
-  warning: { color: "#92400E" },
-  danger: { color: "#991B1B" },
+  warning: { color: colors.secondaryDark },
+  danger: { color: colors.dangerDark },
+  info: { color: colors.tertiaryDark },
 });
 
 const styles = StyleSheet.create({
@@ -257,21 +332,22 @@ const styles = StyleSheet.create({
   },
   kicker: {
     color: colors.primary,
+    fontFamily: fonts.bold,
     fontSize: 12,
-    fontWeight: "800",
     letterSpacing: 1,
     textTransform: "uppercase",
   },
   title: {
     color: colors.text,
+    fontFamily: fonts.extraBold,
     fontSize: 30,
-    fontWeight: "900",
     letterSpacing: -0.6,
     lineHeight: 36,
     marginTop: spacing.xs,
   },
   subtitle: {
     color: colors.muted,
+    fontFamily: fonts.medium,
     fontSize: 15,
     lineHeight: 22,
     marginTop: spacing.sm,
@@ -293,8 +369,8 @@ const styles = StyleSheet.create({
   },
   roleText: {
     color: colors.muted,
+    fontFamily: fonts.bold,
     fontSize: 11,
-    fontWeight: "800",
   },
   roleTextActive: {
     color: colors.card,
@@ -302,25 +378,19 @@ const styles = StyleSheet.create({
   button: {
     alignItems: "center",
     backgroundColor: colors.primary,
-    borderRadius: radius.pill,
+    borderRadius: radius.button,
     minHeight: 44,
     justifyContent: "center",
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-  },
-  secondaryButton: {
-    backgroundColor: colors.emeraldSoft,
   },
   disabledButton: {
     backgroundColor: colors.border,
   },
   buttonText: {
     color: colors.card,
+    fontFamily: fonts.bold,
     fontSize: 14,
-    fontWeight: "900",
-  },
-  secondaryButtonText: {
-    color: colors.primaryDark,
   },
   disabledButtonText: {
     color: colors.muted,
@@ -340,8 +410,8 @@ const styles = StyleSheet.create({
   },
   selectableChipText: {
     color: colors.muted,
+    fontFamily: fonts.bold,
     fontSize: 13,
-    fontWeight: "800",
   },
   selectableChipTextActive: {
     color: colors.card,
@@ -353,8 +423,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: colors.text,
+    fontFamily: fonts.extraBold,
     fontSize: 21,
-    fontWeight: "900",
   },
   badge: {
     alignSelf: "flex-start",
@@ -363,8 +433,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   badgeText: {
+    fontFamily: fonts.bold,
     fontSize: 12,
-    fontWeight: "800",
     textTransform: "capitalize",
   },
   categoryTile: {
@@ -384,8 +454,8 @@ const styles = StyleSheet.create({
   },
   categoryIcon: {
     color: colors.primary,
+    fontFamily: fonts.extraBold,
     fontSize: 16,
-    fontWeight: "900",
   },
   card: {
     backgroundColor: colors.card,
@@ -404,12 +474,13 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     color: colors.text,
+    fontFamily: fonts.extraBold,
     fontSize: 17,
-    fontWeight: "900",
     lineHeight: 23,
   },
   cardMeta: {
     color: colors.muted,
+    fontFamily: fonts.medium,
     fontSize: 13,
     lineHeight: 19,
   },
@@ -421,13 +492,13 @@ const styles = StyleSheet.create({
   },
   price: {
     color: colors.primary,
+    fontFamily: fonts.extraBold,
     fontSize: 20,
-    fontWeight: "900",
   },
   signal: {
     color: colors.muted,
+    fontFamily: fonts.semiBold,
     fontSize: 13,
-    fontWeight: "700",
   },
   cardFooter: {
     alignItems: "center",
@@ -436,11 +507,12 @@ const styles = StyleSheet.create({
   },
   offerMessage: {
     color: colors.text,
+    fontFamily: fonts.medium,
     fontSize: 14,
     lineHeight: 21,
   },
   emptyState: {
-    backgroundColor: colors.emeraldSoft,
+    backgroundColor: colors.primarySoft,
     borderRadius: radius.lg,
     padding: spacing.xl,
   },
@@ -470,7 +542,7 @@ const styles = StyleSheet.create({
   },
   timelineTitle: {
     color: colors.text,
+    fontFamily: fonts.extraBold,
     fontSize: 15,
-    fontWeight: "900",
   },
 });

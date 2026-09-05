@@ -1,0 +1,18 @@
+---
+description: Unit testing conventions for this repo
+globs: **/*.test.ts,**/*.test.tsx
+alwaysApply: false
+---
+
+Full rules: [docs/engineering/testing.md](../../docs/engineering/testing.md).
+
+Key points when writing or editing a test in this repo:
+
+- Unit/component tests only — no E2E, no Detox/Maestro/Playwright.
+- `@testing-library/react-native`'s `render()` is **async** in the installed
+  version — always `await render(...)`, and destructure the query helpers
+  from the resolved result rather than using the global `screen` singleton.
+- Test behavior (what renders, what a pure function returns, what happens on
+  interaction), not implementation details or static styling.
+- Tests live next to the code they test (`Thing.tsx` → `Thing.test.tsx`).
+- See `src/shared/components/ui.test.tsx` for the reference pattern.
