@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { statusTone, verificationLabel } from "@/features/marketplace/status";
-import { Badge, CaptionText, PrimaryButton } from "@/shared/components/ui";
+import { ActionButton, Badge, CaptionText, PrimaryButton } from "@/shared/components/ui";
 import { colors, fonts, radius, shadows, spacing } from "@/theme/tokens";
 import type { Category, Offer, Task } from "@/types/domain";
 
@@ -52,7 +52,26 @@ export function CategoryTile({ category }: { category: Category }) {
   );
 }
 
-export function TaskCard({ task, cta = "View task" }: { task: Task; cta?: string }) {
+/**
+ * Renders its footer CTA via `href` (navigation, handled by `PrimaryButton`)
+ * or `onPress` (a caller-owned local action, handled by `ActionButton`) —
+ * never both, and never a default. TaskCard is used by both poster and job
+ * seeker screens, so it must not decide a top-level route on its callers'
+ * behalf; see docs/engineering/domain-and-terminology.md — job details is
+ * not a defined flow yet, so a caller with no real destination should pass
+ * neither prop rather than be given an invented one.
+ */
+export function TaskCard({
+  task,
+  cta = "View task",
+  href,
+  onPress,
+}: {
+  task: Task;
+  cta?: string;
+  href?: string;
+  onPress?: () => void;
+}) {
   return (
     <View style={styles.card}>
       <View style={styles.cardTopRow}>
@@ -69,7 +88,11 @@ export function TaskCard({ task, cta = "View task" }: { task: Task; cta?: string
       </View>
       <View style={styles.cardFooter}>
         <CaptionText>{task.offerCount} offers</CaptionText>
-        <PrimaryButton label={cta} href="/(poster)/tasks" tone="secondary" />
+        {href ? (
+          <PrimaryButton label={cta} href={href} tone="secondary" />
+        ) : onPress ? (
+          <ActionButton label={cta} onPress={onPress} tone="secondary" />
+        ) : null}
       </View>
     </View>
   );

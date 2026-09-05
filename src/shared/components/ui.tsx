@@ -67,7 +67,7 @@ export function AppHeader({
   return (
     <View style={styles.header}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.kicker}>Mushkil Asan</Text>
+        <Text style={styles.kicker}>Muskill Asaan</Text>
         <Heading style={styles.title}>{title}</Heading>
         {subtitle ? <BodyText style={styles.subtitle}>{subtitle}</BodyText> : null}
       </View>

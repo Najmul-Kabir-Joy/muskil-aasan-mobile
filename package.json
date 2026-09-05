@@ -1,5 +1,5 @@
 {
-  "name": "mushkil-asan-mobile",
+  "name": "muskill-asaan-mobile",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
@@ -41,7 +41,7 @@
     "jest": "~29.7.0",
     "jest-expo": "~54.0.18",
     "prettier": "^3.9.6",
-    "react-test-renderer": "^19.1.0",
+    "test-renderer": "^1.2.0",
     "typescript": "~5.9.2"
   },
   "private": true

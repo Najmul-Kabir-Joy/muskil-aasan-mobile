@@ -60,7 +60,7 @@ export default function PosterHomeScreen() {
         action={<PrimaryButton label="All tasks" href="/(poster)/tasks" tone="secondary" />}
       />
       {activeTasks.slice(0, 2).map((task) => (
-        <TaskCard key={task.id} task={task} />
+        <TaskCard key={task.id} task={task} href="/(poster)/tasks" />
       ))}
 
       <EmptyState

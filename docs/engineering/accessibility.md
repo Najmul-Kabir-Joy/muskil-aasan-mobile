@@ -1,7 +1,7 @@
 # Accessibility
 
 Accessibility is a requirement for every screen that ships, not a follow-up
-task. Muskil Aasan's users include people relying on screen readers and people
+task. Muskill Asaan's users include people relying on screen readers and people
 with limited literacy in one of the app's two languages — accessible UI and
 usable UI overlap heavily here.
 

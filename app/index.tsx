@@ -10,7 +10,7 @@ export default function WelcomeScreen() {
           <Text style={styles.logoText}>MA</Text>
         </View>
         <Badge label="Dhaka pilot" tone="success" />
-        <Text style={styles.brand}>Mushkil Asan</Text>
+        <Text style={styles.brand}>Muskill Asaan</Text>
         <Text style={styles.headline}>Post work. Find work. Keep every step clear.</Text>
         <AppText style={styles.body}>
           One account gives every user two simple modes: Poster mode for getting help and Job seeker

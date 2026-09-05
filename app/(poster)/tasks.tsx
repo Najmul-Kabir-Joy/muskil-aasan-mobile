@@ -59,7 +59,7 @@ export default function PosterTasksScreen() {
         ))}
       </View>
 
-      <TaskCard task={activeTask} cta="Status" />
+      <TaskCard task={activeTask} cta="Status" href="/(poster)/tasks" />
 
       {hiredOffer ? (
         <EmptyState

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "mushkil-asan-mobile",
-    "slug": "mushkil-asan-mobile",
-    "scheme": "mushkilasan",
+    "name": "Muskill Asaan",
+    "slug": "muskill-asaan-mobile",
+    "scheme": "muskillasaan",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

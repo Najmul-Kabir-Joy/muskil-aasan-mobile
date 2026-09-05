@@ -1,5 +1,5 @@
 ---
-description: Core engineering standards for the Muskil Aasan mobile app
+description: Core engineering standards for the Muskill Asaan mobile app
 globs:
 alwaysApply: true
 ---
@@ -18,7 +18,7 @@ Cursor-specific notes:
   for a screen/component/feature — this repo has established patterns
   (`src/shared/components/ui.tsx` for primitives, `src/theme/tokens.ts` for
   design tokens, `src/types/domain.ts` for shared domain types).
-- Do not invent undefined Muskil Aasan product behavior (payments,
+- Do not invent undefined Muskill Asaan product behavior (payments,
   verification/NID, escrow, job lifecycle, cancellation, ratings, matching,
   location privacy, fees) — see AGENTS.md's "Do not invent product behavior"
   section. Ask instead of guessing.

@@ -1,6 +1,6 @@
 ---
 name: implement-feature
-description: Use when asked to implement a new Muskil Aasan product feature or a non-trivial piece of new behavior in the app (a new screen, a new interaction, a new piece of feature logic). Not for one-line fixes (use fix-bug) or a single new reusable component with no feature logic (use create-ui-component).
+description: Use when asked to implement a new Muskill Asaan product feature or a non-trivial piece of new behavior in the app (a new screen, a new interaction, a new piece of feature logic). Not for one-line fixes (use fix-bug) or a single new reusable component with no feature logic (use create-ui-component).
 ---
 
 # Implement Feature

@@ -12,29 +12,43 @@ testable, not a reason to add E2E infrastructure.
 
 Run with `npm test`, `npm run test:watch`, or `npm run test:coverage`.
 
-## Important: `render()` is async
+## Important: the installed RNTL version is async-first
 
-`@testing-library/react-native` v14 made `render()` return a `Promise`. Every
-test that renders a component must `await` it:
+The currently installed `@testing-library/react-native` (v14) made its core
+APIs return `Promise`s. Every test using any of these must `await` them:
+
+- **`render()`** returns `Promise<RenderResult>`.
+- **`rerender()`** (from a `render()` result) returns `Promise<void>`.
+- **`fireEvent.press`/`fireEvent.changeText`/`fireEvent.scroll`/etc.** each
+  return `Promise<void>` — `await fireEvent.press(button)`, not
+  `fireEvent.press(button)`.
 
 ```ts
-it("renders the given label", async () => {
-  const { getByText } = await render(<Badge label="Verified" />);
-  expect(getByText("Verified")).toBeTruthy();
+it("calls onPress when tapped", async () => {
+  const onPress = jest.fn();
+  const { getByRole } = await render(<ActionButton label="Confirm" onPress={onPress} />);
+
+  await fireEvent.press(getByRole("button", { name: "Confirm" }));
+
+  expect(onPress).toHaveBeenCalledTimes(1);
 });
 ```
 
-Forgetting `await` gives a confusing failure (`getByText is not a function`)
-because `render()` silently returns an unresolved `Promise` instead of a
-result object.
+Forgetting `await` on `render()` gives a confusing failure (`getByText is not
+a function`) because it silently returns an unresolved `Promise` instead of a
+result object. Forgetting it on `fireEvent.*` is worse — the call still
+"succeeds" (no error), but the interaction may not have flushed before your
+assertion runs, so a test can pass or fail depending on timing rather than on
+whether the behavior is actually correct.
+
+If this project ever upgrades `@testing-library/react-native` to a version
+with a different (e.g. sync) API, update this section to match the actually
+installed version — don't leave stale async guidance around a sync API, or
+vice versa.
 
 Prefer destructuring the return value of `render()` (`const { getByText } =
 await render(...)`) over the global `screen` singleton — it's more explicit
 about which render a query belongs to.
-
-`rerender()` (from a `render()` result) is **also async** for the same
-reason — `await rerender(<Updated />)` before asserting on the new output, or
-the assertion runs against the pre-rerender tree.
 
 ## Testing navigation behavior
 
@@ -92,3 +106,12 @@ category as mocking network/storage.
 Verify it's compatible with the installed Expo SDK / React / React Native
 versions first (check peer dependencies) — don't assume the latest major
 version of a testing package works with the currently pinned React version.
+
+Note: `@testing-library/react-native` v14's real peer dependency is a package
+literally named **`test-renderer`** (by the RNTL maintainer, the modern
+replacement for React's now-legacy `react-test-renderer`) — not
+`react-test-renderer`. `test-renderer` is what's declared in this project's
+`devDependencies`. `react-test-renderer` still ends up in `node_modules`
+transitively (via `jest-expo`'s own dependency on it), but nothing in this
+project imports it directly, and it should not be re-added as an explicit
+devDependency.

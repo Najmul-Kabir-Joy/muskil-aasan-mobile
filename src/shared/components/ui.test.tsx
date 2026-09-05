@@ -14,7 +14,7 @@ describe("ActionButton", () => {
     const { getByRole } = await render(<ActionButton label="Confirm" onPress={onPress} />);
 
     const button = getByRole("button", { name: "Confirm" });
-    fireEvent.press(button);
+    await fireEvent.press(button);
 
     expect(onPress).toHaveBeenCalledTimes(1);
     expect(button.props.accessibilityState).toEqual(expect.objectContaining({ disabled: false }));
@@ -25,7 +25,7 @@ describe("ActionButton", () => {
     const { getByRole } = await render(<ActionButton label="Confirm" onPress={onPress} disabled />);
 
     const button = getByRole("button", { name: "Confirm" });
-    fireEvent.press(button);
+    await fireEvent.press(button);
 
     expect(onPress).not.toHaveBeenCalled();
     expect(button.props.accessibilityState).toEqual(expect.objectContaining({ disabled: true }));
@@ -55,7 +55,7 @@ describe("SelectableChip", () => {
       <SelectableChip label="Urgent" selected={false} onPress={onPress} />,
     );
 
-    fireEvent.press(getByRole("button", { name: "Urgent" }));
+    await fireEvent.press(getByRole("button", { name: "Urgent" }));
 
     expect(onPress).toHaveBeenCalledTimes(1);
   });

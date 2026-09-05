@@ -24,9 +24,11 @@ conventions. This skill is the workflow, not a restatement of the rules.
    produces (see `src/data/mock.ts` / `src/types/domain.ts` for realistic
    shapes), not arbitrary placeholder strings, unless the test is
    specifically about garbage-input handling.
-5. **Remember `render()` is async** in the installed
-   `@testing-library/react-native` — always `await render(...)` and
-   destructure query helpers from the resolved result. See
+5. **Remember the installed `@testing-library/react-native` is async-first**:
+   `render()`, `rerender()`, and every `fireEvent.*` call (`.press`,
+   `.changeText`, `.scroll`, etc.) return a `Promise` — always `await` them
+   (`await render(...)`, `await fireEvent.press(...)`), and destructure query
+   helpers from the resolved `render()` result. See
    `src/shared/components/ui.test.tsx` for the reference pattern.
 6. **Place the test next to the code it tests**
    (`Thing.tsx` → `Thing.test.tsx`).

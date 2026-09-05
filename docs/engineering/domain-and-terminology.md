@@ -13,28 +13,76 @@ payments-adjacent behavior.
    domain UI in `src/features/marketplace/` describe the current UI
    prototype's mock data shape. They exist to make the screens render
    something plausible. **They are not an approved product specification.**
-2. **Approved product requirements.** At the time of writing, none of the
-   business rules below have been approved beyond "Muskil Aasan is a
-   micro-job marketplace connecting job providers and job seekers in Dhaka."
-   If a future spec approves a concrete rule, record it here (or link to
-   where it's recorded) so this stops being a hypothetical.
+2. **Approved product requirements.** A small set of **high-level** product
+   truths are confirmed (see below) — everything else is not. When a new
+   requirement is approved, record it in the confirmed list, at the same
+   altitude as the existing entries (a one-sentence truth, not an
+   implementation spec).
 3. **Intentionally undefined product decisions.** Do not implement or infer
-   these from the prototype:
-   - payment behavior or pricing rules
-   - verification rules or NID requirements
-   - escrow behavior
-   - the final job lifecycle (states/transitions beyond the mock
-     `TaskStatus` values)
-   - cancellation policy
-   - ratings behavior
-   - matching/recommendation rules
-   - location privacy rules
-   - platform fees
-   - trust/safety guarantees
+   these from the prototype (list below).
 
-If implementing a task requires assuming one of these, stop and ask rather
-than guessing a plausible-sounding rule — see AGENTS.md's "Do not invent
-product behavior."
+If implementing a task requires assuming something not on the confirmed
+list, stop and ask rather than guessing a plausible-sounding rule — see
+AGENTS.md's "Do not invent product behavior."
+
+### Confirmed high-level product requirements
+
+These are approved. **"Confirmed" means the sentence itself is true — it
+does not mean any implementation detail of _how_ it works is decided.** See
+the explicit non-example after the list.
+
+1. Muskill Asaan is a micro-job marketplace.
+2. Initial market is Bangladesh.
+3. Initial launch area is Dhaka.
+4. There is currently no international launch plan.
+5. A single user account can act as both a Job Provider and a Job Seeker.
+6. Users should be able to switch easily between those two modes.
+7. A Job Provider can post a small job/help request.
+8. Job Seekers can discover jobs through a feed-like browsing experience.
+9. A Job Seeker can privately respond/comment/apply to a job.
+10. That response is visible only to the Job Provider / owner of that job.
+11. A Job Provider can choose a Job Seeker from the responses.
+12. The Provider can send that person a job request.
+13. The selected Job Seeker must accept the job request.
+14. Jobs may be local/physical or remote/online.
+15. The platform is not limited to a single job type.
+16. Categories will be used to organize jobs and improve discovery/onboarding.
+17. Job Providers can broadly be anyone.
+18. Job Seekers are broadly anyone looking to earn extra income.
+
+**Confirmed requirement ≠ implementation detail.** For example, #11-13 confirm
+that a provider-chooses-then-seeker-accepts flow exists at a high level — they
+do **not** confirm: what happens while the selected seeker is deciding, whether
+a provider can message/request multiple seekers at once, what fields a
+response/application form has, what "accept" technically transitions in a
+status machine, or what completion confirmation looks like. All of those are
+still undefined (below), even though the surrounding high-level flow is
+confirmed.
+
+### Intentionally undefined product decisions
+
+Do not implement or infer these from the prototype, and do not treat a
+confirmed requirement above as deciding any of them:
+
+- the final job lifecycle/status machine (states/transitions beyond the mock
+  `TaskStatus` values)
+- payments
+- escrow
+- pricing/bidding rules
+- cancellation policy
+- refunds
+- disputes
+- NID verification / identity verification requirements
+- ratings/reviews
+- matching/recommendation rules
+- platform fees
+- precise location privacy rules
+- trust/safety guarantees
+- whether a job can have multiple workers
+- what happens while a selected Job Seeker is deciding whether to accept
+- whether multiple Job Seekers can receive a job request simultaneously
+- the exact fields on a response/application
+- completion confirmation behavior
 
 ## Terminology
 

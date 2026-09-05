@@ -1,6 +1,6 @@
-# Muskil Aasan Mobile
+# Muskill Asaan Mobile
 
-Expo + React Native prototype for the Muskil Aasan micro-job marketplace
+Expo + React Native prototype for the Muskill Asaan micro-job marketplace
 (Bangladesh, initially Dhaka).
 
 ## Stack
@@ -46,14 +46,14 @@ npm run web
 
 ## Checks
 
-```bash
-npm run lint            # ESLint
-npm run typecheck        # tsc --noEmit
-npm test                   # Jest unit/component tests
-npm run test:coverage         # Jest with coverage report
-npm run format                   # Prettier — writes changes
-npm run format:check                # Prettier — check only, used in CI
-```
+There is no hosted CI for this repository right now (deliberately — see
+[git-workflow.md](docs/engineering/git-workflow.md)). Run these locally
+before opening a PR:
 
-All four (`format:check`, `lint`, `typecheck`, `test`) run in CI on every pull
-request — see [.github/workflows/ci.yml](.github/workflows/ci.yml).
+```bash
+npm run format:check    # Prettier — check only (npm run format to fix drift)
+npm run lint             # ESLint
+npm run typecheck          # tsc --noEmit
+npm test                     # Jest unit/component tests
+npm run test:coverage           # Jest with coverage report
+```

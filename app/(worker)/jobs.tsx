@@ -66,7 +66,11 @@ export default function WorkerJobsScreen() {
       <SectionHeader title={`Jobs you can offer on (${filteredTasks.length})`} />
       {filteredTasks.map((task) => (
         <View key={task.id} style={{ gap: 10 }}>
-          <TaskCard task={task} cta="View job" />
+          {/* No href/onPress: the job-details flow for job seekers isn't
+              defined yet (see docs/engineering/domain-and-terminology.md), so
+              this card intentionally has no navigating CTA — it must not
+              route into the poster-only /(poster)/tasks screen. */}
+          <TaskCard task={task} />
           <View style={{ flexDirection: "row", gap: 10 }}>
             <ActionButton
               label={savedTaskIds.includes(task.id) ? "Saved" : "Save"}

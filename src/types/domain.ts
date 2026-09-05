@@ -2,7 +2,7 @@
  * PROTOTYPE / MOCK domain types.
  *
  * Everything in this file describes the current UI prototype's mock data
- * shape only. It is NOT an approved Muskil Aasan product specification.
+ * shape only. It is NOT an approved Muskill Asaan product specification.
  * Job lifecycle, verification, offer/response flow, and every status enum
  * below can (and likely will) change once real product/business rules are
  * defined — do not treat a status value existing here as evidence that the
