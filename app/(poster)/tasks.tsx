@@ -1,16 +1,16 @@
 import { useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { OfferCard, TaskCard } from "@/features/marketplace/components";
 import {
   ActionButton,
   AppHeader,
+  AppText,
   Badge,
   EmptyState,
-  OfferCard,
   PrimaryButton,
-  Screen,
+  ScrollScreen,
   SectionHeader,
   SelectableChip,
-  TaskCard,
 } from "@/shared/components/ui";
 import { offers, tasks } from "@/data/mock";
 import { colors } from "@/theme/tokens";
@@ -41,7 +41,7 @@ export default function PosterTasksScreen() {
   const hiredOffer = offers.find((offer) => offer.id === hiredOfferId);
 
   return (
-    <Screen>
+    <ScrollScreen>
       <AppHeader
         title="Compare offers safely."
         subtitle="Show status, budget, timeline summary, and clear hire/pass decisions before contact is unlocked."
@@ -102,15 +102,15 @@ export default function PosterTasksScreen() {
           </View>
         ))
       ) : (
-        <Text style={{ color: colors.muted }}>
+        <AppText style={{ color: colors.muted }}>
           No visible offers. Change task or reset by reopening the screen.
-        </Text>
+        </AppText>
       )}
 
       <View style={{ gap: 12 }}>
         <PrimaryButton label="View task timeline" href="/task-status" />
         <PrimaryButton label="Report an issue" href="/support" tone="secondary" />
       </View>
-    </Screen>
+    </ScrollScreen>
   );
 }

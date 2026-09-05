@@ -1,14 +1,13 @@
 import { StyleSheet, Text, View } from "react-native";
+import { CategoryTile, RoleSwitch, TaskCard } from "@/features/marketplace/components";
 import {
   AppHeader,
+  AppText,
   Badge,
-  CategoryTile,
   EmptyState,
   PrimaryButton,
-  RoleSwitch,
-  Screen,
+  ScrollScreen,
   SectionHeader,
-  TaskCard,
 } from "@/shared/components/ui";
 import { categories, tasks } from "@/data/mock";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
@@ -18,7 +17,7 @@ export default function PosterHomeScreen() {
   const totalOffers = activeTasks.reduce((sum, task) => sum + task.offerCount, 0);
 
   return (
-    <Screen>
+    <ScrollScreen>
       <AppHeader
         title="Hi, Nadia"
         subtitle="Mirpur · ready to post or track a task"
@@ -28,9 +27,9 @@ export default function PosterHomeScreen() {
       <View style={styles.actionCard}>
         <Badge label="Poster mode" tone="success" />
         <Text style={styles.actionTitle}>What do you need help with today?</Text>
-        <Text style={styles.actionBody}>
+        <AppText style={styles.actionBody}>
           Create one clear task. Add budget, timing, and area so job seekers can send better offers.
-        </Text>
+        </AppText>
         <PrimaryButton label="Post a new task" href="/(poster)/post-task" />
       </View>
 
@@ -68,7 +67,7 @@ export default function PosterHomeScreen() {
         title="How Poster mode works"
         body="1. Post task · 2. Compare verified offers · 3. Hire · 4. Track completion and payment manually during the pilot."
       />
-    </Screen>
+    </ScrollScreen>
   );
 }
 

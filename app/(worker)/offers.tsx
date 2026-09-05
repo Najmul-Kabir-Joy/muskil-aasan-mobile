@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { View } from "react-native";
+import { OfferCard } from "@/features/marketplace/components";
 import {
   ActionButton,
   AppHeader,
   EmptyState,
-  OfferCard,
   PrimaryButton,
-  Screen,
+  ScrollScreen,
   SectionHeader,
   SelectableChip,
 } from "@/shared/components/ui";
@@ -32,7 +32,7 @@ export default function WorkerOffersScreen() {
   }, [activeTab, withdrawnOfferIds]);
 
   return (
-    <Screen>
+    <ScrollScreen>
       <AppHeader
         title="Track your job offers."
         subtitle="Job seeker mode should always show status, last update, amount, and the next action."
@@ -70,6 +70,6 @@ export default function WorkerOffersScreen() {
           action={<PrimaryButton label="Browse jobs" href="/(worker)/jobs" />}
         />
       ) : null}
-    </Screen>
+    </ScrollScreen>
   );
 }

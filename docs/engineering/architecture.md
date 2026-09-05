@@ -1,6 +1,9 @@
 # Architecture
 
-Muskil Aasan is an Expo Router app. This document defines where code lives and why.
+Muskil Aasan is an Expo Router app. This document defines where code lives and
+why. For what the domain types/terms in this codebase do and don't mean as
+product truth, see
+[domain-and-terminology.md](./domain-and-terminology.md) first.
 
 ## Top-level layout
 
@@ -49,22 +52,47 @@ hooks, and types that only make sense for that feature (e.g. `jobs`,
 other way around, and features should not import from each other — if two
 features need the same thing, that's a signal to move it into `shared/`.
 
-**No feature directories exist yet.** The current prototype has no code that is
-exclusively about one feature — `app/(poster)/` and `app/(worker)/` are route
-groups, not features, and all shared UI already lives in
-`src/shared/components/ui.tsx`. Create the first `src/features/<name>/`
-directory when a feature actually accumulates feature-specific logic (a hook,
-a validation rule, a non-trivial component) — not preemptively.
+`src/features/marketplace/` is the first (and currently only) feature
+directory. It holds the domain-specific UI and pure logic tied to the
+prototype's task/offer/category/role concepts (`RoleSwitch`, `TaskCard`,
+`OfferCard`, `CategoryTile`, `statusTone`, `verificationLabel`) — used by both
+`app/(poster)/` and `app/(worker)/`, since both route groups interact with the
+same underlying marketplace domain. It is **not** approved product
+terminology or lifecycle — see
+[domain-and-terminology.md](./domain-and-terminology.md).
+
+Create a new `src/features/<name>/` directory only when a feature actually
+accumulates its own logic (a hook, a validation rule, a non-trivial
+component) — not preemptively.
 
 ## Shared layer
 
-`src/shared/components/ui.tsx` currently holds every reusable primitive
-(`Screen`, `Badge`, `PrimaryButton`, `SectionHeader`, etc.) as one file. Split
-it into multiple files only when the file becomes genuinely hard to navigate —
-don't split it today just to look tidy.
+`src/shared/components/ui.tsx` holds feature-agnostic reusable primitives
+only: page shells (`Screen`, `ScrollScreen`), typography (`AppText`,
+`Heading`, `BodyText`, `CaptionText`), and generic controls/surfaces
+(`Badge`, `PrimaryButton`, `ActionButton`, `SelectableChip`, `SectionHeader`,
+`EmptyState`, `Timeline`, `AppHeader`). It must not depend on
+`src/types/domain.ts` or contain marketplace-specific logic — that's what
+`src/features/marketplace/` is for. Split `ui.tsx` into multiple files only
+when it becomes genuinely hard to navigate — don't split it today just to
+look tidy.
 
 Promote something from a feature into `shared/` only once it has a second real
 consumer. One usage is not a pattern; it's just where the code happens to live.
+
+## Screen vs. ScrollScreen
+
+- **`ScrollScreen`** — safe area + `ScrollView`. Use for ordinary stacked
+  content and forms. This is what every current prototype screen uses.
+- **`Screen`** — safe area + a plain `View`, no scrolling. Use this for a
+  screen whose content is a virtualized list — render a `FlatList` directly
+  inside it. Never nest a `FlatList`/`VirtualizedList` inside `ScrollScreen`
+  (double-virtualization breaks scroll performance and, on some RN versions,
+  warns or crashes).
+
+No screen currently needs `Screen` (nothing renders a `FlatList` yet) — it
+exists so the first list/feed screen doesn't have to fight `ScrollScreen`'s
+`ScrollView`.
 
 ## Data and services
 
@@ -87,9 +115,12 @@ backend, a caching need, or a testing need that justifies them.
 ## Design tokens
 
 `src/theme/tokens.ts` is the single source of truth for colors, spacing,
-radii, shadows, and typography. See [code-style.md](./code-style.md) for the
-naming rules. Screens must import tokens, never hardcode hex values or magic
-numbers for spacing/typography.
+radii, shadows, and typography (`typography.display/heading/body/caption/button`).
+See [code-style.md](./code-style.md) for the naming rules. Screens must
+import tokens, never hardcode hex values or magic numbers for
+spacing/typography — and prefer the `AppText`/`Heading`/`BodyText`/
+`CaptionText` primitives in `src/shared/components/ui.tsx` over a bare RN
+`Text` for user-facing copy.
 
 ## State ownership (for when it's needed)
 

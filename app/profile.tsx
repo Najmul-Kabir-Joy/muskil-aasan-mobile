@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { View } from "react-native";
+import { RoleSwitch } from "@/features/marketplace/components";
 import {
   ActionButton,
   AppHeader,
   Badge,
   EmptyState,
   PrimaryButton,
-  RoleSwitch,
-  Screen,
+  ScrollScreen,
   SectionHeader,
   SelectableChip,
 } from "@/shared/components/ui";
@@ -25,7 +25,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <Screen>
+    <ScrollScreen>
       <AppHeader
         title="Nadia Rahman"
         subtitle="Mirpur · two modes enabled · switch anytime"
@@ -77,6 +77,6 @@ export default function ProfileScreen() {
       />
 
       <PrimaryButton label="Contact support" href="/support" tone="secondary" />
-    </Screen>
+    </ScrollScreen>
   );
 }

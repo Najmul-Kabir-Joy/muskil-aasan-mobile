@@ -1,47 +1,62 @@
-import { render } from "@testing-library/react-native";
-import { Badge, statusTone, verificationLabel } from "@/shared/components/ui";
-
-describe("statusTone", () => {
-  it("maps completed tasks to the success tone", () => {
-    expect(statusTone("completed")).toBe("success");
-  });
-
-  it("maps cancelled and disputed tasks to the danger tone", () => {
-    expect(statusTone("cancelled")).toBe("danger");
-    expect(statusTone("disputed")).toBe("danger");
-  });
-
-  it("maps hired and completion-requested tasks to the warning tone", () => {
-    expect(statusTone("hired")).toBe("warning");
-    expect(statusTone("completion requested")).toBe("warning");
-  });
-
-  it("falls back to the neutral tone for every other status", () => {
-    expect(statusTone("draft")).toBe("neutral");
-    expect(statusTone("open")).toBe("neutral");
-    expect(statusTone("offer received")).toBe("neutral");
-    expect(statusTone("in progress")).toBe("neutral");
-  });
-});
-
-describe("verificationLabel", () => {
-  it("labels a verified worker as Verified", () => {
-    expect(verificationLabel("verified")).toBe("Verified");
-  });
-
-  it("labels a pending worker as Pending", () => {
-    expect(verificationLabel("pending")).toBe("Pending");
-  });
-
-  it("labels every other status as Unverified", () => {
-    expect(verificationLabel("unverified")).toBe("Unverified");
-    expect(verificationLabel("rejected")).toBe("Unverified");
-  });
-});
+import { fireEvent, render } from "@testing-library/react-native";
+import { ActionButton, Badge, SelectableChip } from "@/shared/components/ui";
 
 describe("Badge", () => {
   it("renders the given label", async () => {
     const { getByText } = await render(<Badge label="Verified" />);
     expect(getByText("Verified")).toBeTruthy();
+  });
+});
+
+describe("ActionButton", () => {
+  it("exposes an accessible button role and calls onPress when enabled", async () => {
+    const onPress = jest.fn();
+    const { getByRole } = await render(<ActionButton label="Confirm" onPress={onPress} />);
+
+    const button = getByRole("button", { name: "Confirm" });
+    fireEvent.press(button);
+
+    expect(onPress).toHaveBeenCalledTimes(1);
+    expect(button.props.accessibilityState).toEqual(expect.objectContaining({ disabled: false }));
+  });
+
+  it("does not call onPress and exposes a disabled accessibility state when disabled", async () => {
+    const onPress = jest.fn();
+    const { getByRole } = await render(<ActionButton label="Confirm" onPress={onPress} disabled />);
+
+    const button = getByRole("button", { name: "Confirm" });
+    fireEvent.press(button);
+
+    expect(onPress).not.toHaveBeenCalled();
+    expect(button.props.accessibilityState).toEqual(expect.objectContaining({ disabled: true }));
+  });
+});
+
+describe("SelectableChip", () => {
+  it("exposes the selected accessibility state matching the selected prop", async () => {
+    const { getByRole, rerender } = await render(
+      <SelectableChip label="Urgent" selected={false} onPress={() => {}} />,
+    );
+
+    expect(getByRole("button", { name: "Urgent" }).props.accessibilityState).toEqual(
+      expect.objectContaining({ selected: false }),
+    );
+
+    await rerender(<SelectableChip label="Urgent" selected onPress={() => {}} />);
+
+    expect(getByRole("button", { name: "Urgent" }).props.accessibilityState).toEqual(
+      expect.objectContaining({ selected: true }),
+    );
+  });
+
+  it("calls onPress when tapped", async () => {
+    const onPress = jest.fn();
+    const { getByRole } = await render(
+      <SelectableChip label="Urgent" selected={false} onPress={onPress} />,
+    );
+
+    fireEvent.press(getByRole("button", { name: "Urgent" }));
+
+    expect(onPress).toHaveBeenCalledTimes(1);
   });
 });

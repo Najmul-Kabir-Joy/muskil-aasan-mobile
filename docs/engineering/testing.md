@@ -32,6 +32,25 @@ Prefer destructuring the return value of `render()` (`const { getByText } =
 await render(...)`) over the global `screen` singleton — it's more explicit
 about which render a query belongs to.
 
+`rerender()` (from a `render()` result) is **also async** for the same
+reason — `await rerender(<Updated />)` before asserting on the new output, or
+the assertion runs against the pre-rerender tree.
+
+## Testing navigation behavior
+
+For a component whose only relevant behavior is _which_ `expo-router`
+function it calls (e.g. `replace` vs. `push`), mock `expo-router` at the
+module boundary rather than mounting a real navigation tree:
+
+```ts
+jest.mock("expo-router", () => ({ useRouter: jest.fn() }));
+```
+
+Then assert on the mock in each test. See
+`src/features/marketplace/components.test.tsx` (RoleSwitch) for the pattern.
+This is a boundary mock, not an implementation-detail mock — it's the same
+category as mocking network/storage.
+
 ## What to test
 
 - Domain/business logic (pure functions, validation, status/state mapping)
@@ -62,9 +81,11 @@ about which render a query belongs to.
   specifically about handling garbage input.
 - Avoid mocking anything you don't have to. Mock at the boundary (network,
   storage, native modules) — not the function you're actually testing.
-- See `src/shared/components/ui.test.tsx` for the current reference example:
-  it covers a pure mapping function (`statusTone`/`verificationLabel`) and a
-  component's rendered output.
+- Reference examples: `src/shared/components/ui.test.tsx` (component
+  rendering and accessibility behavior),
+  `src/features/marketplace/status.test.ts` (pure domain-mapping functions),
+  `src/features/marketplace/components.test.tsx` (navigation behavior via an
+  `expo-router` boundary mock).
 
 ## Before installing a testing dependency
 

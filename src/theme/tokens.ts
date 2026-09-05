@@ -28,6 +28,36 @@ export const fonts = {
   extraBold: "PlusJakartaSans_800ExtraBold",
 };
 
+// Semantic typography presets. Only the handful of roles that are actually
+// reused across components — not a token per one-off text style. See
+// docs/engineering/code-style.md.
+export const typography = {
+  display: {
+    fontFamily: fonts.extraBold,
+    fontSize: 30,
+    lineHeight: 36,
+    letterSpacing: -0.6,
+  },
+  heading: {
+    fontFamily: fonts.extraBold,
+    fontSize: 21,
+  },
+  body: {
+    fontFamily: fonts.medium,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  caption: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  button: {
+    fontFamily: fonts.bold,
+    fontSize: 14,
+  },
+};
+
 export const spacing = {
   xs: 4,
   sm: 8,

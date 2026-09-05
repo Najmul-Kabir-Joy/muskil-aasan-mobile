@@ -1,3 +1,20 @@
+/**
+ * PROTOTYPE / MOCK domain types.
+ *
+ * Everything in this file describes the current UI prototype's mock data
+ * shape only. It is NOT an approved Muskil Aasan product specification.
+ * Job lifecycle, verification, offer/response flow, and every status enum
+ * below can (and likely will) change once real product/business rules are
+ * defined — do not treat a status value existing here as evidence that the
+ * corresponding behavior is approved.
+ *
+ * See docs/engineering/domain-and-terminology.md for:
+ * - the distinction between prototype concepts, approved product
+ *   requirements, and intentionally undefined product decisions
+ * - current preferred product terminology (Job Provider / Job Seeker / Job /
+ *   Response) vs. the legacy prototype names still used in this file
+ */
+
 export type Role = "poster" | "jobSeeker";
 
 export type TaskStatus =

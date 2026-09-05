@@ -3,8 +3,9 @@ import { StyleSheet, Text, View } from "react-native";
 import {
   ActionButton,
   AppHeader,
+  AppText,
   PrimaryButton,
-  Screen,
+  ScrollScreen,
   SectionHeader,
   SelectableChip,
 } from "@/shared/components/ui";
@@ -25,7 +26,7 @@ export default function SupportScreen() {
   const [submitted, setSubmitted] = useState(false);
 
   return (
-    <Screen>
+    <ScrollScreen>
       <AppHeader
         title="Report issue"
         subtitle="Safety entry points should be visible from profile, job detail, task status, job seeker profile, and offer cards."
@@ -47,11 +48,11 @@ export default function SupportScreen() {
         <Text style={styles.title}>
           {submitted ? "Support has received your report." : "Ready to submit report"}
         </Text>
-        <Text style={styles.body}>
+        <AppText style={styles.body}>
           {submitted
             ? `Reason: ${selectedReason}. We may contact you by phone or WhatsApp during the pilot.`
             : `Selected reason: ${selectedReason}. Admin notes and resolution status will be part of the operations queue.`}
-        </Text>
+        </AppText>
       </View>
 
       <ActionButton
@@ -60,7 +61,7 @@ export default function SupportScreen() {
         disabled={submitted}
       />
       <PrimaryButton label="Back to task status" href="/task-status" />
-    </Screen>
+    </ScrollScreen>
   );
 }
 

@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
-import { Badge, PrimaryButton, Screen } from "@/shared/components/ui";
+import { AppText, Badge, PrimaryButton, ScrollScreen } from "@/shared/components/ui";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
 export default function WelcomeScreen() {
   return (
-    <Screen>
+    <ScrollScreen>
       <View style={styles.hero}>
         <View style={styles.logoMark}>
           <Text style={styles.logoText}>MA</Text>
@@ -12,24 +12,24 @@ export default function WelcomeScreen() {
         <Badge label="Dhaka pilot" tone="success" />
         <Text style={styles.brand}>Mushkil Asan</Text>
         <Text style={styles.headline}>Post work. Find work. Keep every step clear.</Text>
-        <Text style={styles.body}>
+        <AppText style={styles.body}>
           One account gives every user two simple modes: Poster mode for getting help and Job seeker
           mode for finding paid tasks.
-        </Text>
+        </AppText>
       </View>
 
       <View style={styles.modeGrid}>
         <View style={styles.modeCard}>
           <Text style={styles.modeTitle}>Poster mode</Text>
-          <Text style={styles.modeBody}>
+          <AppText style={styles.modeBody}>
             Post a task, compare offers, hire safely, and track completion.
-          </Text>
+          </AppText>
         </View>
         <View style={styles.modeCard}>
           <Text style={styles.modeTitle}>Job seeker mode</Text>
-          <Text style={styles.modeBody}>
+          <AppText style={styles.modeBody}>
             Browse nearby jobs, send offers, and track manual pilot earnings.
-          </Text>
+          </AppText>
         </View>
       </View>
 
@@ -38,7 +38,7 @@ export default function WelcomeScreen() {
         <PrimaryButton label="Switch to Job seeker mode" href="/(worker)/jobs" tone="secondary" />
         <PrimaryButton label="Start onboarding demo" href="/onboarding" tone="secondary" />
       </View>
-    </Screen>
+    </ScrollScreen>
   );
 }
 

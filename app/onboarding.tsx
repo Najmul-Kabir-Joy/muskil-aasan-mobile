@@ -3,9 +3,10 @@ import { StyleSheet, Text, TextInput, View } from "react-native";
 import {
   ActionButton,
   AppHeader,
+  AppText,
   Badge,
   PrimaryButton,
-  Screen,
+  ScrollScreen,
   SectionHeader,
   SelectableChip,
 } from "@/shared/components/ui";
@@ -29,7 +30,7 @@ export default function OnboardingScreen() {
   }, [name, otp, phone, role, step]);
 
   return (
-    <Screen>
+    <ScrollScreen>
       <AppHeader
         title="Create trust before the first job."
         subtitle="Every user can use both modes. Start with the mode you need now and switch later from profile."
@@ -56,7 +57,9 @@ export default function OnboardingScreen() {
               keyboardType="phone-pad"
               style={styles.input}
             />
-            <Text style={styles.helpText}>We use your number to protect jobs and offers.</Text>
+            <AppText style={styles.helpText}>
+              We use your number to protect jobs and offers.
+            </AppText>
           </>
         ) : null}
         {step === 1 ? (
@@ -69,9 +72,9 @@ export default function OnboardingScreen() {
               placeholderTextColor={colors.muted}
               style={styles.input}
             />
-            <Text style={styles.helpText}>
+            <AppText style={styles.helpText}>
               Mock OTP accepts any 4 digits. Resend and expired states can be checked in this step.
-            </Text>
+            </AppText>
           </>
         ) : null}
         {step === 2 ? (
@@ -124,7 +127,7 @@ export default function OnboardingScreen() {
           )}
         </View>
       </View>
-    </Screen>
+    </ScrollScreen>
   );
 }
 

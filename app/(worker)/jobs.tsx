@@ -1,17 +1,16 @@
 import { useMemo, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
+import { RoleSwitch, TaskCard } from "@/features/marketplace/components";
 import {
   ActionButton,
   AppHeader,
   EmptyState,
-  RoleSwitch,
-  Screen,
+  ScrollScreen,
   SectionHeader,
   SelectableChip,
-  TaskCard,
 } from "@/shared/components/ui";
 import { tasks } from "@/data/mock";
-import { colors, radius, spacing } from "@/theme/tokens";
+import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
 const filters = ["Category", "Area", "Budget", "Urgent", "Remote"];
 
@@ -39,7 +38,7 @@ export default function WorkerJobsScreen() {
   }
 
   return (
-    <Screen>
+    <ScrollScreen>
       <AppHeader
         title="Find jobs near Mirpur"
         subtitle="Job seeker mode helps you scan budget, area, urgency, category, and offer count before sending an offer."
@@ -103,7 +102,7 @@ export default function WorkerJobsScreen() {
         title="Job seeker setup"
         body="If your profile is incomplete, this area should show category, skill, service area, and verification prompts before high-risk offers are allowed."
       />
-    </Screen>
+    </ScrollScreen>
   );
 }
 
@@ -114,6 +113,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: 1,
     color: colors.text,
+    fontFamily: fonts.medium,
     fontSize: 15,
     minHeight: 48,
     paddingHorizontal: spacing.lg,

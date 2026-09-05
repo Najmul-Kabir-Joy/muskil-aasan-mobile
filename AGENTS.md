@@ -22,14 +22,15 @@ values — see "Design tokens" below.
 
 ## Engineering documentation
 
-| Topic                                              | File                                                                   |
-| -------------------------------------------------- | ---------------------------------------------------------------------- |
-| Architecture, folder layout, feature boundaries    | [docs/engineering/architecture.md](docs/engineering/architecture.md)   |
-| TypeScript, imports, component conventions, tokens | [docs/engineering/code-style.md](docs/engineering/code-style.md)       |
-| Unit testing setup and conventions                 | [docs/engineering/testing.md](docs/engineering/testing.md)             |
-| Security & privacy                                 | [docs/engineering/security.md](docs/engineering/security.md)           |
-| Accessibility                                      | [docs/engineering/accessibility.md](docs/engineering/accessibility.md) |
-| Git/PR hygiene                                     | [docs/engineering/git-workflow.md](docs/engineering/git-workflow.md)   |
+| Topic                                                          | File                                                                                     |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Prototype domain types vs. approved product truth, terminology | [docs/engineering/domain-and-terminology.md](docs/engineering/domain-and-terminology.md) |
+| Architecture, folder layout, feature boundaries                | [docs/engineering/architecture.md](docs/engineering/architecture.md)                     |
+| TypeScript, imports, component conventions, tokens             | [docs/engineering/code-style.md](docs/engineering/code-style.md)                         |
+| Unit testing setup and conventions                             | [docs/engineering/testing.md](docs/engineering/testing.md)                               |
+| Security & privacy                                             | [docs/engineering/security.md](docs/engineering/security.md)                             |
+| Accessibility                                                  | [docs/engineering/accessibility.md](docs/engineering/accessibility.md)                   |
+| Git/PR hygiene                                                 | [docs/engineering/git-workflow.md](docs/engineering/git-workflow.md)                     |
 
 Read the relevant doc before touching that area. This file gives the rules
 that cut across all of them plus agent-specific operating instructions.
@@ -211,6 +212,12 @@ version is selected automatically. Don't upgrade Expo/React Native as a side
 effect of an unrelated change — if an upgrade is genuinely necessary, explain
 why first.
 
+**Follow-up (not part of routine changes):** this repo is on Expo SDK 54 /
+RN 0.81. An Expo SDK upgrade should happen as its own dedicated, isolated
+change — with `npx expo-doctor` and a full manual test pass — before serious
+feature development ramps up, so any compatibility issues surface on their
+own rather than mixed into an unrelated feature or cleanup.
+
 ## Testing
 
 Unit and component tests only — no E2E/Detox/Maestro/Playwright. Full rules
@@ -222,14 +229,23 @@ percentage.
 ## Do not invent product behavior
 
 Many Muskil Aasan product decisions are intentionally undefined right now.
-When a task would require assuming one of these, stop and ask rather than
+**Nothing currently implemented in `src/types/domain.ts` or
+`src/features/marketplace/` is an approved product requirement — it's
+prototype/mock data that makes the screens render something plausible.** See
+[domain-and-terminology.md](docs/engineering/domain-and-terminology.md) for
+the full distinction between prototype concepts, approved requirements, and
+undefined decisions, and for current preferred product terminology. When a
+task would require assuming one of the following, stop and ask rather than
 inventing an answer:
 
 - payment behavior or pricing rules
 - verification rules or NID requirements
 - escrow behavior
-- job lifecycle rules (states/transitions beyond what's already in
-  `src/types/domain.ts`)
+- job lifecycle rules — **note:** the states in `src/types/domain.ts`
+  (`TaskStatus`, `OfferStatus`, etc.) are prototype/mock data only, not
+  approved product truth; don't treat a status existing there as license to
+  build real behavior around it. See
+  [domain-and-terminology.md](docs/engineering/domain-and-terminology.md).
 - cancellation policy
 - ratings behavior
 - matching/recommendation rules

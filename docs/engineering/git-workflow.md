@@ -41,3 +41,19 @@ npm test
 
 (`npm run format:check` fails on formatting drift — run `npm run format` to
 fix it. All four run in CI on every PR; see `.github/workflows/ci.yml`.)
+
+## Branch workflow
+
+The recommended path for any change is:
+
+```
+feature branch -> pull request -> CI -> review -> main
+```
+
+`main` should require CI (the workflow above) to pass before a PR can be
+merged into it, and — once branch protection is turned on for this
+repository — direct pushes to `main` should be avoided in favor of this PR
+flow, even for small changes. Turning on branch protection is a GitHub
+repository-settings change, not something this document can enforce by
+itself; see the repository's admin settings (or whoever holds admin access)
+to configure it.

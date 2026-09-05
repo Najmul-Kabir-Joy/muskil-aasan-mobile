@@ -5,7 +5,7 @@ import {
   AppHeader,
   EmptyState,
   PrimaryButton,
-  Screen,
+  ScrollScreen,
   Timeline,
 } from "@/shared/components/ui";
 import { taskTimeline } from "@/data/mock";
@@ -27,7 +27,7 @@ export default function TaskStatusScreen() {
   );
 
   return (
-    <Screen>
+    <ScrollScreen>
       <AppHeader
         title="One shared source of truth."
         subtitle="After hiring, both sides need the same timeline, next action, payment status, and report entry point."
@@ -55,6 +55,6 @@ export default function TaskStatusScreen() {
         <PrimaryButton label="Go to profile" href="/profile" tone="secondary" />
         <PrimaryButton label="Report issue" href="/support" tone="secondary" />
       </View>
-    </Screen>
+    </ScrollScreen>
   );
 }

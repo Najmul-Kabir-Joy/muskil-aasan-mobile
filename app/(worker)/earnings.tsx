@@ -4,7 +4,7 @@ import {
   AppHeader,
   EmptyState,
   PrimaryButton,
-  Screen,
+  ScrollScreen,
   SectionHeader,
   SelectableChip,
 } from "@/shared/components/ui";
@@ -23,7 +23,7 @@ export default function WorkerEarningsScreen() {
   );
 
   return (
-    <Screen>
+    <ScrollScreen>
       <AppHeader
         title="Job seeker earnings."
         subtitle="Pilot earnings stay honest: do not imply wallet, withdrawal, or escrow until those systems exist."
@@ -46,6 +46,6 @@ export default function WorkerEarningsScreen() {
         body={`${selectedPeriod.jobs} completed job${selectedPeriod.jobs === 1 ? "" : "s"} in ${selectedPeriod.label.toLowerCase()}. During MVP, payment status can be tracked manually with method, reference, admin note, and dispute marker.`}
         action={<PrimaryButton label="View hired tasks" href="/(worker)/offers" />}
       />
-    </Screen>
+    </ScrollScreen>
   );
 }

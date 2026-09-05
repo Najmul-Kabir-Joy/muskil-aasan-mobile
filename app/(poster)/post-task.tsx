@@ -3,9 +3,10 @@ import { StyleSheet, Text, TextInput, View } from "react-native";
 import {
   ActionButton,
   AppHeader,
+  AppText,
   Badge,
   PrimaryButton,
-  Screen,
+  ScrollScreen,
   SectionHeader,
   SelectableChip,
 } from "@/shared/components/ui";
@@ -38,7 +39,7 @@ export default function PostTaskScreen() {
   const canPublish = checks.every((check) => check.done);
 
   return (
-    <Screen>
+    <ScrollScreen>
       <AppHeader
         title="Post a task in under a minute."
         subtitle="Progressive fields keep the first version fast while still collecting enough detail for useful offers."
@@ -126,11 +127,11 @@ export default function PostTaskScreen() {
             ) : null}
             <View style={styles.reviewCard}>
               <Text style={styles.stepTitle}>{title}</Text>
-              <Text style={styles.helpText}>
+              <AppText style={styles.helpText}>
                 {category} · ৳{budget} · {remote ? "Remote" : area} · {timing}
                 {urgent ? " · Urgent" : ""}
-              </Text>
-              <Text style={styles.helpText}>{description}</Text>
+              </AppText>
+              <AppText style={styles.helpText}>{description}</AppText>
             </View>
           </>
         ) : null}
@@ -169,7 +170,7 @@ export default function PostTaskScreen() {
         href="/(poster)/tasks"
         tone={canPublish ? "primary" : "secondary"}
       />
-    </Screen>
+    </ScrollScreen>
   );
 }
 
@@ -187,6 +188,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1,
     color: colors.text,
+    fontFamily: fonts.medium,
     fontSize: 16,
     minHeight: 52,
     paddingHorizontal: spacing.lg,

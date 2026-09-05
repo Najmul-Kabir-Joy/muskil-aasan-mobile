@@ -61,6 +61,23 @@ BAD:   colors.greenButton, colors.homeCardGray
 If a value you need doesn't exist as a token yet, add it to `tokens.ts` — don't
 inline a hex code "just this once."
 
+## Typography
+
+`src/theme/tokens.ts` exports a small `typography` object
+(`display`/`heading`/`body`/`caption`/`button`) for font/size/line-height
+combinations that are genuinely reused across components. It is intentionally
+not exhaustive — a component with a legitimately distinct one-off text size
+(e.g. a card's price display) can keep its own literal style referencing
+`fonts.*` directly rather than being forced into one of the five tokens.
+
+For user-facing text, prefer `AppText`, `Heading`, `BodyText`, or
+`CaptionText` (all in `src/shared/components/ui.tsx`) over a bare RN `Text`.
+There is no global `Text.defaultProps` mutation in this app — plain `Text`
+does not get the app's font automatically, so a bare `Text` with no
+`fontFamily` in its own style will render in the OS default font. `AppText`
+is the explicit, typed replacement for that old (removed) global-mutation
+pattern.
+
 ## Hygiene
 
 - No dead code, no unused imports (ESLint will flag both).
