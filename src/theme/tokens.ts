@@ -59,6 +59,7 @@ export const typography = {
 };
 
 export const spacing = {
+  xxs: 2,
   xs: 4,
   sm: 8,
   md: 12,
@@ -72,7 +73,11 @@ export const radius = {
   md: 16,
   lg: 24,
   pill: 999,
-  button: 12,
+  // Buttons are fully pill-shaped per the Stitch design system spec
+  // ("Primary (Pill): ... radius 9999px") and the exported screen HTML
+  // (`rounded-full` on every button) — corrected from an earlier, mistaken
+  // 12px reading of a summary swatch image.
+  button: 999,
 };
 
 export const shadows = {
@@ -83,4 +88,11 @@ export const shadows = {
     shadowRadius: 20,
     elevation: 3,
   },
+};
+
+// Named gradient presets, analogous to `shadows` — a role name (what the
+// gradient is for), not a screen name, so it can be reused if another
+// surface wants the same "hero illustration" treatment.
+export const gradients = {
+  hero: ["#F2F3FF", "#EAEDFF", "#E2E7FF"] as const,
 };

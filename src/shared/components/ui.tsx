@@ -254,6 +254,7 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   scrollContent: {
+    flexGrow: 1,
     gap: spacing.xl,
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
