@@ -91,15 +91,18 @@ category as mocking network/storage.
 
 - Tests live next to the code they test:
   `ui.tsx` → `ui.test.tsx`, `calculateJobStatus.ts` → `calculateJobStatus.test.ts`.
-- **Exception: files under `app/`.** Expo Router treats every file in `app/`
-  as a route candidate — including a colocated `app/index.test.tsx`. That
-  gets the test file bundled into the actual app by Metro, which then fails
-  to resolve `@testing-library/react-native`'s dependency on Node's
-  `console` module (`Unable to resolve module console`, or a 500 from the
-  dev server). Put route-file tests in `app/__tests__/` instead (e.g.
-  `app/__tests__/index.test.tsx`, importing `../index`) — Metro's default
-  `resolver.blockList` already excludes `__tests__` directories from the app
-  bundle, while Jest still discovers and runs them normally.
+- **Exception: files under `app/`.** Expo Router treats everything inside
+  `app/` — including subdirectories like `app/__tests__/` — as a route or
+  layout candidate. A test file anywhere under `app/` (colocated as
+  `app/index.test.tsx`, or under `app/__tests__/`) risks getting bundled
+  into the actual app by Metro, which then fails to resolve
+  `@testing-library/react-native`'s dependency on Node's `console` module
+  (`Unable to resolve module console`, or a 500 from the dev server). Expo's
+  own docs say not to put test files anywhere inside `app/` for this reason.
+  Put route-file tests in a root-level `__tests__/` directory instead (e.g.
+  `__tests__/welcome-screen.test.tsx`, importing `../app/index`) — entirely
+  outside `app/`, so Metro/Expo Router never sees it regardless of blockList
+  configuration, while Jest still discovers and runs it normally.
 - Use realistic inputs, not placeholder junk (`"asdf"`) unless the test is
   specifically about handling garbage input.
 - Avoid mocking anything you don't have to. Mock at the boundary (network,
@@ -108,8 +111,8 @@ category as mocking network/storage.
   rendering and accessibility behavior),
   `src/features/marketplace/status.test.ts` (pure domain-mapping functions),
   `src/features/marketplace/components.test.tsx` (navigation behavior via an
-  `expo-router` boundary mock), `app/__tests__/index.test.tsx` (a route
-  file's test, colocated in `app/__tests__/` per the exception above).
+  `expo-router` boundary mock), `__tests__/welcome-screen.test.tsx` (a route
+  file's test, kept in the root-level `__tests__/` per the exception above).
 
 ## Before installing a testing dependency
 
