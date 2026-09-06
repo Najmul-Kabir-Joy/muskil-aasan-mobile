@@ -2,9 +2,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { PhoneOtpStep } from "@/features/auth/PhoneOtpStep";
-import { BasicInfoStep } from "@/features/onboarding/BasicInfoStep";
+import { BasicInfo, BasicInfoStep, EMPTY_BASIC_INFO } from "@/features/onboarding/BasicInfoStep";
 import { IdDocs, IdVerificationStep } from "@/features/onboarding/IdVerificationStep";
-import { ActionButton, AppHeader, Badge, ScrollScreen } from "@/shared/components/ui";
+import { ActionButton, AppHeader, ScrollScreen } from "@/shared/components/ui";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
 const EMPTY_DOCS: IdDocs = { nidFront: null, nidBack: null, selfie: null };
@@ -17,20 +17,19 @@ export default function OnboardingScreen() {
   const skipPhoneStep = typeof verifiedPhone === "string" && verifiedPhone.length > 0;
 
   const steps = skipPhoneStep
-    ? ["Basic info", "ID verification"]
-    : ["Basic info", "ID verification", "Phone verification"];
+    ? ["Basic info", "Identity verification"]
+    : ["Basic info", "Identity verification", "Phone verification"];
 
   const [step, setStep] = useState(0);
-  const [name, setName] = useState("");
-  const [area, setArea] = useState("");
+  const [basicInfo, setBasicInfo] = useState<BasicInfo>(EMPTY_BASIC_INFO);
   const [docs, setDocs] = useState<IdDocs>(EMPTY_DOCS);
 
   const isLastStep = step === steps.length - 1;
   const isPhoneStep = !skipPhoneStep && step === 2;
-  const canContinueBasicInfo = name.trim().length >= 2;
+  const canContinueBasicInfo = basicInfo.name.trim().length >= 2 && basicInfo.area.length > 0;
 
   function finish() {
-    // No backend yet — name/area/docs collected above are just discarded.
+    // No backend yet — basicInfo/docs collected above are just discarded.
     // See docs/engineering/domain-and-terminology.md.
     router.replace("/(poster)");
   }
@@ -51,17 +50,29 @@ export default function OnboardingScreen() {
       />
 
       <View style={styles.progress}>
-        {steps.map((label, index) => (
-          <View key={label} style={styles.stepRow}>
-            <Badge label={`Step ${index + 1}`} tone={index <= step ? "success" : "neutral"} />
-            <Text style={[styles.stepText, index === step && styles.activeStepText]}>{label}</Text>
-          </View>
-        ))}
+        <View style={styles.progressLabelRow}>
+          <Text style={styles.progressLabel}>
+            Step {step + 1} of {steps.length}
+          </Text>
+          <Text style={styles.progressStepName}>{steps[step]}</Text>
+        </View>
+        <View style={styles.progressBar}>
+          {steps.map((label, index) => (
+            <View
+              key={label}
+              style={[styles.progressSegment, index <= step && styles.progressSegmentActive]}
+            />
+          ))}
+        </View>
       </View>
 
       <View style={styles.formCard}>
         {step === 0 ? (
-          <BasicInfoStep name={name} onChangeName={setName} area={area} onChangeArea={setArea} />
+          <BasicInfoStep
+            value={basicInfo}
+            onChange={(patch) => setBasicInfo((current) => ({ ...current, ...patch }))}
+            phoneVerified={skipPhoneStep ? verifiedPhone : undefined}
+          />
         ) : null}
 
         {step === 1 ? (
@@ -99,20 +110,37 @@ export default function OnboardingScreen() {
 
 const styles = StyleSheet.create({
   progress: {
-    gap: spacing.md,
+    gap: spacing.xs,
   },
-  stepRow: {
+  progressLabelRow: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.md,
+    justifyContent: "space-between",
   },
-  stepText: {
-    color: colors.text,
-    fontSize: 15,
-    fontFamily: fonts.bold,
-  },
-  activeStepText: {
+  progressLabel: {
     color: colors.primary,
+    fontFamily: fonts.bold,
+    fontSize: 12,
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
+  },
+  progressStepName: {
+    color: colors.muted,
+    fontFamily: fonts.medium,
+    fontSize: 12,
+  },
+  progressBar: {
+    flexDirection: "row",
+    gap: spacing.xxs,
+  },
+  progressSegment: {
+    backgroundColor: colors.border,
+    borderRadius: radius.pill,
+    flex: 1,
+    height: 6,
+  },
+  progressSegmentActive: {
+    backgroundColor: colors.primary,
   },
   formCard: {
     backgroundColor: colors.card,

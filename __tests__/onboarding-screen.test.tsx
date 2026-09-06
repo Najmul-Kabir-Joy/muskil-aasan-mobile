@@ -10,11 +10,22 @@ jest.mock("expo-router", () => ({
 jest.mock("expo-image-picker", () => ({
   CameraType: { front: "front", back: "back" },
   requestCameraPermissionsAsync: jest.fn(),
+  requestMediaLibraryPermissionsAsync: jest.fn(),
   launchCameraAsync: jest.fn(),
+  launchImageLibraryAsync: jest.fn(),
 }));
 
 const mockUseRouter = useRouter as jest.Mock;
 const mockUseLocalSearchParams = useLocalSearchParams as jest.Mock;
+
+async function fillBasicInfo(
+  getByPlaceholderText: (text: string) => unknown,
+  getByText: (text: string) => unknown,
+) {
+  await fireEvent.changeText(getByPlaceholderText("e.g. Tanvir Hossain") as never, "Rahim Uddin");
+  await fireEvent.press(getByText("Select your area (e.g. Dhanmondi, Mirpur)") as never);
+  await fireEvent.press(getByText("Dhanmondi") as never);
+}
 
 describe("OnboardingScreen", () => {
   beforeEach(() => {
@@ -22,36 +33,41 @@ describe("OnboardingScreen", () => {
     mockUseLocalSearchParams.mockReturnValue({});
   });
 
-  it("arriving from Get Started shows all 3 steps and gates Continue on a name", async () => {
-    const { getByRole, getByPlaceholderText, queryByText } = await render(<OnboardingScreen />);
+  it("arriving from Get Started shows all 3 steps and gates Continue on name + area", async () => {
+    const { getByRole, getByPlaceholderText, getByText, queryByText } = await render(
+      <OnboardingScreen />,
+    );
 
-    expect(queryByText("Phone verification")).toBeTruthy();
+    expect(queryByText("Step 1 of 3")).toBeTruthy();
     const continueButton = getByRole("button", { name: "Continue" });
     expect(continueButton.props.accessibilityState).toEqual(
       expect.objectContaining({ disabled: true }),
     );
 
-    await fireEvent.changeText(getByPlaceholderText("Your name"), "Rahim Uddin");
+    await fillBasicInfo(getByPlaceholderText, getByText);
     expect(continueButton.props.accessibilityState).toEqual(
       expect.objectContaining({ disabled: false }),
     );
 
     await fireEvent.press(continueButton);
-    expect(queryByText("NID — front side")).toBeTruthy();
+    expect(queryByText("Verify your identity")).toBeTruthy();
+    expect(queryByText("Upload front of NID")).toBeTruthy();
 
     await fireEvent.press(getByRole("button", { name: "Skip for now" }));
     expect(queryByText("Mobile Number")).toBeTruthy();
   });
 
   it("lets Back return to the previous step", async () => {
-    const { getByRole, getByPlaceholderText, queryByText } = await render(<OnboardingScreen />);
+    const { getByRole, getByPlaceholderText, getByText, queryByText } = await render(
+      <OnboardingScreen />,
+    );
 
-    await fireEvent.changeText(getByPlaceholderText("Your name"), "Rahim Uddin");
+    await fillBasicInfo(getByPlaceholderText, getByText);
     await fireEvent.press(getByRole("button", { name: "Continue" }));
-    expect(queryByText("NID — front side")).toBeTruthy();
+    expect(queryByText("Verify your identity")).toBeTruthy();
 
     await fireEvent.press(getByRole("button", { name: "Back" }));
-    expect(getByPlaceholderText("Your name")).toBeTruthy();
+    expect(getByPlaceholderText("e.g. Tanvir Hossain")).toBeTruthy();
   });
 
   it("arriving from Log In (phone already verified) skips the phone step and finishes to the poster home", async () => {
@@ -59,13 +75,16 @@ describe("OnboardingScreen", () => {
     mockUseRouter.mockReturnValue({ replace });
     mockUseLocalSearchParams.mockReturnValue({ phone: "1712345678" });
 
-    const { getByRole, getByPlaceholderText, queryByText } = await render(<OnboardingScreen />);
+    const { getByRole, getByPlaceholderText, getByText, queryByText } = await render(
+      <OnboardingScreen />,
+    );
 
-    expect(queryByText("Phone verification")).toBeNull();
+    expect(queryByText("Step 1 of 2")).toBeTruthy();
+    expect(queryByText("Phone verified (+880 1712345678)")).toBeTruthy();
 
-    await fireEvent.changeText(getByPlaceholderText("Your name"), "Rahim Uddin");
+    await fillBasicInfo(getByPlaceholderText, getByText);
     await fireEvent.press(getByRole("button", { name: "Continue" }));
-    expect(queryByText("NID — front side")).toBeTruthy();
+    expect(queryByText("Verify your identity")).toBeTruthy();
 
     await fireEvent.press(getByRole("button", { name: "Finish" }));
 

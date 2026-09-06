@@ -13,9 +13,9 @@ export default function LoginScreen() {
 
   function handleVerified(phone: string) {
     if (isDummyExistingUser(phone)) {
-      router.replace("/(poster)");
+      router.replace("/existing-user-home");
     } else {
-      router.replace({ pathname: "/onboarding", params: { phone } });
+      router.replace({ pathname: "/setup-intro", params: { phone } });
     }
   }
 

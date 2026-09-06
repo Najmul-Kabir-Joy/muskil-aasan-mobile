@@ -1,24 +1,30 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { isDummyOtpCorrect } from "@/features/auth/dummyAuth";
 import { ActionButton, AppText } from "@/shared/components/ui";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
-const OTP_LENGTH = 4;
-const RESEND_SECONDS = 45;
+const OTP_LENGTH = 6;
+const RESEND_SECONDS = 30;
+
+function formatCountdown(seconds: number) {
+  return `00:${seconds.toString().padStart(2, "0")}`;
+}
 
 /**
  * Phone number entry + OTP verification, reused by the standalone Login
  * screen and as the final step of the Get Started signup wizard. There is no
- * real backend or SMS provider yet — any 4-digit code is accepted, and
- * `onVerified` fires as soon as all digits are filled in. See
- * src/features/auth/dummyAuth.ts for the dummy existing-vs-new-user check.
+ * real backend or SMS provider yet — one hardcoded 6-digit code is treated
+ * as correct and everything else shows the error state. See
+ * src/features/auth/dummyAuth.ts.
  */
 export function PhoneOtpStep({ onVerified }: { onVerified: (phone: string) => void }) {
   const [phone, setPhone] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [resendIn, setResendIn] = useState(RESEND_SECONDS);
+  const [otpError, setOtpError] = useState(false);
   const otpInputs = useRef<(TextInput | null)[]>([]);
 
   useEffect(() => {
@@ -27,27 +33,36 @@ export function PhoneOtpStep({ onVerified }: { onVerified: (phone: string) => vo
     return () => clearInterval(timer);
   }, [otpSent, resendIn]);
 
-  const canContinue = phone.length >= 10;
-  const resendLabel = `0:${resendIn.toString().padStart(2, "0")}`;
+  const canSendCode = phone.length >= 10;
+  const otpFilled = otp.every(Boolean);
 
-  function handleContinue() {
+  function handleSendCode() {
     setOtpSent(true);
     setResendIn(RESEND_SECONDS);
+    setOtp(Array(OTP_LENGTH).fill(""));
+    setOtpError(false);
   }
 
-  function handleEditNumber() {
+  function handleResend() {
+    if (resendIn > 0) return;
+    setResendIn(RESEND_SECONDS);
+    setOtp(Array(OTP_LENGTH).fill(""));
+    setOtpError(false);
+    otpInputs.current[0]?.focus();
+  }
+
+  function handleChangeNumber() {
     setOtpSent(false);
     setOtp(Array(OTP_LENGTH).fill(""));
+    setOtpError(false);
   }
 
   function handleOtpChange(index: number, value: string) {
     const digit = value.replace(/[^0-9]/g, "").slice(-1);
+    setOtpError(false);
     setOtp((current) => {
       const next = [...current];
       next[index] = digit;
-      if (next.every(Boolean)) {
-        onVerified(phone);
-      }
       return next;
     });
     if (digit && index < OTP_LENGTH - 1) {
@@ -61,34 +76,45 @@ export function PhoneOtpStep({ onVerified }: { onVerified: (phone: string) => vo
     }
   }
 
+  function handleVerify() {
+    if (isDummyOtpCorrect(otp.join(""))) {
+      onVerified(phone);
+    } else {
+      setOtpError(true);
+    }
+  }
+
   return (
     <>
-      <View style={styles.form}>
-        <Text style={styles.fieldLabel}>Mobile Number</Text>
-        <View style={styles.phoneRow}>
-          <View style={styles.countryPill}>
-            <Text style={styles.flag}>🇧🇩</Text>
-            <Text style={styles.countryCode}>+880</Text>
+      {!otpSent ? (
+        <View style={styles.form}>
+          <Text style={styles.fieldLabel}>Mobile Number</Text>
+          <View style={styles.phoneRow}>
+            <View style={styles.countryPill}>
+              <Text style={styles.flag}>🇧🇩</Text>
+              <Text style={styles.countryCode}>+880</Text>
+            </View>
+            <TextInput
+              value={phone}
+              onChangeText={(value) => setPhone(value.replace(/[^0-9]/g, "").slice(0, 11))}
+              placeholder="017XX-XXXXXX"
+              placeholderTextColor={colors.muted}
+              keyboardType="number-pad"
+              maxLength={11}
+              style={styles.phoneInput}
+            />
           </View>
-          <TextInput
-            value={phone}
-            onChangeText={(value) => setPhone(value.replace(/[^0-9]/g, "").slice(0, 11))}
-            placeholder="017XX-XXXXXX"
-            placeholderTextColor={colors.muted}
-            keyboardType="number-pad"
-            maxLength={11}
-            style={styles.phoneInput}
-          />
+          <AppText style={styles.helpText}>We&apos;ll send a 6-digit verification code.</AppText>
+          <ActionButton label="Send Code →" onPress={handleSendCode} disabled={!canSendCode} />
         </View>
-        <AppText style={styles.helpText}>We&apos;ll text you a 6-digit verification code.</AppText>
-        <ActionButton label="Continue →" onPress={handleContinue} disabled={!canContinue} />
-      </View>
-
-      {otpSent ? (
+      ) : (
         <View style={styles.otpBox}>
           <View style={styles.otpNotice}>
             <MaterialIcons name="mark-chat-unread" size={16} color={colors.primary} />
             <Text style={styles.otpNoticeText}>Code sent to +880 {phone}</Text>
+            <Pressable accessibilityRole="button" onPress={handleChangeNumber}>
+              <Text style={styles.changeNumber}>Change number</Text>
+            </Pressable>
           </View>
           <View style={styles.otpRow}>
             {otp.map((digit, index) => (
@@ -103,20 +129,38 @@ export function PhoneOtpStep({ onVerified }: { onVerified: (phone: string) => vo
                 onKeyPress={({ nativeEvent }) => handleOtpKeyPress(index, nativeEvent.key)}
                 keyboardType="number-pad"
                 maxLength={1}
-                style={styles.otpDigit}
+                style={[styles.otpDigit, otpError && styles.otpDigitError]}
               />
             ))}
           </View>
+          {otpError ? (
+            <View style={styles.errorBanner}>
+              <MaterialIcons name="error" size={18} color={colors.dangerDark} />
+              <Text style={styles.errorText}>That code doesn&apos;t look right. Try again.</Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Dismiss error"
+                onPress={() => setOtpError(false)}
+              >
+                <MaterialIcons name="close" size={16} color={colors.dangerDark} />
+              </Pressable>
+            </View>
+          ) : null}
           <View style={styles.otpFooter}>
-            <Text style={styles.otpFooterText}>
-              {resendIn > 0 ? `Resend in ${resendLabel}` : "You can resend the code now"}
-            </Text>
-            <Pressable accessibilityRole="button" onPress={handleEditNumber}>
-              <Text style={styles.editNumber}>Edit Number</Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={handleResend}
+              disabled={resendIn > 0}
+              hitSlop={4}
+            >
+              <Text style={[styles.otpFooterText, resendIn <= 0 && styles.resendActive]}>
+                {resendIn > 0 ? `Resend code in ${formatCountdown(resendIn)}` : "Resend SMS"}
+              </Text>
             </Pressable>
           </View>
+          <ActionButton label="Verify & Complete →" onPress={handleVerify} disabled={!otpFilled} />
         </View>
-      ) : null}
+      )}
     </>
   );
 }
@@ -172,27 +216,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   otpBox: {
-    alignItems: "center",
     backgroundColor: colors.card,
     borderColor: colors.border,
     borderRadius: radius.md,
     borderWidth: 1,
-    gap: spacing.xs,
+    gap: spacing.md,
     padding: spacing.lg,
   },
   otpNotice: {
     alignItems: "center",
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.xs,
   },
   otpNoticeText: {
     color: colors.primary,
     fontFamily: fonts.semiBold,
     fontSize: 12,
+    flexShrink: 1,
+  },
+  changeNumber: {
+    color: colors.primary,
+    fontFamily: fonts.bold,
+    fontSize: 12,
+    textDecorationLine: "underline",
   },
   otpRow: {
     flexDirection: "row",
-    gap: spacing.sm,
+    gap: spacing.xs,
     justifyContent: "center",
   },
   otpDigit: {
@@ -202,26 +253,41 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     color: colors.text,
     fontFamily: fonts.bold,
-    fontSize: 20,
+    fontSize: 18,
     height: 48,
     textAlign: "center",
     width: 40,
   },
+  otpDigitError: {
+    backgroundColor: colors.dangerSoft,
+    borderColor: colors.danger,
+    color: colors.dangerDark,
+  },
+  errorBanner: {
+    alignItems: "center",
+    backgroundColor: colors.dangerSoft,
+    borderRadius: radius.sm,
+    flexDirection: "row",
+    gap: spacing.xs,
+    padding: spacing.sm,
+  },
+  errorText: {
+    color: colors.dangerDark,
+    flex: 1,
+    fontFamily: fonts.medium,
+    fontSize: 12,
+  },
   otpFooter: {
     alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: spacing.xxs,
-    width: "100%",
   },
   otpFooterText: {
     color: colors.muted,
     fontFamily: fonts.medium,
-    fontSize: 11,
+    fontSize: 12,
   },
-  editNumber: {
+  resendActive: {
     color: colors.primary,
     fontFamily: fonts.bold,
-    fontSize: 11,
+    textDecorationLine: "underline",
   },
 });
