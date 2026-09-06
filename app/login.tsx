@@ -77,7 +77,7 @@ export default function LoginScreen() {
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={styles.headline}>Welcome to Muskil Aasan</Text>
+        <Text style={styles.headline}>Welcome to Muskill Asaan</Text>
         <Text style={styles.bengaliLabel}>মুশকিল আসান</Text>
         <AppText style={styles.subtitle}>
           Enter your mobile number to sign in or create an account.
