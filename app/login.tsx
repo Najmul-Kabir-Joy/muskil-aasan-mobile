@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { ActionButton, AppText, ScrollScreen } from "@/shared/components/ui";
+import { BRAND_NAME } from "@/shared/constants/brand";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
 const OTP_LENGTH = 4;
@@ -77,7 +78,7 @@ export default function LoginScreen() {
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={styles.headline}>Welcome to Muskill Asaan</Text>
+        <Text style={styles.headline}>Welcome to {BRAND_NAME}</Text>
         <Text style={styles.bengaliLabel}>মুশকিল আসান</Text>
         <AppText style={styles.subtitle}>
           Enter your mobile number to sign in or create an account.

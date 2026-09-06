@@ -3,6 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { ActionButton, AppText, ScrollScreen } from "@/shared/components/ui";
+import { BRAND_NAME } from "@/shared/constants/brand";
 import { colors, fonts, gradients, radius, spacing } from "@/theme/tokens";
 
 export default function WelcomeScreen() {
@@ -16,7 +17,7 @@ export default function WelcomeScreen() {
           style={styles.logoMark}
           resizeMode="contain"
         />
-        <Text style={styles.brand}>Muskill Asaan</Text>
+        <Text style={styles.brand}>{BRAND_NAME}</Text>
       </View>
 
       <LinearGradient

@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextProps, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { BRAND_NAME } from "@/shared/constants/brand";
 import { colors, fonts, radius, shadows, spacing, typography } from "@/theme/tokens";
 
 type ButtonTone = "primary" | "secondary" | "inverted" | "outlined";
@@ -67,7 +68,7 @@ export function AppHeader({
   return (
     <View style={styles.header}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.kicker}>Muskill Asaan</Text>
+        <Text style={styles.kicker}>{BRAND_NAME}</Text>
         <Heading style={styles.title}>{title}</Heading>
         {subtitle ? <BodyText style={styles.subtitle}>{subtitle}</BodyText> : null}
       </View>
