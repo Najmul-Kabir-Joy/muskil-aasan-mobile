@@ -49,19 +49,6 @@ describe("BasicInfoStep", () => {
     );
   });
 
-  it("updates the bio character counter as the user types", async () => {
-    const { getByPlaceholderText, getByText } = await render(<ControlledBasicInfoStep />);
-
-    expect(getByText("0/150")).toBeTruthy();
-
-    await fireEvent.changeText(
-      getByPlaceholderText("Write a brief note about yourself..."),
-      "Reliable and punctual.",
-    );
-
-    expect(getByText("22/150")).toBeTruthy();
-  });
-
   it("shows the phone-verified pill only when a phone number is passed", async () => {
     const { queryByText, rerender } = await render(<ControlledBasicInfoStep />);
     expect(queryByText(/Phone verified/)).toBeNull();

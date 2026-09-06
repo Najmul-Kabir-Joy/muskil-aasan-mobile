@@ -4,6 +4,11 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { PhoneOtpStep } from "@/features/auth/PhoneOtpStep";
 import { BasicInfo, BasicInfoStep, EMPTY_BASIC_INFO } from "@/features/onboarding/BasicInfoStep";
 import { IdDocs, IdVerificationStep } from "@/features/onboarding/IdVerificationStep";
+import {
+  MAX_PREFERRED_CATEGORIES,
+  PrimaryUseCase,
+  UseCaseStep,
+} from "@/features/onboarding/UseCaseStep";
 import { ActionButton, AppHeader, ScrollScreen } from "@/shared/components/ui";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
@@ -17,21 +22,23 @@ export default function OnboardingScreen() {
   const skipPhoneStep = typeof verifiedPhone === "string" && verifiedPhone.length > 0;
 
   const steps = skipPhoneStep
-    ? ["Basic info", "Identity verification"]
-    : ["Basic info", "Identity verification", "Phone verification"];
+    ? ["Basic info", "Primary use case", "Identity verification"]
+    : ["Basic info", "Primary use case", "Identity verification", "Phone verification"];
 
   const [step, setStep] = useState(0);
   const [basicInfo, setBasicInfo] = useState<BasicInfo>(EMPTY_BASIC_INFO);
+  const [useCase, setUseCase] = useState<PrimaryUseCase>("");
+  const [preferredCategories, setPreferredCategories] = useState<string[]>([]);
   const [docs, setDocs] = useState<IdDocs>(EMPTY_DOCS);
 
   const isLastStep = step === steps.length - 1;
-  const isPhoneStep = !skipPhoneStep && step === 2;
+  const isPhoneStep = !skipPhoneStep && step === 3;
   const canContinueBasicInfo = basicInfo.name.trim().length >= 2 && basicInfo.area.length > 0;
 
   function finish() {
-    // No backend yet — basicInfo/docs collected above are just discarded.
-    // See docs/engineering/domain-and-terminology.md.
-    router.replace("/(poster)");
+    // No backend yet — basicInfo/useCase/preferredCategories/docs collected
+    // above are just discarded. See docs/engineering/domain-and-terminology.md.
+    router.replace(useCase === "jobSeeker" ? "/(worker)/jobs" : "/(poster)");
   }
 
   function advance() {
@@ -40,6 +47,18 @@ export default function OnboardingScreen() {
     } else {
       setStep((value) => value + 1);
     }
+  }
+
+  function toggleCategory(categoryId: string) {
+    setPreferredCategories((current) => {
+      if (current.includes(categoryId)) {
+        return current.filter((id) => id !== categoryId);
+      }
+      if (current.length >= MAX_PREFERRED_CATEGORIES) {
+        return current;
+      }
+      return [...current, categoryId];
+    });
   }
 
   return (
@@ -76,6 +95,22 @@ export default function OnboardingScreen() {
         ) : null}
 
         {step === 1 ? (
+          <>
+            <View style={styles.skipRow}>
+              <Pressable accessibilityRole="button" onPress={advance}>
+                <Text style={styles.skipLabel}>I&apos;m not sure yet</Text>
+              </Pressable>
+            </View>
+            <UseCaseStep
+              useCase={useCase}
+              onChangeUseCase={setUseCase}
+              selectedCategories={preferredCategories}
+              onToggleCategory={toggleCategory}
+            />
+          </>
+        ) : null}
+
+        {step === 2 ? (
           <>
             <View style={styles.skipRow}>
               <Pressable accessibilityRole="button" onPress={advance}>

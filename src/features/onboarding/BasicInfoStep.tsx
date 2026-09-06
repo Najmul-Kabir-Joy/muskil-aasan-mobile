@@ -21,7 +21,6 @@ export type BasicInfo = {
   email: string;
   gender: "" | "Male" | "Female" | "Other";
   dob: string;
-  bio: string;
   avatarUri: string | null;
 };
 
@@ -31,11 +30,8 @@ export const EMPTY_BASIC_INFO: BasicInfo = {
   email: "",
   gender: "",
   dob: "",
-  bio: "",
   avatarUri: null,
 };
-
-const BIO_MAX_LENGTH = 150;
 
 const DHAKA_AREAS = [
   "Dhanmondi",
@@ -237,24 +233,6 @@ export function BasicInfoStep({
         </View>
       </View>
 
-      <View style={styles.field}>
-        <View style={styles.labelRow}>
-          <Text style={styles.label}>Short bio (Optional)</Text>
-          <Text style={styles.hint}>
-            {value.bio.length}/{BIO_MAX_LENGTH}
-          </Text>
-        </View>
-        <TextInput
-          value={value.bio}
-          onChangeText={(text) => onChange({ bio: text.slice(0, BIO_MAX_LENGTH) })}
-          placeholder="Write a brief note about yourself..."
-          placeholderTextColor={colors.muted}
-          multiline
-          numberOfLines={3}
-          style={[styles.input, styles.bioInput]}
-        />
-      </View>
-
       <View style={styles.assurance}>
         <MaterialIcons name="verified-user" size={18} color={colors.primary} />
         <AppText style={styles.assuranceText}>
@@ -395,11 +373,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     minHeight: 48,
     paddingHorizontal: spacing.md,
-  },
-  bioInput: {
-    minHeight: 80,
-    paddingTop: spacing.sm,
-    textAlignVertical: "top",
   },
   dobRow: {
     alignItems: "center",
