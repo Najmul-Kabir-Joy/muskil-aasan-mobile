@@ -59,6 +59,7 @@ export const typography = {
 };
 
 export const spacing = {
+  xxs: 2,
   xs: 4,
   sm: 8,
   md: 12,
@@ -87,4 +88,11 @@ export const shadows = {
     shadowRadius: 20,
     elevation: 3,
   },
+};
+
+// Named gradient presets, analogous to `shadows` — a role name (what the
+// gradient is for), not a screen name, so it can be reused if another
+// surface wants the same "hero illustration" treatment.
+export const gradients = {
+  hero: ["#F2F3FF", "#EAEDFF", "#E2E7FF"] as const,
 };

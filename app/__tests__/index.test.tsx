@@ -10,9 +10,6 @@ import WelcomeScreen from "../index";
 // already excludes __tests__ directories, so Jest still finds this file
 // while Metro/Expo Router never sees it. See docs/engineering/testing.md.
 
-// Mock at the expo-router module boundary (per docs/engineering/testing.md)
-// rather than mounting a real navigation tree, since the only behavior under
-// test is *which route* Get Started pushes to for the selected mode.
 jest.mock("expo-router", () => ({
   useRouter: jest.fn(),
 }));
@@ -20,36 +17,11 @@ jest.mock("expo-router", () => ({
 const mockUseRouter = useRouter as jest.Mock;
 
 describe("WelcomeScreen", () => {
-  it("navigates to the poster route by default (Need Help is preselected)", async () => {
+  it("routes to the onboarding flow on Get Started", async () => {
     const push = jest.fn();
     mockUseRouter.mockReturnValue({ push });
-
     const { getByRole } = await render(<WelcomeScreen />);
     await fireEvent.press(getByRole("button", { name: "Get Started →" }));
-
-    expect(push).toHaveBeenCalledWith("/(poster)");
-  });
-
-  it("navigates to the job seeker route after selecting Want to Earn", async () => {
-    const push = jest.fn();
-    mockUseRouter.mockReturnValue({ push });
-
-    const { getByRole } = await render(<WelcomeScreen />);
-    await fireEvent.press(getByRole("button", { name: /Want to Earn/ }));
-    await fireEvent.press(getByRole("button", { name: "Get Started →" }));
-
-    expect(push).toHaveBeenCalledWith("/(worker)/jobs");
-  });
-
-  it("switching back to Need Help after selecting Want to Earn routes to poster again", async () => {
-    const push = jest.fn();
-    mockUseRouter.mockReturnValue({ push });
-
-    const { getByRole } = await render(<WelcomeScreen />);
-    await fireEvent.press(getByRole("button", { name: /Want to Earn/ }));
-    await fireEvent.press(getByRole("button", { name: /Need Help/ }));
-    await fireEvent.press(getByRole("button", { name: "Get Started →" }));
-
-    expect(push).toHaveBeenCalledWith("/(poster)");
+    expect(push).toHaveBeenCalledWith("/onboarding");
   });
 });
