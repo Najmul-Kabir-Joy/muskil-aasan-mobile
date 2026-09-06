@@ -116,11 +116,13 @@ export function ActionButton({
   onPress,
   tone = "primary",
   disabled = false,
+  icon,
 }: {
   label: string;
   onPress: () => void;
   tone?: ButtonTone;
   disabled?: boolean;
+  icon?: ReactNode;
 }) {
   return (
     <Pressable
@@ -130,6 +132,7 @@ export function ActionButton({
       onPress={onPress}
       style={[styles.button, buttonToneStyles[tone], disabled && styles.disabledButton]}
     >
+      {icon}
       <Text
         style={[
           styles.buttonText,
@@ -299,6 +302,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.primary,
     borderRadius: radius.button,
+    flexDirection: "row",
+    gap: spacing.sm,
     minHeight: 44,
     justifyContent: "center",
     paddingHorizontal: spacing.lg,
