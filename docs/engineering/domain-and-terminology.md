@@ -49,6 +49,10 @@ the explicit non-example after the list.
 16. Categories will be used to organize jobs and improve discovery/onboarding.
 17. Job Providers can broadly be anyone.
 18. Job Seekers are broadly anyone looking to earn extra income.
+19. Signup can collect basic info (name, area) and optionally an NID photo
+    (front/back) plus a verification selfie; the ID step is skippable.
+20. New sign-ups reach the signup form via phone/OTP verification — either
+    before it (from "Get Started") or already done (from "Log In").
 
 **Confirmed requirement ≠ implementation detail.** For example, #11-13 confirm
 that a provider-chooses-then-seeker-accepts flow exists at a high level — they

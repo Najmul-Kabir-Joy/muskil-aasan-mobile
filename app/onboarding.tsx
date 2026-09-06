@@ -1,130 +1,96 @@
-import { useMemo, useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
-import {
-  ActionButton,
-  AppHeader,
-  AppText,
-  Badge,
-  PrimaryButton,
-  ScrollScreen,
-  SectionHeader,
-  SelectableChip,
-} from "@/shared/components/ui";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { PhoneOtpStep } from "@/features/auth/PhoneOtpStep";
+import { BasicInfoStep } from "@/features/onboarding/BasicInfoStep";
+import { IdDocs, IdVerificationStep } from "@/features/onboarding/IdVerificationStep";
+import { ActionButton, AppHeader, Badge, ScrollScreen } from "@/shared/components/ui";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
-const steps = ["Phone number", "OTP verification", "Basic profile", "Choose mode"];
-const roles = ["Poster mode", "Job seeker mode", "Both modes"];
+const EMPTY_DOCS: IdDocs = { nidFront: null, nidBack: null, selfie: null };
 
 export default function OnboardingScreen() {
-  const [step, setStep] = useState(0);
-  const [phone, setPhone] = useState("+880");
-  const [otp, setOtp] = useState("");
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("I need help");
+  const router = useRouter();
+  const { phone: verifiedPhone } = useLocalSearchParams<{ phone?: string }>();
+  // Arriving from the login screen means the phone/OTP step already
+  // happened there — don't ask for it again.
+  const skipPhoneStep = typeof verifiedPhone === "string" && verifiedPhone.length > 0;
 
-  const canContinue = useMemo(() => {
-    if (step === 0) return phone.length >= 8;
-    if (step === 1) return otp.length >= 4;
-    if (step === 2) return name.trim().length >= 2;
-    return Boolean(role);
-  }, [name, otp, phone, role, step]);
+  const steps = skipPhoneStep
+    ? ["Basic info", "ID verification"]
+    : ["Basic info", "ID verification", "Phone verification"];
+
+  const [step, setStep] = useState(0);
+  const [name, setName] = useState("");
+  const [area, setArea] = useState("");
+  const [docs, setDocs] = useState<IdDocs>(EMPTY_DOCS);
+
+  const isLastStep = step === steps.length - 1;
+  const isPhoneStep = !skipPhoneStep && step === 2;
+  const canContinueBasicInfo = name.trim().length >= 2;
+
+  function finish() {
+    // No backend yet — name/area/docs collected above are just discarded.
+    // See docs/engineering/domain-and-terminology.md.
+    router.replace("/(poster)");
+  }
+
+  function advance() {
+    if (isLastStep) {
+      finish();
+    } else {
+      setStep((value) => value + 1);
+    }
+  }
 
   return (
     <ScrollScreen>
       <AppHeader
         title="Create trust before the first job."
-        subtitle="Every user can use both modes. Start with the mode you need now and switch later from profile."
+        subtitle="A few quick steps to set up your account."
       />
 
       <View style={styles.progress}>
-        {steps.map((stepLabel, index) => (
-          <View key={stepLabel} style={styles.stepRow}>
+        {steps.map((label, index) => (
+          <View key={label} style={styles.stepRow}>
             <Badge label={`Step ${index + 1}`} tone={index <= step ? "success" : "neutral"} />
-            <Text style={[styles.stepText, index === step && styles.activeStepText]}>
-              {stepLabel}
-            </Text>
+            <Text style={[styles.stepText, index === step && styles.activeStepText]}>{label}</Text>
           </View>
         ))}
       </View>
 
       <View style={styles.formCard}>
-        <SectionHeader title={steps[step]} />
         {step === 0 ? (
-          <>
-            <TextInput
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              style={styles.input}
-            />
-            <AppText style={styles.helpText}>
-              We use your number to protect jobs and offers.
-            </AppText>
-          </>
+          <BasicInfoStep name={name} onChangeName={setName} area={area} onChangeArea={setArea} />
         ) : null}
+
         {step === 1 ? (
           <>
-            <TextInput
-              value={otp}
-              onChangeText={setOtp}
-              keyboardType="number-pad"
-              placeholder="Enter 4 digit OTP"
-              placeholderTextColor={colors.muted}
-              style={styles.input}
-            />
-            <AppText style={styles.helpText}>
-              Mock OTP accepts any 4 digits. Resend and expired states can be checked in this step.
-            </AppText>
-          </>
-        ) : null}
-        {step === 2 ? (
-          <>
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder="Your name"
-              placeholderTextColor={colors.muted}
-              style={styles.input}
-            />
-            <TextInput
-              placeholder="Area in Dhaka"
-              placeholderTextColor={colors.muted}
-              style={styles.input}
+            <View style={styles.skipRow}>
+              <Pressable accessibilityRole="button" onPress={advance}>
+                <Text style={styles.skipLabel}>Skip for now</Text>
+              </Pressable>
+            </View>
+            <IdVerificationStep
+              docs={docs}
+              onCapture={(key, uri) => setDocs((current) => ({ ...current, [key]: uri }))}
             />
           </>
         ) : null}
-        {step === 3 ? (
-          <View style={styles.chips}>
-            {roles.map((item) => (
-              <SelectableChip
-                key={item}
-                label={item}
-                selected={role === item}
-                onPress={() => setRole(item)}
-              />
-            ))}
-          </View>
-        ) : null}
+
+        {isPhoneStep ? <PhoneOtpStep onVerified={finish} /> : null}
+
         <View style={styles.actions}>
           {step > 0 ? (
+            <ActionButton label="Back" tone="secondary" onPress={() => setStep((v) => v - 1)} />
+          ) : null}
+          {!isPhoneStep ? (
             <ActionButton
-              label="Back"
-              onPress={() => setStep((value) => value - 1)}
-              tone="secondary"
+              label={isLastStep ? "Finish" : "Continue"}
+              onPress={advance}
+              disabled={step === 0 && !canContinueBasicInfo}
             />
           ) : null}
-          {step < steps.length - 1 ? (
-            <ActionButton
-              label="Continue"
-              onPress={() => setStep((value) => value + 1)}
-              disabled={!canContinue}
-            />
-          ) : (
-            <PrimaryButton
-              label="Enter prototype"
-              href={role === "Job seeker mode" ? "/(worker)/jobs" : "/(poster)"}
-            />
-          )}
         </View>
       </View>
     </ScrollScreen>
@@ -156,25 +122,13 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
     padding: spacing.lg,
   },
-  input: {
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    color: colors.text,
-    fontSize: 18,
+  skipRow: {
+    alignItems: "flex-end",
+  },
+  skipLabel: {
+    color: colors.primary,
     fontFamily: fonts.bold,
-    minHeight: 52,
-    paddingHorizontal: spacing.lg,
-  },
-  helpText: {
-    color: colors.muted,
     fontSize: 13,
-    lineHeight: 20,
-  },
-  chips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
   },
   actions: {
     flexDirection: "row",
