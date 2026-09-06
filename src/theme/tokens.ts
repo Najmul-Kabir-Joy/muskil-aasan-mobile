@@ -72,7 +72,11 @@ export const radius = {
   md: 16,
   lg: 24,
   pill: 999,
-  button: 12,
+  // Buttons are fully pill-shaped per the Stitch design system spec
+  // ("Primary (Pill): ... radius 9999px") and the exported screen HTML
+  // (`rounded-full` on every button) — corrected from an earlier, mistaken
+  // 12px reading of a summary swatch image.
+  button: 999,
 };
 
 export const shadows = {
