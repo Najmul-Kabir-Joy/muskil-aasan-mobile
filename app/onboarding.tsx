@@ -21,9 +21,11 @@ export default function OnboardingScreen() {
   // happened there — don't ask for it again.
   const skipPhoneStep = typeof verifiedPhone === "string" && verifiedPhone.length > 0;
 
+  // The primary-use-case question (+ its category picker) lives inside the
+  // Basic info step rather than being its own numbered step.
   const steps = skipPhoneStep
-    ? ["Basic info", "Primary use case", "Identity verification"]
-    : ["Basic info", "Primary use case", "Identity verification", "Phone verification"];
+    ? ["Basic info", "Identity verification"]
+    : ["Basic info", "Identity verification", "Phone verification"];
 
   const [step, setStep] = useState(0);
   const [basicInfo, setBasicInfo] = useState<BasicInfo>(EMPTY_BASIC_INFO);
@@ -32,7 +34,7 @@ export default function OnboardingScreen() {
   const [docs, setDocs] = useState<IdDocs>(EMPTY_DOCS);
 
   const isLastStep = step === steps.length - 1;
-  const isPhoneStep = !skipPhoneStep && step === 3;
+  const isPhoneStep = !skipPhoneStep && step === 2;
   const canContinueBasicInfo = basicInfo.name.trim().length >= 2 && basicInfo.area.length > 0;
 
   function finish() {
@@ -46,6 +48,13 @@ export default function OnboardingScreen() {
       finish();
     } else {
       setStep((value) => value + 1);
+    }
+  }
+
+  function handleChangeUseCase(value: PrimaryUseCase) {
+    setUseCase(value);
+    if (value !== "jobSeeker") {
+      setPreferredCategories([]);
     }
   }
 
@@ -87,30 +96,22 @@ export default function OnboardingScreen() {
 
       <View style={styles.formCard}>
         {step === 0 ? (
-          <BasicInfoStep
-            value={basicInfo}
-            onChange={(patch) => setBasicInfo((current) => ({ ...current, ...patch }))}
-            phoneVerified={skipPhoneStep ? verifiedPhone : undefined}
-          />
-        ) : null}
-
-        {step === 1 ? (
           <>
-            <View style={styles.skipRow}>
-              <Pressable accessibilityRole="button" onPress={advance}>
-                <Text style={styles.skipLabel}>I&apos;m not sure yet</Text>
-              </Pressable>
-            </View>
+            <BasicInfoStep
+              value={basicInfo}
+              onChange={(patch) => setBasicInfo((current) => ({ ...current, ...patch }))}
+              phoneVerified={skipPhoneStep ? verifiedPhone : undefined}
+            />
             <UseCaseStep
               useCase={useCase}
-              onChangeUseCase={setUseCase}
+              onChangeUseCase={handleChangeUseCase}
               selectedCategories={preferredCategories}
               onToggleCategory={toggleCategory}
             />
           </>
         ) : null}
 
-        {step === 2 ? (
+        {step === 1 ? (
           <>
             <View style={styles.skipRow}>
               <Pressable accessibilityRole="button" onPress={advance}>
