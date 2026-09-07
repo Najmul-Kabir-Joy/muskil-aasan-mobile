@@ -14,6 +14,23 @@ import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
 const EMPTY_DOCS: IdDocs = { nidFront: null, nidBack: null, selfie: null };
 
+type ScreenKey = "basicInfo" | "useCase" | "identity" | "phone";
+
+// The primary-use-case screen is a real screen in the flow (own Back/
+// Continue), but it's "silent": it doesn't get counted or labeled in the
+// visible step progress, which only tracks Basic info / Identity
+// verification / Phone verification.
+function displayIndexFor(screen: ScreenKey): number {
+  switch (screen) {
+    case "identity":
+      return 1;
+    case "phone":
+      return 2;
+    default:
+      return 0;
+  }
+}
+
 export default function OnboardingScreen() {
   const router = useRouter();
   const { phone: verifiedPhone } = useLocalSearchParams<{ phone?: string }>();
@@ -21,9 +38,10 @@ export default function OnboardingScreen() {
   // happened there — don't ask for it again.
   const skipPhoneStep = typeof verifiedPhone === "string" && verifiedPhone.length > 0;
 
-  // The primary-use-case question (+ its category picker) lives inside the
-  // Basic info step rather than being its own numbered step.
-  const steps = skipPhoneStep
+  const screens: ScreenKey[] = skipPhoneStep
+    ? ["basicInfo", "useCase", "identity"]
+    : ["basicInfo", "useCase", "identity", "phone"];
+  const displaySteps = skipPhoneStep
     ? ["Basic info", "Identity verification"]
     : ["Basic info", "Identity verification", "Phone verification"];
 
@@ -33,8 +51,11 @@ export default function OnboardingScreen() {
   const [preferredCategories, setPreferredCategories] = useState<string[]>([]);
   const [docs, setDocs] = useState<IdDocs>(EMPTY_DOCS);
 
-  const isLastStep = step === steps.length - 1;
-  const isPhoneStep = !skipPhoneStep && step === 2;
+  const currentScreen = screens[step];
+  const isLastStep = step === screens.length - 1;
+  const isPhoneStep = currentScreen === "phone";
+  const showProgress = currentScreen !== "useCase";
+  const displayIndex = displayIndexFor(currentScreen);
   const canContinueBasicInfo = basicInfo.name.trim().length >= 2 && basicInfo.area.length > 0;
 
   function finish() {
@@ -77,31 +98,44 @@ export default function OnboardingScreen() {
         subtitle="A few quick steps to set up your account."
       />
 
-      <View style={styles.progress}>
-        <View style={styles.progressLabelRow}>
-          <Text style={styles.progressLabel}>
-            Step {step + 1} of {steps.length}
-          </Text>
-          <Text style={styles.progressStepName}>{steps[step]}</Text>
+      {showProgress ? (
+        <View style={styles.progress}>
+          <View style={styles.progressLabelRow}>
+            <Text style={styles.progressLabel}>
+              Step {displayIndex + 1} of {displaySteps.length}
+            </Text>
+            <Text style={styles.progressStepName}>{displaySteps[displayIndex]}</Text>
+          </View>
+          <View style={styles.progressBar}>
+            {displaySteps.map((label, index) => (
+              <View
+                key={label}
+                style={[
+                  styles.progressSegment,
+                  index <= displayIndex && styles.progressSegmentActive,
+                ]}
+              />
+            ))}
+          </View>
         </View>
-        <View style={styles.progressBar}>
-          {steps.map((label, index) => (
-            <View
-              key={label}
-              style={[styles.progressSegment, index <= step && styles.progressSegmentActive]}
-            />
-          ))}
-        </View>
-      </View>
+      ) : null}
 
       <View style={styles.formCard}>
-        {step === 0 ? (
+        {currentScreen === "basicInfo" ? (
+          <BasicInfoStep
+            value={basicInfo}
+            onChange={(patch) => setBasicInfo((current) => ({ ...current, ...patch }))}
+            phoneVerified={skipPhoneStep ? verifiedPhone : undefined}
+          />
+        ) : null}
+
+        {currentScreen === "useCase" ? (
           <>
-            <BasicInfoStep
-              value={basicInfo}
-              onChange={(patch) => setBasicInfo((current) => ({ ...current, ...patch }))}
-              phoneVerified={skipPhoneStep ? verifiedPhone : undefined}
-            />
+            <View style={styles.skipRow}>
+              <Pressable accessibilityRole="button" onPress={advance}>
+                <Text style={styles.skipLabel}>I&apos;m not sure yet</Text>
+              </Pressable>
+            </View>
             <UseCaseStep
               useCase={useCase}
               onChangeUseCase={handleChangeUseCase}
@@ -111,7 +145,7 @@ export default function OnboardingScreen() {
           </>
         ) : null}
 
-        {step === 1 ? (
+        {currentScreen === "identity" ? (
           <>
             <View style={styles.skipRow}>
               <Pressable accessibilityRole="button" onPress={advance}>
@@ -135,7 +169,7 @@ export default function OnboardingScreen() {
             <ActionButton
               label={isLastStep ? "Finish" : "Continue"}
               onPress={advance}
-              disabled={step === 0 && !canContinueBasicInfo}
+              disabled={currentScreen === "basicInfo" && !canContinueBasicInfo}
             />
           ) : null}
         </View>

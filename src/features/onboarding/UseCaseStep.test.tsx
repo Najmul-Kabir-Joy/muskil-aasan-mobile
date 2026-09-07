@@ -65,19 +65,4 @@ describe("UseCaseStep", () => {
       expect.objectContaining({ selected: true }),
     );
   });
-
-  it("'I'm not sure yet' clears the selected card and hides categories", async () => {
-    const { getByRole, queryByText } = await render(<ControlledUseCaseStep />);
-    const seekerCard = getByRole("button", { name: /I'd like to help/ });
-
-    await fireEvent.press(seekerCard);
-    expect(queryByText(/Pick up to 5 categories/)).toBeTruthy();
-
-    await fireEvent.press(getByRole("button", { name: "I'm not sure yet" }));
-
-    expect(seekerCard.props.accessibilityState).toEqual(
-      expect.objectContaining({ selected: false }),
-    );
-    expect(queryByText(/Pick up to 5 categories/)).toBeNull();
-  });
 });

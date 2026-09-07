@@ -54,16 +54,10 @@ export function UseCaseStep({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>How would you like to use it?</Text>
-        <View style={styles.headerRow}>
-          <AppText style={styles.subtitle}>
-            You can always switch modes or do both later from your profile.
-          </AppText>
-          <Pressable accessibilityRole="button" onPress={() => onChangeUseCase("")}>
-            <Text style={styles.skipLabel}>I&apos;m not sure yet</Text>
-          </Pressable>
-        </View>
+        <AppText style={styles.subtitle}>
+          You can always switch modes or do both later from your profile.
+        </AppText>
       </View>
-
       <View style={styles.cards}>
         {OPTIONS.map((option) => {
           const selected = useCase === option.value;
@@ -122,26 +116,13 @@ const styles = StyleSheet.create({
   header: {
     gap: spacing.xxs,
   },
-  headerRow: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: spacing.sm,
-    justifyContent: "space-between",
-  },
   title: {
     color: colors.text,
     fontFamily: fonts.bold,
     fontSize: 20,
   },
-  skipLabel: {
-    color: colors.primary,
-    flexShrink: 0,
-    fontFamily: fonts.bold,
-    fontSize: 12,
-  },
   subtitle: {
     color: colors.muted,
-    flex: 1,
     fontSize: 14,
   },
   cards: {
