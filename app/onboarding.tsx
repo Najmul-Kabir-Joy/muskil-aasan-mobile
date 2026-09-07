@@ -164,7 +164,9 @@ export default function OnboardingScreen() {
         {isPhoneStep ? <PhoneOtpStep onVerified={advance} /> : null}
 
         <View style={styles.actions}>
-          {step > 0 ? (
+          {/* No Back from the use-case screen — the user is already
+              authenticated and phone-verified by this point. */}
+          {step > 0 && currentScreen !== "useCase" ? (
             <ActionButton label="Back" tone="secondary" onPress={() => setStep((v) => v - 1)} />
           ) : null}
           {!isPhoneStep ? (

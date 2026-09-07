@@ -90,9 +90,10 @@ describe("OnboardingScreen", () => {
     expect(queryByText(/^Step \d of \d$/)).toBeNull();
   });
 
-  it("lets Back return to the previous screen, including from the trailing use-case screen", async () => {
-    const { getByRole, getByPlaceholderText, getByText, getByLabelText, queryByText } =
-      await render(<OnboardingScreen />);
+  it("lets Back return to the previous screen", async () => {
+    const { getByRole, getByPlaceholderText, getByText, queryByText } = await render(
+      <OnboardingScreen />,
+    );
 
     await fillBasicInfo(getByPlaceholderText, getByText);
     await fireEvent.press(getByRole("button", { name: "Continue" }));
@@ -100,16 +101,21 @@ describe("OnboardingScreen", () => {
 
     await fireEvent.press(getByRole("button", { name: "Back" }));
     expect(getByPlaceholderText("e.g. Tanvir Hossain")).toBeTruthy();
+  });
 
+  it("has no Back button on the trailing use-case screen — the user is already phone-verified", async () => {
+    const { getByRole, getByPlaceholderText, getByText, getByLabelText, queryByRole, queryByText } =
+      await render(<OnboardingScreen />);
+
+    await fillBasicInfo(getByPlaceholderText, getByText);
     await fireEvent.press(getByRole("button", { name: "Continue" }));
     await fireEvent.press(getByRole("button", { name: "Skip for now" }));
     await fireEvent.changeText(getByPlaceholderText("017XX-XXXXXX"), "1712345678");
     await fireEvent.press(getByRole("button", { name: "Send Code →" }));
     await completeOtp(getByLabelText, getByRole);
-    expect(queryByText("How would you like to use it?")).toBeTruthy();
 
-    await fireEvent.press(getByRole("button", { name: "Back" }));
-    expect(queryByText("Mobile Number")).toBeTruthy();
+    expect(queryByText("How would you like to use it?")).toBeTruthy();
+    expect(queryByRole("button", { name: "Back" })).toBeNull();
   });
 
   it("choosing 'I'd like to help & earn' reveals categories, capped at 5", async () => {
