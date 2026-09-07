@@ -27,20 +27,32 @@ async function fillBasicInfo(
   await fireEvent.press(getByText("Dhanmondi") as never);
 }
 
+async function completeOtp(
+  getByLabelText: (label: string) => unknown,
+  getByRole: (role: string, options: { name: string }) => unknown,
+) {
+  const correctCode = "123456";
+  for (let index = 0; index < correctCode.length; index += 1) {
+    await fireEvent.changeText(
+      getByLabelText(`Verification code digit ${index + 1} of 6`) as never,
+      correctCode[index],
+    );
+  }
+  await fireEvent.press(getByRole("button", { name: "Verify & Complete →" }) as never);
+}
+
 describe("OnboardingScreen", () => {
   beforeEach(() => {
     mockUseRouter.mockReturnValue({ replace: jest.fn() });
     mockUseLocalSearchParams.mockReturnValue({});
   });
 
-  it("arriving from Get Started: use-case is its own screen but a silent (uncounted) one", async () => {
+  it("arriving from Get Started: Basic info -> Identity -> Phone, all counted and labeled", async () => {
     const { getByRole, getByPlaceholderText, getByText, queryByText } = await render(
       <OnboardingScreen />,
     );
 
     expect(queryByText("Step 1 of 3")).toBeTruthy();
-    expect(queryByText("How would you like to use it?")).toBeNull();
-
     const continueButton = getByRole("button", { name: "Continue" });
     expect(continueButton.props.accessibilityState).toEqual(
       expect.objectContaining({ disabled: true }),
@@ -52,11 +64,6 @@ describe("OnboardingScreen", () => {
     );
 
     await fireEvent.press(continueButton);
-    expect(queryByText("How would you like to use it?")).toBeTruthy();
-    // Silent step: no "Step X of Y" progress indicator while here.
-    expect(queryByText(/^Step \d of \d$/)).toBeNull();
-
-    await fireEvent.press(getByRole("button", { name: "Continue" }));
     expect(queryByText("Step 2 of 3")).toBeTruthy();
     expect(queryByText("Verify your identity")).toBeTruthy();
     expect(queryByText("Upload front of NID")).toBeTruthy();
@@ -66,45 +73,55 @@ describe("OnboardingScreen", () => {
     expect(queryByText("Mobile Number")).toBeTruthy();
   });
 
-  it("lets Back return to the previous screen", async () => {
-    const { getByRole, getByPlaceholderText, getByText, queryByText } = await render(
-      <OnboardingScreen />,
-    );
+  it("the use-case question appears after OTP verification, as a silent (uncounted) screen", async () => {
+    const { getByRole, getByPlaceholderText, getByText, getByLabelText, queryByText } =
+      await render(<OnboardingScreen />);
 
     await fillBasicInfo(getByPlaceholderText, getByText);
     await fireEvent.press(getByRole("button", { name: "Continue" }));
-    expect(queryByText("How would you like to use it?")).toBeTruthy();
+    await fireEvent.press(getByRole("button", { name: "Skip for now" }));
 
+    await fireEvent.changeText(getByPlaceholderText("017XX-XXXXXX"), "1712345678");
+    await fireEvent.press(getByRole("button", { name: "Send Code →" }));
+    await completeOtp(getByLabelText, getByRole);
+
+    expect(queryByText("How would you like to use it?")).toBeTruthy();
+    // Silent step: no "Step X of Y" progress indicator while here.
+    expect(queryByText(/^Step \d of \d$/)).toBeNull();
+  });
+
+  it("lets Back return to the previous screen, including from the trailing use-case screen", async () => {
+    const { getByRole, getByPlaceholderText, getByText, getByLabelText, queryByText } =
+      await render(<OnboardingScreen />);
+
+    await fillBasicInfo(getByPlaceholderText, getByText);
     await fireEvent.press(getByRole("button", { name: "Continue" }));
     expect(queryByText("Verify your identity")).toBeTruthy();
-
-    await fireEvent.press(getByRole("button", { name: "Back" }));
-    expect(queryByText("How would you like to use it?")).toBeTruthy();
 
     await fireEvent.press(getByRole("button", { name: "Back" }));
     expect(getByPlaceholderText("e.g. Tanvir Hossain")).toBeTruthy();
-  });
 
-  it("'I'm not sure yet' skips the use-case screen without requiring a selection", async () => {
-    const { getByRole, getByPlaceholderText, getByText, queryByText } = await render(
-      <OnboardingScreen />,
-    );
-
-    await fillBasicInfo(getByPlaceholderText, getByText);
     await fireEvent.press(getByRole("button", { name: "Continue" }));
+    await fireEvent.press(getByRole("button", { name: "Skip for now" }));
+    await fireEvent.changeText(getByPlaceholderText("017XX-XXXXXX"), "1712345678");
+    await fireEvent.press(getByRole("button", { name: "Send Code →" }));
+    await completeOtp(getByLabelText, getByRole);
     expect(queryByText("How would you like to use it?")).toBeTruthy();
 
-    await fireEvent.press(getByRole("button", { name: "I'm not sure yet" }));
-    expect(queryByText("Verify your identity")).toBeTruthy();
+    await fireEvent.press(getByRole("button", { name: "Back" }));
+    expect(queryByText("Mobile Number")).toBeTruthy();
   });
 
   it("choosing 'I'd like to help & earn' reveals categories, capped at 5", async () => {
-    const { getByRole, getByPlaceholderText, getByText, queryByText } = await render(
-      <OnboardingScreen />,
-    );
+    const { getByRole, getByPlaceholderText, getByText, getByLabelText, queryByText } =
+      await render(<OnboardingScreen />);
 
     await fillBasicInfo(getByPlaceholderText, getByText);
     await fireEvent.press(getByRole("button", { name: "Continue" }));
+    await fireEvent.press(getByRole("button", { name: "Skip for now" }));
+    await fireEvent.changeText(getByPlaceholderText("017XX-XXXXXX"), "1712345678");
+    await fireEvent.press(getByRole("button", { name: "Send Code →" }));
+    await completeOtp(getByLabelText, getByRole);
 
     expect(queryByText(/Pick up to 5 categories/)).toBeNull();
     await fireEvent.press(getByRole("button", { name: /I'd like to help/ }));
@@ -127,23 +144,34 @@ describe("OnboardingScreen", () => {
 
     await fillBasicInfo(getByPlaceholderText, getByText);
     await fireEvent.press(getByRole("button", { name: "Continue" }));
-    await fireEvent.press(getByRole("button", { name: /I'd like to help/ }));
-    await fireEvent.press(getByRole("button", { name: "Continue" }));
     await fireEvent.press(getByRole("button", { name: "Skip for now" }));
-
     await fireEvent.changeText(getByPlaceholderText("017XX-XXXXXX"), "1712345678");
     await fireEvent.press(getByRole("button", { name: "Send Code →" }));
+    await completeOtp(getByLabelText, getByRole);
 
-    const correctCode = "123456";
-    for (let index = 0; index < correctCode.length; index += 1) {
-      await fireEvent.changeText(
-        getByLabelText(`Verification code digit ${index + 1} of 6`),
-        correctCode[index],
-      );
-    }
-    await fireEvent.press(getByRole("button", { name: "Verify & Complete →" }));
+    await fireEvent.press(getByRole("button", { name: /I'd like to help/ }));
+    await fireEvent.press(getByRole("button", { name: "Finish" }));
 
     expect(replace).toHaveBeenCalledWith("/(worker)/jobs");
+  });
+
+  it("'I'm not sure yet' finishes into the poster home without requiring a use-case choice", async () => {
+    const replace = jest.fn();
+    mockUseRouter.mockReturnValue({ replace });
+    const { getByRole, getByPlaceholderText, getByText, getByLabelText } = await render(
+      <OnboardingScreen />,
+    );
+
+    await fillBasicInfo(getByPlaceholderText, getByText);
+    await fireEvent.press(getByRole("button", { name: "Continue" }));
+    await fireEvent.press(getByRole("button", { name: "Skip for now" }));
+    await fireEvent.changeText(getByPlaceholderText("017XX-XXXXXX"), "1712345678");
+    await fireEvent.press(getByRole("button", { name: "Send Code →" }));
+    await completeOtp(getByLabelText, getByRole);
+
+    await fireEvent.press(getByRole("button", { name: "I'm not sure yet" }));
+
+    expect(replace).toHaveBeenCalledWith("/(poster)");
   });
 
   it("arriving from Log In (phone already verified) skips the phone step and finishes to the poster home", async () => {
@@ -160,11 +188,12 @@ describe("OnboardingScreen", () => {
 
     await fillBasicInfo(getByPlaceholderText, getByText);
     await fireEvent.press(getByRole("button", { name: "Continue" }));
-    expect(queryByText("How would you like to use it?")).toBeTruthy();
-
-    await fireEvent.press(getByRole("button", { name: "I'm not sure yet" }));
     expect(queryByText("Step 2 of 2")).toBeTruthy();
     expect(queryByText("Verify your identity")).toBeTruthy();
+
+    await fireEvent.press(getByRole("button", { name: "Skip for now" }));
+    expect(queryByText("How would you like to use it?")).toBeTruthy();
+    expect(queryByText(/^Step \d of \d$/)).toBeNull();
 
     await fireEvent.press(getByRole("button", { name: "Finish" }));
 

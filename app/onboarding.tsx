@@ -38,9 +38,11 @@ export default function OnboardingScreen() {
   // happened there — don't ask for it again.
   const skipPhoneStep = typeof verifiedPhone === "string" && verifiedPhone.length > 0;
 
+  // The use-case screen comes last (after phone/OTP verification when that
+  // step exists) — see the note on displayIndexFor above.
   const screens: ScreenKey[] = skipPhoneStep
-    ? ["basicInfo", "useCase", "identity"]
-    : ["basicInfo", "useCase", "identity", "phone"];
+    ? ["basicInfo", "identity", "useCase"]
+    : ["basicInfo", "identity", "phone", "useCase"];
   const displaySteps = skipPhoneStep
     ? ["Basic info", "Identity verification"]
     : ["Basic info", "Identity verification", "Phone verification"];
@@ -159,7 +161,7 @@ export default function OnboardingScreen() {
           </>
         ) : null}
 
-        {isPhoneStep ? <PhoneOtpStep onVerified={finish} /> : null}
+        {isPhoneStep ? <PhoneOtpStep onVerified={advance} /> : null}
 
         <View style={styles.actions}>
           {step > 0 ? (
