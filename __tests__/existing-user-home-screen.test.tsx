@@ -19,13 +19,13 @@ describe("ExistingUserHomeScreen", () => {
     expect(queryByText(/Rating|Verified|Guaranteed|Ready to Work/)).toBeNull();
   });
 
-  it("routes to the neutral prototype home on Continue", async () => {
+  it("routes to the default (Job Provider) prototype destination on Continue", async () => {
     const replace = jest.fn();
     mockUseRouter.mockReturnValue({ replace });
     const { getByRole } = await render(<ExistingUserHomeScreen />);
 
     await fireEvent.press(getByRole("button", { name: "Continue →" }));
 
-    expect(replace).toHaveBeenCalledWith("/prototype-home");
+    expect(replace).toHaveBeenCalledWith("/(poster)");
   });
 });

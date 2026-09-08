@@ -2,18 +2,18 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { ActionButton, AppText, ScrollScreen } from "@/shared/components/ui";
-import { PROTOTYPE_HOME_ROUTE } from "@/shared/constants/routes";
+import { PROTOTYPE_DEFAULT_ROUTE } from "@/shared/constants/routes";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
 // Shown after OTP verification recognizes a dummy existing account. There is
-// no real user profile, mode, or Home experience yet — this screen only
-// confirms sign-in and hands off to a neutral placeholder route. See
-// docs/engineering/domain-and-terminology.md for what is still undefined.
+// no real user profile or Home experience yet — this screen only confirms
+// sign-in and hands off to the default prototype destination (Job Provider —
+// see docs/engineering/domain-and-terminology.md).
 export default function ExistingUserHomeScreen() {
   const router = useRouter();
 
   function handleContinue() {
-    router.replace(PROTOTYPE_HOME_ROUTE);
+    router.replace(PROTOTYPE_DEFAULT_ROUTE);
   }
 
   return (

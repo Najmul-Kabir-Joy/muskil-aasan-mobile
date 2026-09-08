@@ -61,6 +61,15 @@ export type Task = {
   urgent: boolean;
   offerCount: number;
   description: string;
+  // Optional — only set for tasks shown in the Provider Home "Community
+  // Jobs" feed (a task posted by someone other than the current viewer,
+  // rendered in a social-feed layout). Existing task list/detail screens
+  // ignore these.
+  postedBy?: { name: string; area: string; verified?: boolean };
+  postedAgo?: string;
+  likes?: number;
+  remote?: boolean;
+  photoNote?: string;
 };
 
 export type Offer = {
