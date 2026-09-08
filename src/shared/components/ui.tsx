@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextProps, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { BRAND_NAME } from "@/shared/constants/brand";
 import { colors, fonts, radius, shadows, spacing, typography } from "@/theme/tokens";
 
 type ButtonTone = "primary" | "secondary" | "inverted" | "outlined";
@@ -67,7 +68,7 @@ export function AppHeader({
   return (
     <View style={styles.header}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.kicker}>Muskill Asaan</Text>
+        <Text style={styles.kicker}>{BRAND_NAME}</Text>
         <Heading style={styles.title}>{title}</Heading>
         {subtitle ? <BodyText style={styles.subtitle}>{subtitle}</BodyText> : null}
       </View>
@@ -116,11 +117,13 @@ export function ActionButton({
   onPress,
   tone = "primary",
   disabled = false,
+  icon,
 }: {
   label: string;
   onPress: () => void;
   tone?: ButtonTone;
   disabled?: boolean;
+  icon?: ReactNode;
 }) {
   return (
     <Pressable
@@ -130,6 +133,7 @@ export function ActionButton({
       onPress={onPress}
       style={[styles.button, buttonToneStyles[tone], disabled && styles.disabledButton]}
     >
+      {icon}
       <Text
         style={[
           styles.buttonText,
@@ -299,6 +303,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.primary,
     borderRadius: radius.button,
+    flexDirection: "row",
+    gap: spacing.sm,
     minHeight: 44,
     justifyContent: "center",
     paddingHorizontal: spacing.lg,

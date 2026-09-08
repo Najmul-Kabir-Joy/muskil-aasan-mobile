@@ -1,8 +1,9 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { ActionButton, AppText, ScrollScreen } from "@/shared/components/ui";
+import { BRAND_NAME } from "@/shared/constants/brand";
 import { colors, fonts, gradients, radius, spacing } from "@/theme/tokens";
 
 export default function WelcomeScreen() {
@@ -16,7 +17,7 @@ export default function WelcomeScreen() {
           style={styles.logoMark}
           resizeMode="contain"
         />
-        <Text style={styles.brand}>Muskill Asaan</Text>
+        <Text style={styles.brand}>{BRAND_NAME}</Text>
       </View>
 
       <LinearGradient
@@ -87,13 +88,14 @@ export default function WelcomeScreen() {
             own mode-selection step — not a welcome-screen shortcut into
             Provider/Seeker areas (that specific flow isn't confirmed). */}
         <ActionButton label="Get Started →" onPress={() => router.push("/onboarding")} />
-        {/* Matches the design exactly, but there is no login/auth flow to
-            send this to yet (see AGENTS.md's "Do not invent product
-            behavior") — it's intentionally not a Pressable/PrimaryButton. */}
-        <View style={styles.loginRow}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push("/login")}
+          style={styles.loginRow}
+        >
           <Text style={styles.loginPrefix}>Already have an account? </Text>
           <Text style={styles.loginAction}>Log In</Text>
-        </View>
+        </Pressable>
       </View>
     </ScrollScreen>
   );

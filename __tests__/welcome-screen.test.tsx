@@ -25,4 +25,12 @@ describe("WelcomeScreen", () => {
     await fireEvent.press(getByRole("button", { name: "Get Started →" }));
     expect(push).toHaveBeenCalledWith("/onboarding");
   });
+
+  it("routes to the login screen from Already have an account? Log In", async () => {
+    const push = jest.fn();
+    mockUseRouter.mockReturnValue({ push });
+    const { getByRole } = await render(<WelcomeScreen />);
+    await fireEvent.press(getByRole("button", { name: /Log In/ }));
+    expect(push).toHaveBeenCalledWith("/login");
+  });
 });

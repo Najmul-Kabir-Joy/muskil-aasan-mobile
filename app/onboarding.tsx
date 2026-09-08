@@ -1,130 +1,197 @@
-import { useMemo, useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { PhoneOtpStep } from "@/features/auth/PhoneOtpStep";
+import { BasicInfo, BasicInfoStep, EMPTY_BASIC_INFO } from "@/features/onboarding/BasicInfoStep";
+import { IdDocs, IdVerificationStep } from "@/features/onboarding/IdVerificationStep";
 import {
-  ActionButton,
-  AppHeader,
-  AppText,
-  Badge,
-  PrimaryButton,
-  ScrollScreen,
-  SectionHeader,
-  SelectableChip,
-} from "@/shared/components/ui";
+  MAX_PREFERRED_CATEGORIES,
+  PrimaryUseCase,
+  UseCaseStep,
+} from "@/features/onboarding/UseCaseStep";
+import { ActionButton, AppHeader, ScrollScreen } from "@/shared/components/ui";
+import {
+  PROTOTYPE_HOME_ROUTE,
+  PROTOTYPE_PROVIDER_ROUTE,
+  PROTOTYPE_SEEKER_ROUTE,
+} from "@/shared/constants/routes";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
-const steps = ["Phone number", "OTP verification", "Basic profile", "Choose mode"];
-const roles = ["Poster mode", "Job seeker mode", "Both modes"];
+const EMPTY_DOCS: IdDocs = { nidFront: null, nidBack: null, selfie: null };
+
+type ScreenKey = "basicInfo" | "identity" | "phone" | "useCase";
+
+// The primary-interaction screen is a real screen in the flow (own Back/
+// Continue), but it's "silent": it doesn't get counted or labeled in the
+// visible step progress, which only tracks Basic info / Identity
+// verification / Phone verification. See
+// docs/engineering/domain-and-terminology.md.
+function displayIndexFor(screen: ScreenKey): number {
+  switch (screen) {
+    case "identity":
+      return 1;
+    case "phone":
+      return 2;
+    default:
+      return 0;
+  }
+}
 
 export default function OnboardingScreen() {
-  const [step, setStep] = useState(0);
-  const [phone, setPhone] = useState("+880");
-  const [otp, setOtp] = useState("");
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("I need help");
+  const router = useRouter();
+  const { phone: verifiedPhone } = useLocalSearchParams<{ phone?: string }>();
+  // Arriving from the login screen means the phone/OTP step already
+  // happened there — don't ask for it again.
+  const skipPhoneStep = typeof verifiedPhone === "string" && verifiedPhone.length > 0;
 
-  const canContinue = useMemo(() => {
-    if (step === 0) return phone.length >= 8;
-    if (step === 1) return otp.length >= 4;
-    if (step === 2) return name.trim().length >= 2;
-    return Boolean(role);
-  }, [name, otp, phone, role, step]);
+  // The use-case screen comes last (after phone/OTP verification when that
+  // step exists) — see the note on displayIndexFor above.
+  const screens: ScreenKey[] = skipPhoneStep
+    ? ["basicInfo", "identity", "useCase"]
+    : ["basicInfo", "identity", "phone", "useCase"];
+  const displaySteps = skipPhoneStep
+    ? ["Basic info", "Identity verification"]
+    : ["Basic info", "Identity verification", "Phone verification"];
+
+  const [step, setStep] = useState(0);
+  const [basicInfo, setBasicInfo] = useState<BasicInfo>(EMPTY_BASIC_INFO);
+  const [useCase, setUseCase] = useState<PrimaryUseCase>("");
+  const [preferredCategories, setPreferredCategories] = useState<string[]>([]);
+  const [docs, setDocs] = useState<IdDocs>(EMPTY_DOCS);
+
+  const currentScreen = screens[step];
+  const isLastStep = step === screens.length - 1;
+  const isPhoneStep = currentScreen === "phone";
+  const showProgress = currentScreen !== "useCase";
+  const displayIndex = displayIndexFor(currentScreen);
+  const canContinueBasicInfo = basicInfo.name.trim().length >= 2 && basicInfo.area.length > 0;
+
+  function finish() {
+    // No backend yet — basicInfo/preferredCategories/docs collected above
+    // are just discarded. The primary-interaction answer is only an initial
+    // preference, never an exclusive account type, so each outcome gets its
+    // own temporary destination — "no preference" must never silently
+    // resolve to Job Provider. See
+    // docs/engineering/domain-and-terminology.md.
+    if (useCase === "poster") {
+      router.replace(PROTOTYPE_PROVIDER_ROUTE);
+    } else if (useCase === "jobSeeker") {
+      router.replace(PROTOTYPE_SEEKER_ROUTE);
+    } else {
+      router.replace(PROTOTYPE_HOME_ROUTE);
+    }
+  }
+
+  function advance() {
+    if (isLastStep) {
+      finish();
+    } else {
+      setStep((value) => value + 1);
+    }
+  }
+
+  function handleChangeUseCase(value: PrimaryUseCase) {
+    setUseCase(value);
+    if (value !== "jobSeeker") {
+      setPreferredCategories([]);
+    }
+  }
+
+  function toggleCategory(categoryId: string) {
+    setPreferredCategories((current) => {
+      if (current.includes(categoryId)) {
+        return current.filter((id) => id !== categoryId);
+      }
+      if (current.length >= MAX_PREFERRED_CATEGORIES) {
+        return current;
+      }
+      return [...current, categoryId];
+    });
+  }
 
   return (
     <ScrollScreen>
       <AppHeader
         title="Create trust before the first job."
-        subtitle="Every user can use both modes. Start with the mode you need now and switch later from profile."
+        subtitle="A few quick steps to set up your account."
       />
 
-      <View style={styles.progress}>
-        {steps.map((stepLabel, index) => (
-          <View key={stepLabel} style={styles.stepRow}>
-            <Badge label={`Step ${index + 1}`} tone={index <= step ? "success" : "neutral"} />
-            <Text style={[styles.stepText, index === step && styles.activeStepText]}>
-              {stepLabel}
+      {showProgress ? (
+        <View style={styles.progress}>
+          <View style={styles.progressLabelRow}>
+            <Text style={styles.progressLabel}>
+              Step {displayIndex + 1} of {displaySteps.length}
             </Text>
+            <Text style={styles.progressStepName}>{displaySteps[displayIndex]}</Text>
           </View>
-        ))}
-      </View>
-
-      <View style={styles.formCard}>
-        <SectionHeader title={steps[step]} />
-        {step === 0 ? (
-          <>
-            <TextInput
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              style={styles.input}
-            />
-            <AppText style={styles.helpText}>
-              We use your number to protect jobs and offers.
-            </AppText>
-          </>
-        ) : null}
-        {step === 1 ? (
-          <>
-            <TextInput
-              value={otp}
-              onChangeText={setOtp}
-              keyboardType="number-pad"
-              placeholder="Enter 4 digit OTP"
-              placeholderTextColor={colors.muted}
-              style={styles.input}
-            />
-            <AppText style={styles.helpText}>
-              Mock OTP accepts any 4 digits. Resend and expired states can be checked in this step.
-            </AppText>
-          </>
-        ) : null}
-        {step === 2 ? (
-          <>
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder="Your name"
-              placeholderTextColor={colors.muted}
-              style={styles.input}
-            />
-            <TextInput
-              placeholder="Area in Dhaka"
-              placeholderTextColor={colors.muted}
-              style={styles.input}
-            />
-          </>
-        ) : null}
-        {step === 3 ? (
-          <View style={styles.chips}>
-            {roles.map((item) => (
-              <SelectableChip
-                key={item}
-                label={item}
-                selected={role === item}
-                onPress={() => setRole(item)}
+          <View style={styles.progressBar}>
+            {displaySteps.map((label, index) => (
+              <View
+                key={label}
+                style={[
+                  styles.progressSegment,
+                  index <= displayIndex && styles.progressSegmentActive,
+                ]}
               />
             ))}
           </View>
+        </View>
+      ) : null}
+
+      <View style={styles.formCard}>
+        {currentScreen === "basicInfo" ? (
+          <BasicInfoStep
+            value={basicInfo}
+            onChange={(patch) => setBasicInfo((current) => ({ ...current, ...patch }))}
+            phoneVerified={skipPhoneStep ? verifiedPhone : undefined}
+          />
         ) : null}
+
+        {currentScreen === "identity" ? (
+          <>
+            <View style={styles.skipRow}>
+              <Pressable accessibilityRole="button" onPress={advance}>
+                <Text style={styles.skipLabel}>Skip for now</Text>
+              </Pressable>
+            </View>
+            <IdVerificationStep
+              docs={docs}
+              onCapture={(key, uri) => setDocs((current) => ({ ...current, [key]: uri }))}
+            />
+          </>
+        ) : null}
+
+        {isPhoneStep ? <PhoneOtpStep onVerified={advance} /> : null}
+
+        {currentScreen === "useCase" ? (
+          <>
+            <View style={styles.skipRow}>
+              <Pressable accessibilityRole="button" onPress={advance}>
+                <Text style={styles.skipLabel}>I&apos;m not sure yet</Text>
+              </Pressable>
+            </View>
+            <UseCaseStep
+              useCase={useCase}
+              onChangeUseCase={handleChangeUseCase}
+              selectedCategories={preferredCategories}
+              onToggleCategory={toggleCategory}
+            />
+          </>
+        ) : null}
+
         <View style={styles.actions}>
-          {step > 0 ? (
+          {/* No Back from the use-case screen — the user is already
+              authenticated and phone-verified by this point. */}
+          {step > 0 && currentScreen !== "useCase" ? (
+            <ActionButton label="Back" tone="secondary" onPress={() => setStep((v) => v - 1)} />
+          ) : null}
+          {!isPhoneStep ? (
             <ActionButton
-              label="Back"
-              onPress={() => setStep((value) => value - 1)}
-              tone="secondary"
+              label={isLastStep ? "Finish" : "Continue"}
+              onPress={advance}
+              disabled={currentScreen === "basicInfo" && !canContinueBasicInfo}
             />
           ) : null}
-          {step < steps.length - 1 ? (
-            <ActionButton
-              label="Continue"
-              onPress={() => setStep((value) => value + 1)}
-              disabled={!canContinue}
-            />
-          ) : (
-            <PrimaryButton
-              label="Enter prototype"
-              href={role === "Job seeker mode" ? "/(worker)/jobs" : "/(poster)"}
-            />
-          )}
         </View>
       </View>
     </ScrollScreen>
@@ -133,20 +200,37 @@ export default function OnboardingScreen() {
 
 const styles = StyleSheet.create({
   progress: {
-    gap: spacing.md,
+    gap: spacing.xs,
   },
-  stepRow: {
+  progressLabelRow: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.md,
+    justifyContent: "space-between",
   },
-  stepText: {
-    color: colors.text,
-    fontSize: 15,
-    fontFamily: fonts.bold,
-  },
-  activeStepText: {
+  progressLabel: {
     color: colors.primary,
+    fontFamily: fonts.bold,
+    fontSize: 12,
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
+  },
+  progressStepName: {
+    color: colors.muted,
+    fontFamily: fonts.medium,
+    fontSize: 12,
+  },
+  progressBar: {
+    flexDirection: "row",
+    gap: spacing.xxs,
+  },
+  progressSegment: {
+    backgroundColor: colors.border,
+    borderRadius: radius.pill,
+    flex: 1,
+    height: 6,
+  },
+  progressSegmentActive: {
+    backgroundColor: colors.primary,
   },
   formCard: {
     backgroundColor: colors.card,
@@ -156,25 +240,13 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
     padding: spacing.lg,
   },
-  input: {
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    color: colors.text,
-    fontSize: 18,
+  skipRow: {
+    alignItems: "flex-end",
+  },
+  skipLabel: {
+    color: colors.primary,
     fontFamily: fonts.bold,
-    minHeight: 52,
-    paddingHorizontal: spacing.lg,
-  },
-  helpText: {
-    color: colors.muted,
     fontSize: 13,
-    lineHeight: 20,
-  },
-  chips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
   },
   actions: {
     flexDirection: "row",
