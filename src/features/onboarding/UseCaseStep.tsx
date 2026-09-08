@@ -54,9 +54,7 @@ export function UseCaseStep({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>How would you like to use it?</Text>
-        <AppText style={styles.subtitle}>
-          You can always switch modes or do both later from your profile.
-        </AppText>
+        <AppText style={styles.subtitle}>You can always switch modes or use both later.</AppText>
       </View>
       <View style={styles.cards}>
         {OPTIONS.map((option) => {
