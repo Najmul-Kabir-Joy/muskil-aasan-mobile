@@ -10,16 +10,22 @@ import {
   UseCaseStep,
 } from "@/features/onboarding/UseCaseStep";
 import { ActionButton, AppHeader, ScrollScreen } from "@/shared/components/ui";
+import {
+  PROTOTYPE_HOME_ROUTE,
+  PROTOTYPE_PROVIDER_ROUTE,
+  PROTOTYPE_SEEKER_ROUTE,
+} from "@/shared/constants/routes";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
 const EMPTY_DOCS: IdDocs = { nidFront: null, nidBack: null, selfie: null };
 
-type ScreenKey = "basicInfo" | "useCase" | "identity" | "phone";
+type ScreenKey = "basicInfo" | "identity" | "phone" | "useCase";
 
-// The primary-use-case screen is a real screen in the flow (own Back/
+// The primary-interaction screen is a real screen in the flow (own Back/
 // Continue), but it's "silent": it doesn't get counted or labeled in the
 // visible step progress, which only tracks Basic info / Identity
-// verification / Phone verification.
+// verification / Phone verification. See
+// docs/engineering/domain-and-terminology.md.
 function displayIndexFor(screen: ScreenKey): number {
   switch (screen) {
     case "identity":
@@ -61,9 +67,19 @@ export default function OnboardingScreen() {
   const canContinueBasicInfo = basicInfo.name.trim().length >= 2 && basicInfo.area.length > 0;
 
   function finish() {
-    // No backend yet — basicInfo/useCase/preferredCategories/docs collected
-    // above are just discarded. See docs/engineering/domain-and-terminology.md.
-    router.replace(useCase === "jobSeeker" ? "/(worker)/jobs" : "/(poster)");
+    // No backend yet — basicInfo/preferredCategories/docs collected above
+    // are just discarded. The primary-interaction answer is only an initial
+    // preference, never an exclusive account type, so each outcome gets its
+    // own temporary destination — "no preference" must never silently
+    // resolve to Job Provider. See
+    // docs/engineering/domain-and-terminology.md.
+    if (useCase === "poster") {
+      router.replace(PROTOTYPE_PROVIDER_ROUTE);
+    } else if (useCase === "jobSeeker") {
+      router.replace(PROTOTYPE_SEEKER_ROUTE);
+    } else {
+      router.replace(PROTOTYPE_HOME_ROUTE);
+    }
   }
 
   function advance() {
@@ -131,22 +147,6 @@ export default function OnboardingScreen() {
           />
         ) : null}
 
-        {currentScreen === "useCase" ? (
-          <>
-            <View style={styles.skipRow}>
-              <Pressable accessibilityRole="button" onPress={advance}>
-                <Text style={styles.skipLabel}>I&apos;m not sure yet</Text>
-              </Pressable>
-            </View>
-            <UseCaseStep
-              useCase={useCase}
-              onChangeUseCase={handleChangeUseCase}
-              selectedCategories={preferredCategories}
-              onToggleCategory={toggleCategory}
-            />
-          </>
-        ) : null}
-
         {currentScreen === "identity" ? (
           <>
             <View style={styles.skipRow}>
@@ -162,6 +162,22 @@ export default function OnboardingScreen() {
         ) : null}
 
         {isPhoneStep ? <PhoneOtpStep onVerified={advance} /> : null}
+
+        {currentScreen === "useCase" ? (
+          <>
+            <View style={styles.skipRow}>
+              <Pressable accessibilityRole="button" onPress={advance}>
+                <Text style={styles.skipLabel}>I&apos;m not sure yet</Text>
+              </Pressable>
+            </View>
+            <UseCaseStep
+              useCase={useCase}
+              onChangeUseCase={handleChangeUseCase}
+              selectedCategories={preferredCategories}
+              onToggleCategory={toggleCategory}
+            />
+          </>
+        ) : null}
 
         <View style={styles.actions}>
           {/* No Back from the use-case screen — the user is already

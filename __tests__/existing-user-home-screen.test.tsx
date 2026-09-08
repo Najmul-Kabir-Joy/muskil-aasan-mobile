@@ -9,27 +9,23 @@ jest.mock("expo-router", () => ({
 const mockUseRouter = useRouter as jest.Mock;
 
 describe("ExistingUserHomeScreen", () => {
-  it("defaults to Job Seeker mode and routes to the worker jobs feed", async () => {
-    const replace = jest.fn();
-    mockUseRouter.mockReturnValue({ replace });
-    const { getByRole, getByText } = await render(<ExistingUserHomeScreen />);
+  it("shows a simple welcome-back confirmation with no mode, ratings, or verification claims", async () => {
+    mockUseRouter.mockReturnValue({ replace: jest.fn() });
+    const { getByText, queryByText } = await render(<ExistingUserHomeScreen />);
 
-    expect(getByText("Job Seeker Mode")).toBeTruthy();
-    await fireEvent.press(getByRole("button", { name: "Go to Home Feed →" }));
-
-    expect(replace).toHaveBeenCalledWith("/(worker)/jobs");
+    expect(getByText("Welcome back!")).toBeTruthy();
+    expect(getByText("You're signed in.")).toBeTruthy();
+    expect(queryByText(/Job Seeker Mode|Job Provider Mode/)).toBeNull();
+    expect(queryByText(/Rating|Verified|Guaranteed|Ready to Work/)).toBeNull();
   });
 
-  it("switches to Job Provider mode and routes to the poster home", async () => {
+  it("routes to the neutral prototype home on Continue", async () => {
     const replace = jest.fn();
     mockUseRouter.mockReturnValue({ replace });
-    const { getByRole, getByText } = await render(<ExistingUserHomeScreen />);
+    const { getByRole } = await render(<ExistingUserHomeScreen />);
 
-    await fireEvent.press(getByRole("button", { name: "Switch to Job Provider" }));
-    expect(getByText("Job Provider Mode")).toBeTruthy();
+    await fireEvent.press(getByRole("button", { name: "Continue →" }));
 
-    await fireEvent.press(getByRole("button", { name: "Go to Home Feed →" }));
-
-    expect(replace).toHaveBeenCalledWith("/(poster)");
+    expect(replace).toHaveBeenCalledWith("/prototype-home");
   });
 });

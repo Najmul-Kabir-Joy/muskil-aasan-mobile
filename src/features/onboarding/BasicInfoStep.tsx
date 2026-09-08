@@ -135,9 +135,7 @@ export function BasicInfoStep({
         </View>
         <View style={styles.avatarText}>
           <Text style={styles.avatarTitle}>Add a profile picture</Text>
-          <AppText style={styles.avatarSubtitle}>
-            Neighbors prefer connecting with real profiles!
-          </AppText>
+          <AppText style={styles.avatarSubtitle}>Optional</AppText>
         </View>
       </Pressable>
 
@@ -162,7 +160,6 @@ export function BasicInfoStep({
           <Text style={styles.label}>
             Current area in Dhaka <Text style={styles.required}>*</Text>
           </Text>
-          <Text style={styles.hint}>Hyper-local matching</Text>
         </View>
         <Pressable
           accessibilityRole="button"
@@ -231,13 +228,6 @@ export function BasicInfoStep({
           />
           <MaterialIcons name="calendar-today" size={18} color={colors.muted} />
         </View>
-      </View>
-
-      <View style={styles.assurance}>
-        <MaterialIcons name="verified-user" size={18} color={colors.primary} />
-        <AppText style={styles.assuranceText}>
-          Your phone and precise location are never displayed publicly without permission.
-        </AppText>
       </View>
 
       <Modal
@@ -427,19 +417,6 @@ const styles = StyleSheet.create({
   genderChipTextActive: {
     color: colors.card,
     fontFamily: fonts.bold,
-  },
-  assurance: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    flexDirection: "row",
-    gap: spacing.sm,
-    padding: spacing.sm,
-  },
-  assuranceText: {
-    color: colors.muted,
-    flex: 1,
-    fontSize: 12,
   },
   modalBackdrop: {
     backgroundColor: "rgba(15, 23, 42, 0.4)",

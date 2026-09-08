@@ -29,7 +29,7 @@ const ROWS: ProgressRow[] = [
   {
     key: "identity",
     title: "Identity Verification",
-    detail: "NID / Student ID to earn a trusted green verification tick",
+    detail: "Optional NID front/back + photo",
     status: "optional",
   },
 ];
@@ -40,10 +40,6 @@ export default function SetupIntroScreen() {
 
   function handleGetStarted() {
     router.replace({ pathname: "/onboarding", params: { phone } });
-  }
-
-  function handleLater() {
-    router.replace("/(poster)");
   }
 
   return (
@@ -60,15 +56,14 @@ export default function SetupIntroScreen() {
         </View>
         <Text style={styles.headline}>Let&apos;s finish setting up your profile</Text>
         <AppText style={styles.subtitle}>
-          Your phone number +880 {phone} is verified. Just 2 quick steps left to connect with
-          trusted local micro-jobs.
+          Your phone number +880 {phone} is verified. Just a couple more steps to finish setting up
+          your profile.
         </AppText>
       </LinearGradient>
 
       <View style={styles.progressCard}>
         <View style={styles.progressHeader}>
           <Text style={styles.progressLabel}>Setup Progress</Text>
-          <Text style={styles.progressStep}>Step 1 of 3</Text>
         </View>
         {ROWS.map((row) => (
           <View key={row.key} style={styles.row}>
@@ -104,17 +99,8 @@ export default function SetupIntroScreen() {
         ))}
       </View>
 
-      <View style={styles.tip}>
-        <MaterialIcons name="lightbulb" size={20} color={colors.secondaryDark} />
-        <AppText style={styles.tipText}>
-          Profiles with an area get <Text style={styles.tipBold}>3x more replies</Text> within the
-          first 2 hours!
-        </AppText>
-      </View>
-
       <View style={styles.actions}>
         <ActionButton label="Get Started →" onPress={handleGetStarted} />
-        <ActionButton label="I'll complete this later" tone="secondary" onPress={handleLater} />
       </View>
     </ScrollScreen>
   );
@@ -174,16 +160,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
     textTransform: "uppercase",
   },
-  progressStep: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.pill,
-    color: colors.primary,
-    fontFamily: fonts.bold,
-    fontSize: 11,
-    overflow: "hidden",
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xxs,
-  },
   row: {
     flexDirection: "row",
     gap: spacing.sm,
@@ -235,18 +211,6 @@ const styles = StyleSheet.create({
   rowDetail: {
     color: colors.muted,
     fontSize: 12,
-  },
-  tip: {
-    alignItems: "center",
-    backgroundColor: colors.secondarySoft,
-    borderRadius: radius.md,
-    flexDirection: "row",
-    gap: spacing.sm,
-    padding: spacing.md,
-  },
-  tipText: { color: colors.text, flex: 1, fontSize: 12 },
-  tipBold: {
-    fontFamily: fonts.bold,
   },
   actions: {
     gap: spacing.sm,

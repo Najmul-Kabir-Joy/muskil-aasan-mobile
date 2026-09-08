@@ -41,6 +41,21 @@ async function completeOtp(
   await fireEvent.press(getByRole("button", { name: "Verify & Complete →" }) as never);
 }
 
+/** Drives a fresh Get Started render up to (but not through) the silent preference screen. */
+async function reachPreferenceScreenFromGetStarted(render_: typeof render) {
+  const utils = await render_(<OnboardingScreen />);
+  const { getByRole, getByPlaceholderText, getByText, getByLabelText } = utils;
+
+  await fillBasicInfo(getByPlaceholderText, getByText);
+  await fireEvent.press(getByRole("button", { name: "Continue" }));
+  await fireEvent.press(getByRole("button", { name: "Skip for now" }));
+  await fireEvent.changeText(getByPlaceholderText("17XXXXXXXX"), "1712345678");
+  await fireEvent.press(getByRole("button", { name: "Send Code →" }));
+  await completeOtp(getByLabelText, getByRole);
+
+  return utils;
+}
+
 describe("OnboardingScreen", () => {
   beforeEach(() => {
     mockUseRouter.mockReturnValue({ replace: jest.fn() });
@@ -73,23 +88,6 @@ describe("OnboardingScreen", () => {
     expect(queryByText("Mobile Number")).toBeTruthy();
   });
 
-  it("the use-case question appears after OTP verification, as a silent (uncounted) screen", async () => {
-    const { getByRole, getByPlaceholderText, getByText, getByLabelText, queryByText } =
-      await render(<OnboardingScreen />);
-
-    await fillBasicInfo(getByPlaceholderText, getByText);
-    await fireEvent.press(getByRole("button", { name: "Continue" }));
-    await fireEvent.press(getByRole("button", { name: "Skip for now" }));
-
-    await fireEvent.changeText(getByPlaceholderText("017XX-XXXXXX"), "1712345678");
-    await fireEvent.press(getByRole("button", { name: "Send Code →" }));
-    await completeOtp(getByLabelText, getByRole);
-
-    expect(queryByText("How would you like to use it?")).toBeTruthy();
-    // Silent step: no "Step X of Y" progress indicator while here.
-    expect(queryByText(/^Step \d of \d$/)).toBeNull();
-  });
-
   it("lets Back return to the previous screen", async () => {
     const { getByRole, getByPlaceholderText, getByText, queryByText } = await render(
       <OnboardingScreen />,
@@ -103,36 +101,27 @@ describe("OnboardingScreen", () => {
     expect(getByPlaceholderText("e.g. Tanvir Hossain")).toBeTruthy();
   });
 
-  it("has no Back button on the trailing use-case screen — the user is already phone-verified", async () => {
-    const { getByRole, getByPlaceholderText, getByText, getByLabelText, queryByRole, queryByText } =
-      await render(<OnboardingScreen />);
+  it("shows the primary-interaction preference after Phone OTP, uncounted in the Step X of Y progress, with no Back button", async () => {
+    const { getByText, queryByText, queryByRole } =
+      await reachPreferenceScreenFromGetStarted(render);
 
-    await fillBasicInfo(getByPlaceholderText, getByText);
-    await fireEvent.press(getByRole("button", { name: "Continue" }));
-    await fireEvent.press(getByRole("button", { name: "Skip for now" }));
-    await fireEvent.changeText(getByPlaceholderText("017XX-XXXXXX"), "1712345678");
-    await fireEvent.press(getByRole("button", { name: "Send Code →" }));
-    await completeOtp(getByLabelText, getByRole);
-
-    expect(queryByText("How would you like to use it?")).toBeTruthy();
+    expect(getByText("How would you like to use it?")).toBeTruthy();
+    expect(queryByText(/^Step \d of \d$/)).toBeNull();
     expect(queryByRole("button", { name: "Back" })).toBeNull();
   });
 
-  it("choosing 'I'd like to help & earn' reveals categories, capped at 5", async () => {
-    const { getByRole, getByPlaceholderText, getByText, getByLabelText, queryByText } =
-      await render(<OnboardingScreen />);
-
-    await fillBasicInfo(getByPlaceholderText, getByText);
-    await fireEvent.press(getByRole("button", { name: "Continue" }));
-    await fireEvent.press(getByRole("button", { name: "Skip for now" }));
-    await fireEvent.changeText(getByPlaceholderText("017XX-XXXXXX"), "1712345678");
-    await fireEvent.press(getByRole("button", { name: "Send Code →" }));
-    await completeOtp(getByLabelText, getByRole);
+  it("does not reveal the category picker until Job Seeker preference is selected", async () => {
+    const { getByRole, queryByText } = await reachPreferenceScreenFromGetStarted(render);
 
     expect(queryByText(/Pick up to 5 categories/)).toBeNull();
     await fireEvent.press(getByRole("button", { name: /I'd like to help/ }));
     expect(queryByText(/Pick up to 5 categories/)).toBeTruthy();
+  });
 
+  it("caps category selection at 5", async () => {
+    const { getByRole, getByText } = await reachPreferenceScreenFromGetStarted(render);
+
+    await fireEvent.press(getByRole("button", { name: /I'd like to help/ }));
     const categoryNames = ["Repair", "Tutor", "Delivery", "Design", "Photo", "Admin"];
     for (const name of categoryNames) {
       await fireEvent.press(getByRole("button", { name }));
@@ -141,19 +130,21 @@ describe("OnboardingScreen", () => {
     expect(getByText("5/5 selected")).toBeTruthy();
   });
 
-  it("finishes into the worker jobs feed when Job Seeker was chosen", async () => {
+  it("Job Provider preference routes to the provider prototype destination, not silently to Job Seeker", async () => {
     const replace = jest.fn();
     mockUseRouter.mockReturnValue({ replace });
-    const { getByRole, getByPlaceholderText, getByText, getByLabelText } = await render(
-      <OnboardingScreen />,
-    );
+    const { getByRole } = await reachPreferenceScreenFromGetStarted(render);
 
-    await fillBasicInfo(getByPlaceholderText, getByText);
-    await fireEvent.press(getByRole("button", { name: "Continue" }));
-    await fireEvent.press(getByRole("button", { name: "Skip for now" }));
-    await fireEvent.changeText(getByPlaceholderText("017XX-XXXXXX"), "1712345678");
-    await fireEvent.press(getByRole("button", { name: "Send Code →" }));
-    await completeOtp(getByLabelText, getByRole);
+    await fireEvent.press(getByRole("button", { name: /I need help/ }));
+    await fireEvent.press(getByRole("button", { name: "Finish" }));
+
+    expect(replace).toHaveBeenCalledWith("/(poster)");
+  });
+
+  it("Job Seeker preference routes to the seeker prototype destination", async () => {
+    const replace = jest.fn();
+    mockUseRouter.mockReturnValue({ replace });
+    const { getByRole } = await reachPreferenceScreenFromGetStarted(render);
 
     await fireEvent.press(getByRole("button", { name: /I'd like to help/ }));
     await fireEvent.press(getByRole("button", { name: "Finish" }));
@@ -161,26 +152,18 @@ describe("OnboardingScreen", () => {
     expect(replace).toHaveBeenCalledWith("/(worker)/jobs");
   });
 
-  it("'I'm not sure yet' finishes into the poster home without requiring a use-case choice", async () => {
+  it("'I'm not sure yet' does NOT default to Job Provider — it routes to the neutral prototype home", async () => {
     const replace = jest.fn();
     mockUseRouter.mockReturnValue({ replace });
-    const { getByRole, getByPlaceholderText, getByText, getByLabelText } = await render(
-      <OnboardingScreen />,
-    );
-
-    await fillBasicInfo(getByPlaceholderText, getByText);
-    await fireEvent.press(getByRole("button", { name: "Continue" }));
-    await fireEvent.press(getByRole("button", { name: "Skip for now" }));
-    await fireEvent.changeText(getByPlaceholderText("017XX-XXXXXX"), "1712345678");
-    await fireEvent.press(getByRole("button", { name: "Send Code →" }));
-    await completeOtp(getByLabelText, getByRole);
+    const { getByRole } = await reachPreferenceScreenFromGetStarted(render);
 
     await fireEvent.press(getByRole("button", { name: "I'm not sure yet" }));
 
-    expect(replace).toHaveBeenCalledWith("/(poster)");
+    expect(replace).toHaveBeenCalledWith("/prototype-home");
+    expect(replace).not.toHaveBeenCalledWith("/(poster)");
   });
 
-  it("arriving from Log In (phone already verified) skips the phone step and finishes to the poster home", async () => {
+  it("arriving from Log In (phone already verified) skips the phone step, still requires Basic Info, and reaches the preference screen after Identity", async () => {
     const replace = jest.fn();
     mockUseRouter.mockReturnValue({ replace });
     mockUseLocalSearchParams.mockReturnValue({ phone: "1712345678" });
@@ -191,9 +174,15 @@ describe("OnboardingScreen", () => {
 
     expect(queryByText("Step 1 of 2")).toBeTruthy();
     expect(queryByText("Phone verified (+880 1712345678)")).toBeTruthy();
+    expect(queryByText("Mobile Number")).toBeNull();
+
+    const continueButton = getByRole("button", { name: "Continue" });
+    expect(continueButton.props.accessibilityState).toEqual(
+      expect.objectContaining({ disabled: true }),
+    );
 
     await fillBasicInfo(getByPlaceholderText, getByText);
-    await fireEvent.press(getByRole("button", { name: "Continue" }));
+    await fireEvent.press(continueButton);
     expect(queryByText("Step 2 of 2")).toBeTruthy();
     expect(queryByText("Verify your identity")).toBeTruthy();
 
@@ -201,8 +190,8 @@ describe("OnboardingScreen", () => {
     expect(queryByText("How would you like to use it?")).toBeTruthy();
     expect(queryByText(/^Step \d of \d$/)).toBeNull();
 
-    await fireEvent.press(getByRole("button", { name: "Finish" }));
+    await fireEvent.press(getByRole("button", { name: "I'm not sure yet" }));
 
-    expect(replace).toHaveBeenCalledWith("/(poster)");
+    expect(replace).toHaveBeenCalledWith("/prototype-home");
   });
 });

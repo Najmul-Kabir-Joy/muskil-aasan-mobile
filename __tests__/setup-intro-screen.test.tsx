@@ -28,13 +28,18 @@ describe("SetupIntroScreen", () => {
     });
   });
 
-  it("routes straight to the poster home when deferring setup", async () => {
-    const replace = jest.fn();
-    mockUseRouter.mockReturnValue({ replace });
-    const { getByRole } = await render(<SetupIntroScreen />);
+  it("does not offer a way to bypass required Basic Information", async () => {
+    mockUseRouter.mockReturnValue({ replace: jest.fn() });
+    const { queryByRole } = await render(<SetupIntroScreen />);
 
-    await fireEvent.press(getByRole("button", { name: "I'll complete this later" }));
+    expect(queryByRole("button", { name: "I'll complete this later" })).toBeNull();
+  });
 
-    expect(replace).toHaveBeenCalledWith("/(poster)");
+  it("does not show unapproved trust or engagement claims", async () => {
+    mockUseRouter.mockReturnValue({ replace: jest.fn() });
+    const { queryByText } = await render(<SetupIntroScreen />);
+
+    expect(queryByText(/3x more replies/i)).toBeNull();
+    expect(queryByText(/trusted/i)).toBeNull();
   });
 });

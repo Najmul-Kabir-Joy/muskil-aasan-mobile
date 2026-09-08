@@ -2,6 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { isDummyOtpCorrect } from "@/features/auth/dummyAuth";
+import { isValidBangladeshPhone, normalizeBangladeshPhone } from "@/features/auth/phone";
 import { ActionButton, AppText } from "@/shared/components/ui";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
@@ -33,7 +34,7 @@ export function PhoneOtpStep({ onVerified }: { onVerified: (phone: string) => vo
     return () => clearInterval(timer);
   }, [otpSent, resendIn]);
 
-  const canSendCode = phone.length >= 10;
+  const canSendCode = isValidBangladeshPhone(phone);
   const otpFilled = otp.every(Boolean);
 
   function handleSendCode() {
@@ -96,8 +97,8 @@ export function PhoneOtpStep({ onVerified }: { onVerified: (phone: string) => vo
             </View>
             <TextInput
               value={phone}
-              onChangeText={(value) => setPhone(value.replace(/[^0-9]/g, "").slice(0, 11))}
-              placeholder="017XX-XXXXXX"
+              onChangeText={(value) => setPhone(normalizeBangladeshPhone(value))}
+              placeholder="17XXXXXXXX"
               placeholderTextColor={colors.muted}
               keyboardType="number-pad"
               maxLength={11}

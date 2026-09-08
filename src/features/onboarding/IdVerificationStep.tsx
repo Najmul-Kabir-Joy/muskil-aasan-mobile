@@ -119,21 +119,9 @@ export function IdVerificationStep({
         </Pressable>
         {whyExpanded ? (
           <AppText style={styles.whyBody}>
-            Adding your identity badge helps neighbors in Dhaka know you are genuinely you. It
-            increases trust when asking for micro-tasks, running urgent errands, or lending a hand
-            locally.
+            This information may be used for identity-related features later.
           </AppText>
         ) : null}
-      </View>
-
-      <View style={styles.safetyBanner}>
-        <MaterialIcons name="verified-user" size={18} color={colors.primary} />
-        <View style={styles.safetyText}>
-          <Text style={styles.safetyTitle}>Community Safety</Text>
-          <AppText style={styles.safetySubtitle}>
-            Earn the trusted green badge to unlock more neighborhood opportunities faster.
-          </AppText>
-        </View>
       </View>
 
       {NID_SLOTS.map((slot) => {
@@ -227,16 +215,14 @@ export function IdVerificationStep({
       <View style={styles.tip}>
         <MaterialIcons name="lightbulb" size={20} color={colors.secondaryDark} />
         <AppText style={styles.tipText}>
-          Tip: Good natural lighting helps avoid blurry uploads so your neighbors can quickly
-          recognize you.
+          Tip: Good natural lighting helps avoid blurry photos.
         </AppText>
       </View>
 
       <View style={styles.privacyNote}>
         <MaterialIcons name="lock" size={18} color={colors.muted} />
         <AppText style={styles.privacyText}>
-          We&apos;ll only use this information for identity-related features. Your documents are
-          securely encrypted and will never be shared publicly or sold.
+          Photos stay on this device for this prototype and are not uploaded anywhere.
         </AppText>
       </View>
     </View>
@@ -287,27 +273,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
     padding: spacing.md,
-  },
-  safetyBanner: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    flexDirection: "row",
-    gap: spacing.sm,
-    padding: spacing.md,
-  },
-  safetyText: {
-    flex: 1,
-    gap: 2,
-  },
-  safetyTitle: {
-    color: colors.primary,
-    fontFamily: fonts.bold,
-    fontSize: 14,
-  },
-  safetySubtitle: {
-    color: colors.muted,
-    fontSize: 12,
   },
   card: {
     backgroundColor: colors.card,
