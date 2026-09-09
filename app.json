@@ -37,7 +37,8 @@
           "cameraPermission": "Muskill Asaan needs camera access to photograph your NID and take a verification selfie.",
           "photosPermission": "Muskill Asaan needs photo library access to attach an NID image."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "extra": {
       "router": {},
