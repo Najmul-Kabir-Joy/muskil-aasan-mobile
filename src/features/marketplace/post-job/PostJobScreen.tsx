@@ -38,6 +38,19 @@ function formatCustomTime(date: Date): string {
   return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 }
 
+// Compares calendar dates only (local time), ignoring time-of-day — today
+// itself counts as "today or future". Used as an application-level backstop
+// so a past date can never be accepted even if the native picker's own
+// `minimumDate` fails to block it (observed under a fast synthetic scroll
+// gesture in manual testing).
+function isTodayOrFuture(date: Date): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const compared = new Date(date);
+  compared.setHours(0, 0, 0, 0);
+  return compared.getTime() >= today.getTime();
+}
+
 /**
  * Frontend-only "Post a Job" prototype. No backend, no persistence, no real
  * job creation — pressing "Post Job" only shows a local confirmation. See
@@ -77,7 +90,7 @@ export default function PostJobScreen() {
     if (Platform.OS === "android") {
       setDatePickerOpen(false);
     }
-    if (event.type === "set" && selected) {
+    if (event.type === "set" && selected && isTodayOrFuture(selected)) {
       setCustomDatePart(selected);
     }
   }
@@ -129,7 +142,8 @@ export default function PostJobScreen() {
     description.trim().length > 0 &&
     (workMode === "remote" || area.length > 0) &&
     timing.length > 0 &&
-    (timing !== "Custom" || (customDatePart !== null && customTimePart !== null)) &&
+    (timing !== "Custom" ||
+      (customDatePart !== null && isTodayOrFuture(customDatePart) && customTimePart !== null)) &&
     budget.length > 0 &&
     Number(budget) > 0;
 

@@ -191,6 +191,68 @@ describe("PostJobScreen", () => {
     expect(getByTestId("datetimepicker-date").props.minimumDate).toEqual(expectedMinimum);
   });
 
+  it("accepts today as a valid custom date", async () => {
+    const { getByRole, getByText, queryByText, getByTestId } = await render(<PostJobScreen />);
+
+    await fireEvent.press(getByRole("button", { name: "Custom" }));
+    await fireEvent.press(getByText("Select date"));
+
+    const today = new Date();
+    await fireEvent(getByTestId("datetimepicker-date"), "onChange", { type: "set" }, today);
+
+    expect(queryByText("Select date")).toBeNull();
+  });
+
+  it("accepts a future custom date", async () => {
+    const { getByRole, getByText, queryByText, getByTestId } = await render(<PostJobScreen />);
+
+    await fireEvent.press(getByRole("button", { name: "Custom" }));
+    await fireEvent.press(getByText("Select date"));
+
+    const future = new Date();
+    future.setDate(future.getDate() + 3);
+    await fireEvent(getByTestId("datetimepicker-date"), "onChange", { type: "set" }, future);
+
+    expect(queryByText("Select date")).toBeNull();
+  });
+
+  it("rejects a past custom date even if the native picker emits one", async () => {
+    const { getByRole, getByText, getByTestId } = await render(<PostJobScreen />);
+
+    await fireEvent.press(getByRole("button", { name: "Custom" }));
+    await fireEvent.press(getByText("Select date"));
+
+    const past = new Date();
+    past.setDate(past.getDate() - 1);
+    await fireEvent(getByTestId("datetimepicker-date"), "onChange", { type: "set" }, past);
+
+    // Rejected: the placeholder is still showing, not a formatted past date.
+    expect(getByText("Select date")).toBeTruthy();
+  });
+
+  it("does not let a rejected past custom date make Post Job valid, even after picking a time", async () => {
+    const { getByRole, getByText, getByPlaceholderText, getByTestId } = await render(
+      <PostJobScreen />,
+    );
+
+    await fillRequiredFieldsAsRemote(getByText, getByPlaceholderText, getByRole);
+    await fireEvent.press(getByRole("button", { name: "Custom" }));
+
+    await fireEvent.press(getByText("Select date"));
+    const past = new Date();
+    past.setDate(past.getDate() - 1);
+    await fireEvent(getByTestId("datetimepicker-date"), "onChange", { type: "set" }, past);
+
+    await fireEvent.press(getByText("Select time"));
+    const pickedTime = new Date();
+    pickedTime.setHours(14, 30, 0, 0);
+    await fireEvent(getByTestId("datetimepicker-time"), "onChange", { type: "set" }, pickedTime);
+
+    expect(getByRole("button", { name: "Post Job →" }).props.accessibilityState).toEqual(
+      expect.objectContaining({ disabled: true }),
+    );
+  });
+
   it("selecting a timing option marks it selected", async () => {
     const { getByRole } = await render(<PostJobScreen />);
     const todayButton = getByRole("button", { name: "Today" });
