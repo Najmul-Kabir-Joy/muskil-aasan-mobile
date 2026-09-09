@@ -1,4 +1,6 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { statusTone, verificationLabel } from "@/features/marketplace/status";
 import { ActionButton, Badge, CaptionText, PrimaryButton } from "@/shared/components/ui";
@@ -93,6 +95,142 @@ export function TaskCard({
         ) : onPress ? (
           <ActionButton label={cta} onPress={onPress} tone="secondary" />
         ) : null}
+      </View>
+    </View>
+  );
+}
+
+const AVATAR_TONES = [
+  { background: colors.primarySoft, text: colors.primaryDark },
+  { background: colors.secondarySoft, text: colors.secondaryDark },
+  { background: colors.tertiarySoft, text: colors.tertiaryDark },
+];
+
+function initialsFor(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
+
+/**
+ * A task posted by someone other than the current viewer, shown in the
+ * Provider Home "Community Jobs" feed — a social-feed layout (poster
+ * identity, like/save) rather than TaskCard's compact list-item layout.
+ * `task.postedBy` must be set; this is not meant for the current user's own
+ * tasks. Like/save are local-only UI state (no backend, nothing persisted —
+ * see docs/engineering/domain-and-terminology.md).
+ */
+export function CommunityPostCard({ task }: { task: Task }) {
+  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const baseLikes = task.likes ?? 0;
+
+  if (!task.postedBy) return null;
+  const tone = AVATAR_TONES[task.postedBy.name.length % AVATAR_TONES.length];
+  const isRoute = task.area.includes("→");
+  const areaIcon: "near-me" | "language" | "pin-drop" = isRoute
+    ? "near-me"
+    : task.remote
+      ? "language"
+      : "pin-drop";
+  const timingIcon: "alarm" | "schedule" = task.urgent ? "alarm" : "schedule";
+
+  return (
+    <View style={styles.communityCard}>
+      <View style={styles.communityHeaderRow}>
+        <View style={styles.communityPosterRow}>
+          <View style={[styles.communityAvatar, { backgroundColor: tone.background }]}>
+            <Text style={[styles.communityAvatarText, { color: tone.text }]}>
+              {initialsFor(task.postedBy.name)}
+            </Text>
+          </View>
+          <View>
+            <Text style={styles.communityName}>{task.postedBy.name}</Text>
+            <CaptionText style={styles.communityMeta}>
+              {task.postedBy.area} · {task.postedAgo}
+            </CaptionText>
+          </View>
+        </View>
+        <MaterialIcons name="more-horiz" size={20} color={colors.muted} />
+      </View>
+
+      <View style={styles.communityBadgeRow}>
+        <Badge label={task.category} />
+        {task.remote ? <Badge label="Remote" tone="info" /> : null}
+      </View>
+
+      <Text style={styles.cardTitle}>{task.title}</Text>
+      <CaptionText numberOfLines={2}>{task.description}</CaptionText>
+
+      {task.photoNote ? (
+        <View style={styles.communityPhotoNote}>
+          <MaterialIcons name="inventory-2" size={22} color={colors.primary} />
+          <Text style={styles.communityPhotoNoteText}>{task.photoNote}</Text>
+        </View>
+      ) : null}
+
+      <View style={styles.communityMetaStrip}>
+        <Text style={styles.communityMetaPrice}>
+          <MaterialIcons name="payments" size={14} color={colors.primary} /> {task.budget}
+        </Text>
+        <Text style={styles.communityMetaDot}>•</Text>
+        <View style={styles.communityMetaItem}>
+          <MaterialIcons name={areaIcon} size={14} color={colors.muted} />
+          <Text style={styles.communityMetaText}>{task.area}</Text>
+        </View>
+        <Text style={styles.communityMetaDot}>•</Text>
+        <View style={styles.communityMetaItem}>
+          <MaterialIcons
+            name={timingIcon}
+            size={14}
+            color={task.urgent ? colors.danger : colors.muted}
+          />
+          <Text style={styles.communityMetaText}>{task.timing}</Text>
+        </View>
+      </View>
+
+      <View style={styles.communityFooter}>
+        <View style={styles.communityFooterActions}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={liked ? "Unlike" : "Like"}
+            accessibilityState={{ selected: liked }}
+            onPress={() => setLiked((current) => !current)}
+            style={styles.communityFooterButton}
+          >
+            <MaterialIcons
+              name={liked ? "thumb-up" : "thumb-up-off-alt"}
+              size={18}
+              color={liked ? colors.primary : colors.muted}
+            />
+            <Text style={[styles.communityFooterText, liked && styles.communityFooterTextActive]}>
+              {baseLikes + (liked ? 1 : 0)}
+            </Text>
+          </Pressable>
+          <View style={styles.communityFooterButton}>
+            <MaterialIcons name="chat-bubble-outline" size={18} color={colors.muted} />
+            <Text style={styles.communityFooterText}>{task.responseCount ?? 0} responses</Text>
+          </View>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={saved ? "Saved" : "Save"}
+          accessibilityState={{ selected: saved }}
+          onPress={() => setSaved((current) => !current)}
+          style={styles.communityFooterButton}
+        >
+          <MaterialIcons
+            name={saved ? "bookmark" : "bookmark-border"}
+            size={18}
+            color={saved ? colors.primary : colors.muted}
+          />
+          <Text style={[styles.communityFooterText, saved && styles.communityFooterTextActive]}>
+            {saved ? "Saved" : "Save"}
+          </Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -210,5 +348,116 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     fontSize: 14,
     lineHeight: 21,
+  },
+  communityCard: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.sm,
+    padding: spacing.lg,
+    ...shadows.card,
+  },
+  communityHeaderRow: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  communityPosterRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexShrink: 1,
+    gap: spacing.sm,
+  },
+  communityAvatar: {
+    alignItems: "center",
+    borderRadius: radius.pill,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
+  },
+  communityAvatarText: {
+    fontFamily: fonts.extraBold,
+    fontSize: 14,
+  },
+  communityName: {
+    color: colors.text,
+    fontFamily: fonts.bold,
+    fontSize: 15,
+  },
+  communityMeta: {
+    marginTop: 0,
+  },
+  communityBadgeRow: {
+    flexDirection: "row",
+    gap: spacing.xs,
+  },
+  communityPhotoNote: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.sm,
+    height: 64,
+    justifyContent: "center",
+  },
+  communityPhotoNoteText: {
+    color: colors.muted,
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+  },
+  communityMetaStrip: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderRadius: radius.sm,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
+    padding: spacing.sm,
+  },
+  communityMetaPrice: {
+    color: colors.primary,
+    fontFamily: fonts.extraBold,
+    fontSize: 14,
+  },
+  communityMetaDot: {
+    color: colors.muted,
+  },
+  communityMetaItem: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.xxs,
+  },
+  communityMetaText: {
+    color: colors.muted,
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+  },
+  communityFooter: {
+    alignItems: "center",
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingTop: spacing.sm,
+  },
+  communityFooterActions: {
+    flexDirection: "row",
+    gap: spacing.lg,
+  },
+  communityFooterButton: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.xxs,
+  },
+  communityFooterText: {
+    color: colors.muted,
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+  },
+  communityFooterTextActive: {
+    color: colors.primary,
   },
 });

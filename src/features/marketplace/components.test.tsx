@@ -1,7 +1,7 @@
 import { fireEvent, render } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
-import { RoleSwitch, TaskCard } from "@/features/marketplace/components";
-import { tasks } from "@/data/mock";
+import { CommunityPostCard, RoleSwitch, TaskCard } from "@/features/marketplace/components";
+import { communityTasks, tasks } from "@/data/mock";
 
 // Mock at the expo-router module boundary (per docs/engineering/testing.md)
 // rather than mounting a real navigation tree, since the only behavior under
@@ -67,5 +67,81 @@ describe("TaskCard", () => {
     const { queryByRole } = await render(<TaskCard task={task} />);
 
     expect(queryByRole("button")).toBeNull();
+  });
+
+  it("still renders offerCount as offers, unaffected by the community feed's separate responseCount", async () => {
+    const { getByText } = await render(<TaskCard task={task} />);
+
+    expect(getByText(`${task.offerCount} offers`)).toBeTruthy();
+  });
+});
+
+describe("CommunityPostCard", () => {
+  const firstTask = communityTasks[0];
+  const remoteTask = communityTasks[2];
+
+  it("renders the poster's name and area, with no verification claim", async () => {
+    const { getByText, queryByLabelText, queryByText } = await render(
+      <CommunityPostCard task={firstTask} />,
+    );
+
+    expect(getByText("Nusrat Jahan")).toBeTruthy();
+    expect(getByText(/Dhanmondi · 25 min ago/)).toBeTruthy();
+    expect(queryByLabelText("Verified neighbor")).toBeNull();
+    expect(queryByText("Verified")).toBeNull();
+  });
+
+  it("shows a Remote badge only for a remote task", async () => {
+    const { getByText, queryByText, rerender } = await render(
+      <CommunityPostCard task={firstTask} />,
+    );
+    expect(queryByText("Remote")).toBeNull();
+
+    await rerender(<CommunityPostCard task={remoteTask} />);
+    expect(getByText("Remote")).toBeTruthy();
+  });
+
+  it("shows a photo note only when the task has one", async () => {
+    const { queryByText } = await render(<CommunityPostCard task={communityTasks[1]} />);
+
+    expect(queryByText("Hatil box & flatpack kit photo attached")).toBeTruthy();
+  });
+
+  it("toggles the like count locally without a backend, starting from the task's like count", async () => {
+    const { getByRole, getByText } = await render(<CommunityPostCard task={firstTask} />);
+
+    expect(getByText("18")).toBeTruthy();
+    await fireEvent.press(getByRole("button", { name: "Like" }));
+    expect(getByText("19")).toBeTruthy();
+
+    await fireEvent.press(getByRole("button", { name: "Unlike" }));
+    expect(getByText("18")).toBeTruthy();
+  });
+
+  it("toggles Save / Saved locally", async () => {
+    const { getByRole } = await render(<CommunityPostCard task={firstTask} />);
+
+    await fireEvent.press(getByRole("button", { name: "Save" }));
+    expect(getByRole("button", { name: "Saved" })).toBeTruthy();
+  });
+
+  it("renders the task's responseCount, not offerCount, as the response count", async () => {
+    // Guards against re-conflating the two: offerCount means offers/
+    // applications elsewhere in the marketplace, responseCount is this
+    // feed's own comment count — they must stay independent.
+    expect(firstTask.offerCount).not.toBe(firstTask.responseCount);
+
+    const { getByText, queryByText } = await render(<CommunityPostCard task={firstTask} />);
+
+    expect(getByText("7 responses")).toBeTruthy();
+    expect(queryByText(`${firstTask.offerCount} responses`)).toBeNull();
+  });
+
+  it("falls back to 0 responses when responseCount is not set", async () => {
+    const { getByText } = await render(
+      <CommunityPostCard task={{ ...firstTask, responseCount: undefined }} />,
+    );
+
+    expect(getByText("0 responses")).toBeTruthy();
   });
 });

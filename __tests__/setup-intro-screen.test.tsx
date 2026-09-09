@@ -28,11 +28,14 @@ describe("SetupIntroScreen", () => {
     });
   });
 
-  it("does not offer a way to bypass required Basic Information", async () => {
-    mockUseRouter.mockReturnValue({ replace: jest.fn() });
-    const { queryByRole } = await render(<SetupIntroScreen />);
+  it("lets a new user defer the whole setup, defaulting to the Job Provider destination", async () => {
+    const replace = jest.fn();
+    mockUseRouter.mockReturnValue({ replace });
+    const { getByRole } = await render(<SetupIntroScreen />);
 
-    expect(queryByRole("button", { name: "I'll complete this later" })).toBeNull();
+    await fireEvent.press(getByRole("button", { name: "I'll complete this later" }));
+
+    expect(replace).toHaveBeenCalledWith("/(poster)");
   });
 
   it("does not show unapproved trust or engagement claims", async () => {

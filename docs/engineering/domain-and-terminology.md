@@ -55,17 +55,29 @@ the explicit non-example after the list.
     → a primary-interaction preference (optional; see #21).
 20. "Log In" verifies phone/OTP first, then looks up whether the phone
     belongs to an existing account. An existing account goes straight to
-    Home. A new account still must complete Basic Info (required) and may
-    skip Identity verification, but does **not** repeat phone/OTP
-    verification, since Login already verified it. A new account then sees
-    the same optional primary-interaction preference (#21) before Home.
+    Home. A new account does **not** repeat phone/OTP verification, since
+    Login already verified it, and is shown a "setup intro" screen
+    (`app/setup-intro.tsx`) that leads into Basic Info → Identity → the
+    primary-interaction preference (#21). That setup-intro screen has its
+    own "I'll complete this later" action that defers the **entire**
+    remaining setup — including Basic Info — defaulting to the Job Provider
+    destination instead (#22). This is a deliberate exception scoped to this
+    one screen: the separate "Get Started" wizard (#19, reached directly
+    from Welcome, no setup-intro screen involved) still has no way to bypass
+    Basic Info.
 21. After the numbered onboarding steps, both flows show a silent (uncounted
     in the "Step X of Y" progress), skippable "How would you like to use
     it?" preference with three outcomes — Job Provider leaning, Job Seeker
     leaning (which reveals a category picker capped at 5 selections), or no
-    preference. This is an **initial preference only**, never an exclusive
-    account type: per #5-6, every account can still act as both Job
-    Provider and Job Seeker regardless of what is chosen here or later.
+    preference (#22). This is an **initial preference only**, never an
+    exclusive account type: per #5-6, every account can still act as both
+    Job Provider and Job Seeker regardless of what is chosen here or later.
+22. If no preference is recorded — skipped, deferred via setup-intro's "I'll
+    complete this later", or an existing user with nothing on record — the
+    prototype defaults to the Job Provider destination (decided 2026-09-09;
+    see `PROTOTYPE_DEFAULT_ROUTE` in `src/shared/constants/routes.ts`). This
+    is a prototype navigation default, not a statement that Job Provider is
+    the real product's default mode long-term.
 
 **Confirmed requirement ≠ implementation detail.** For example, #11-13 confirm
 that a provider-chooses-then-seeker-accepts flow exists at a high level — they
@@ -100,10 +112,13 @@ confirmed requirement above as deciding any of them:
 - whether multiple Job Seekers can receive a job request simultaneously
 - the exact fields on a response/application
 - completion confirmation behavior
-- which mode/home a user lands on immediately after signup or login (Job
-  Provider vs. Job Seeker) — see "Prototype-only mechanics" below
 - any consequence of completing or skipping identity verification (access,
   trust signals, or otherwise)
+
+Note: the _prototype's navigation default_ for "no preference recorded" is
+decided (#22, Job Provider) — but that is a UI routing choice for this
+prototype, not a decision about the real product's eventual default
+mode/experience, which remains open.
 
 ### Prototype-only mechanics (not product decisions)
 
@@ -119,13 +134,11 @@ not be read as approved behavior:
 - **No backend or auth provider.** Nothing in this flow persists a session,
   calls a real API, or implements real authentication.
 - **Landing routes after onboarding.** `src/shared/constants/routes.ts`
-  defines three temporary destinations: `PROTOTYPE_PROVIDER_ROUTE` and
-  `PROTOTYPE_SEEKER_ROUTE` are used only when the primary-interaction
-  preference explicitly picked that side; `PROTOTYPE_HOME_ROUTE` (a small
-  "pick one to explore" interstitial, `app/prototype-home.tsx`) is used for
-  "no preference" and for existing users, who have no stored preference in
-  this prototype. No-preference must never silently resolve to either mode —
-  that would make Job Provider (or Job Seeker) an unapproved default.
+  defines `PROTOTYPE_PROVIDER_ROUTE` and `PROTOTYPE_SEEKER_ROUTE` (the
+  existing "poster"/"worker" prototype areas) and `PROTOTYPE_DEFAULT_ROUTE`
+  (currently an alias for `PROTOTYPE_PROVIDER_ROUTE` — see #22), used
+  whenever no preference is recorded, including for existing users, who have
+  no stored preference in this prototype.
 - **Identity verification consequences.** Completing or skipping the
   Identity step has no effect beyond the UI state of that screen; no
   verification status, badge, or access change is implemented or implied.

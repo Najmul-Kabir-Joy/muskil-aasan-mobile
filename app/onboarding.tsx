@@ -10,11 +10,7 @@ import {
   UseCaseStep,
 } from "@/features/onboarding/UseCaseStep";
 import { ActionButton, AppHeader, ScrollScreen } from "@/shared/components/ui";
-import {
-  PROTOTYPE_HOME_ROUTE,
-  PROTOTYPE_PROVIDER_ROUTE,
-  PROTOTYPE_SEEKER_ROUTE,
-} from "@/shared/constants/routes";
+import { PROTOTYPE_DEFAULT_ROUTE, PROTOTYPE_SEEKER_ROUTE } from "@/shared/constants/routes";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
 const EMPTY_DOCS: IdDocs = { nidFront: null, nidBack: null, selfie: null };
@@ -69,17 +65,10 @@ export default function OnboardingScreen() {
   function finish() {
     // No backend yet — basicInfo/preferredCategories/docs collected above
     // are just discarded. The primary-interaction answer is only an initial
-    // preference, never an exclusive account type, so each outcome gets its
-    // own temporary destination — "no preference" must never silently
-    // resolve to Job Provider. See
+    // preference, never an exclusive account type. No preference recorded
+    // defaults to Job Provider — see
     // docs/engineering/domain-and-terminology.md.
-    if (useCase === "poster") {
-      router.replace(PROTOTYPE_PROVIDER_ROUTE);
-    } else if (useCase === "jobSeeker") {
-      router.replace(PROTOTYPE_SEEKER_ROUTE);
-    } else {
-      router.replace(PROTOTYPE_HOME_ROUTE);
-    }
+    router.replace(useCase === "jobSeeker" ? PROTOTYPE_SEEKER_ROUTE : PROTOTYPE_DEFAULT_ROUTE);
   }
 
   function advance() {

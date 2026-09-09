@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { ActionButton, AppText, ScrollScreen } from "@/shared/components/ui";
 import { BRAND_NAME } from "@/shared/constants/brand";
+import { PROTOTYPE_DEFAULT_ROUTE } from "@/shared/constants/routes";
 import { colors, fonts, gradients, radius, spacing } from "@/theme/tokens";
 
 type ProgressRow = {
@@ -40,6 +41,14 @@ export default function SetupIntroScreen() {
 
   function handleGetStarted() {
     router.replace({ pathname: "/onboarding", params: { phone } });
+  }
+
+  // Deliberately allows a Login-new-user to defer the entire setup
+  // (including Basic Info) from this specific screen — see
+  // docs/engineering/domain-and-terminology.md. No preference recorded
+  // defaults to Job Provider.
+  function handleLater() {
+    router.replace(PROTOTYPE_DEFAULT_ROUTE);
   }
 
   return (
@@ -101,6 +110,7 @@ export default function SetupIntroScreen() {
 
       <View style={styles.actions}>
         <ActionButton label="Get Started →" onPress={handleGetStarted} />
+        <ActionButton label="I'll complete this later" tone="secondary" onPress={handleLater} />
       </View>
     </ScrollScreen>
   );

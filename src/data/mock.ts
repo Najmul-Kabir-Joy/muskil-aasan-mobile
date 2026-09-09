@@ -146,6 +146,63 @@ export const offers: Offer[] = [
   },
 ];
 
+// Tasks posted by other neighbors, shown in the Provider Home "Community
+// Jobs" feed — distinct from `tasks` (the current dummy user's own posts).
+export const communityTasks: Task[] = [
+  {
+    id: "c1",
+    title: "Pick up medicine from Labaid and deliver to Green Road",
+    category: "Delivery",
+    budget: "৳350",
+    area: "Dhanmondi → Green Road",
+    timing: "Need within 1 hour",
+    status: "open",
+    urgent: true,
+    offerCount: 0,
+    responseCount: 7,
+    description:
+      "Need someone with a bicycle/bike to quickly collect emergency prescription medicine from Labaid Hospital pharmacy and drop off at Green Road.",
+    postedBy: { name: "Nusrat Jahan", area: "Dhanmondi" },
+    postedAgo: "25 min ago",
+    likes: 18,
+  },
+  {
+    id: "c2",
+    title: "Assemble wooden wardrobe & study desk",
+    category: "Carpentry",
+    budget: "৳1,200",
+    area: "Mirpur 10",
+    timing: "Tomorrow morning",
+    status: "open",
+    urgent: false,
+    offerCount: 0,
+    responseCount: 12,
+    description:
+      "Flat pack furniture delivered from Hatil. Need an experienced hand with power drill and basic carpentry tools.",
+    postedBy: { name: "Tanvir Hossain", area: "Mirpur 10" },
+    postedAgo: "1 hour ago",
+    likes: 32,
+    photoNote: "Hatil box & flatpack kit photo attached",
+  },
+  {
+    id: "c3",
+    title: "Bangla to English document transcription & typing",
+    category: "Admin",
+    budget: "৳600",
+    area: "Remote / Anywhere in BD",
+    timing: "Due Sunday",
+    status: "open",
+    urgent: false,
+    offerCount: 0,
+    responseCount: 4,
+    description: "12 handwritten pages of university notes need neat typing into a Word document.",
+    postedBy: { name: "Farzana Karim", area: "Gulshan 1" },
+    postedAgo: "3 hours ago",
+    likes: 9,
+    remote: true,
+  },
+];
+
 export const taskTimeline: TimelineEvent[] = [
   { label: "Posted", detail: "Task was published in Mirpur.", completed: true },
   { label: "Offer accepted", detail: "Rafiq was selected for the task.", completed: true },

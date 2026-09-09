@@ -152,15 +152,14 @@ describe("OnboardingScreen", () => {
     expect(replace).toHaveBeenCalledWith("/(worker)/jobs");
   });
 
-  it("'I'm not sure yet' does NOT default to Job Provider — it routes to the neutral prototype home", async () => {
+  it("'I'm not sure yet' defaults to the Job Provider destination", async () => {
     const replace = jest.fn();
     mockUseRouter.mockReturnValue({ replace });
     const { getByRole } = await reachPreferenceScreenFromGetStarted(render);
 
     await fireEvent.press(getByRole("button", { name: "I'm not sure yet" }));
 
-    expect(replace).toHaveBeenCalledWith("/prototype-home");
-    expect(replace).not.toHaveBeenCalledWith("/(poster)");
+    expect(replace).toHaveBeenCalledWith("/(poster)");
   });
 
   it("arriving from Log In (phone already verified) skips the phone step, still requires Basic Info, and reaches the preference screen after Identity", async () => {
@@ -192,6 +191,6 @@ describe("OnboardingScreen", () => {
 
     await fireEvent.press(getByRole("button", { name: "I'm not sure yet" }));
 
-    expect(replace).toHaveBeenCalledWith("/prototype-home");
+    expect(replace).toHaveBeenCalledWith("/(poster)");
   });
 });
