@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { AppText } from "@/shared/components/ui";
+import { DHAKA_AREAS } from "@/shared/constants/areas";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
 export type BasicInfo = {
@@ -32,21 +33,6 @@ export const EMPTY_BASIC_INFO: BasicInfo = {
   dob: "",
   avatarUri: null,
 };
-
-const DHAKA_AREAS = [
-  "Dhanmondi",
-  "Mirpur 1",
-  "Mirpur 10",
-  "Gulshan 1",
-  "Gulshan 2",
-  "Banani",
-  "Uttara",
-  "Mohammadpur",
-  "Badda",
-  "Old Dhaka (Puran Dhaka)",
-  "Bashundhara R/A",
-  "Khilgaon",
-];
 
 const GENDERS: { value: "Male" | "Female" | "Other"; icon: "male" | "female" | "transgender" }[] = [
   { value: "Male", icon: "male" },

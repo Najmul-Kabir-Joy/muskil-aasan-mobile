@@ -4,12 +4,51 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { statusTone, verificationLabel } from "@/features/marketplace/status";
 import { ActionButton, Badge, CaptionText, PrimaryButton } from "@/shared/components/ui";
+import { BRAND_NAME } from "@/shared/constants/brand";
 import { colors, fonts, radius, shadows, spacing } from "@/theme/tokens";
 import type { Category, Offer, Task } from "@/types/domain";
 
 // Prototype/mock marketplace UI — tied to src/types/domain.ts's prototype
 // shapes, not approved product requirements. See
 // docs/engineering/domain-and-terminology.md.
+
+/**
+ * Shared Job Provider app-shell header — brand, dummy location display, a
+ * static notification icon, and a profile button. Used by every Provider
+ * screen (Provider Home, Post a Job, ...) so it renders identically
+ * everywhere instead of being redefined per screen. Location and
+ * notifications are static prototype display only — see
+ * docs/engineering/domain-and-terminology.md.
+ */
+export function ProviderAppHeader() {
+  const router = useRouter();
+  return (
+    <View style={styles.providerTopBar}>
+      <View style={styles.providerBrandRow}>
+        <View>
+          <Text style={styles.providerBrandName}>{BRAND_NAME}</Text>
+          <View style={styles.providerLocationRow}>
+            <MaterialIcons name="location-on" size={14} color={colors.primary} />
+            <Text style={styles.providerLocationText}>Mirpur, Dhaka</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.providerTopBarActions}>
+        <View style={styles.providerNotificationButton}>
+          <MaterialIcons name="notifications" size={22} color={colors.muted} />
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Open profile"
+          onPress={() => router.push("/profile")}
+          style={styles.providerProfileButton}
+        >
+          <MaterialIcons name="account-circle" size={20} color={colors.primary} />
+        </Pressable>
+      </View>
+    </View>
+  );
+}
 
 /**
  * Top-level poster/job-seeker mode switch. Uses `router.replace` (not
@@ -262,6 +301,50 @@ export function OfferCard({ offer }: { offer: Offer }) {
 }
 
 const styles = StyleSheet.create({
+  providerTopBar: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  providerBrandRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  providerBrandName: {
+    color: colors.primary,
+    fontFamily: fonts.bold,
+    fontSize: 16,
+  },
+  providerLocationRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.xxs,
+  },
+  providerLocationText: {
+    color: colors.muted,
+    fontFamily: fonts.semiBold,
+    fontSize: 11,
+  },
+  providerTopBarActions: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  providerNotificationButton: {
+    alignItems: "center",
+    height: 36,
+    justifyContent: "center",
+    width: 36,
+  },
+  providerProfileButton: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.pill,
+    height: 36,
+    justifyContent: "center",
+    width: 36,
+  },
   roleSwitch: {
     backgroundColor: colors.surface,
     borderRadius: radius.pill,

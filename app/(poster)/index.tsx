@@ -1,9 +1,8 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { CommunityPostCard, TaskCard } from "@/features/marketplace/components";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { CommunityPostCard, ProviderAppHeader, TaskCard } from "@/features/marketplace/components";
 import { AppText, Badge, PrimaryButton, ScrollScreen } from "@/shared/components/ui";
-import { BRAND_NAME } from "@/shared/constants/brand";
 import { communityTasks, tasks } from "@/data/mock";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 
@@ -14,35 +13,7 @@ export default function PosterHomeScreen() {
 
   return (
     <ScrollScreen>
-      <View style={styles.topBar}>
-        <View style={styles.brandRow}>
-          <Image
-            source={require("../../assets/branding/logo-mark.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <View>
-            <Text style={styles.brandName}>{BRAND_NAME}</Text>
-            <View style={styles.locationRow}>
-              <MaterialIcons name="location-on" size={14} color={colors.primary} />
-              <Text style={styles.locationText}>Mirpur, Dhaka</Text>
-            </View>
-          </View>
-        </View>
-        <View style={styles.topBarActions}>
-          <View style={styles.notificationButton}>
-            <MaterialIcons name="notifications" size={22} color={colors.muted} />
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Open profile"
-            onPress={() => router.push("/profile")}
-            style={styles.profileButton}
-          >
-            <MaterialIcons name="account-circle" size={20} color={colors.primary} />
-          </Pressable>
-        </View>
-      </View>
+      <ProviderAppHeader />
 
       <View style={styles.postBanner}>
         <View style={styles.postBannerText}>
@@ -97,54 +68,6 @@ export default function PosterHomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  topBar: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  brandRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-  logo: {
-    height: 32,
-    width: 32,
-  },
-  brandName: {
-    color: colors.primary,
-    fontFamily: fonts.bold,
-    fontSize: 16,
-  },
-  locationRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: spacing.xxs,
-  },
-  locationText: {
-    color: colors.muted,
-    fontFamily: fonts.semiBold,
-    fontSize: 11,
-  },
-  topBarActions: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-  notificationButton: {
-    alignItems: "center",
-    height: 36,
-    justifyContent: "center",
-    width: 36,
-  },
-  profileButton: {
-    alignItems: "center",
-    backgroundColor: colors.primarySoft,
-    borderRadius: radius.pill,
-    height: 36,
-    justifyContent: "center",
-    width: 36,
-  },
   postBanner: {
     alignItems: "center",
     backgroundColor: colors.primary,
