@@ -26,14 +26,12 @@ export default function PosterHomeScreen() {
             <View style={styles.locationRow}>
               <MaterialIcons name="location-on" size={14} color={colors.primary} />
               <Text style={styles.locationText}>Mirpur, Dhaka</Text>
-              <MaterialIcons name="expand-more" size={14} color={colors.muted} />
             </View>
           </View>
         </View>
         <View style={styles.topBarActions}>
           <View style={styles.notificationButton}>
             <MaterialIcons name="notifications" size={22} color={colors.muted} />
-            <View style={styles.notificationDot} />
           </View>
           <Pressable
             accessibilityRole="button"
@@ -86,7 +84,6 @@ export default function PosterHomeScreen() {
           <View style={styles.nearbyChip}>
             <MaterialIcons name="near-me" size={14} color={colors.primary} />
             <Text style={styles.nearbyChipText}>Nearby</Text>
-            <MaterialIcons name="expand-more" size={14} color={colors.muted} />
           </View>
         </View>
         <View style={styles.communityList}>
@@ -139,15 +136,6 @@ const styles = StyleSheet.create({
     height: 36,
     justifyContent: "center",
     width: 36,
-  },
-  notificationDot: {
-    backgroundColor: colors.danger,
-    borderRadius: radius.pill,
-    height: 8,
-    position: "absolute",
-    right: 4,
-    top: 4,
-    width: 8,
   },
   profileButton: {
     alignItems: "center",

@@ -148,17 +148,7 @@ export function CommunityPostCard({ task }: { task: Task }) {
             </Text>
           </View>
           <View>
-            <View style={styles.communityNameRow}>
-              <Text style={styles.communityName}>{task.postedBy.name}</Text>
-              {task.postedBy.verified ? (
-                <MaterialIcons
-                  name="verified"
-                  size={14}
-                  color={colors.primary}
-                  accessibilityLabel="Verified neighbor"
-                />
-              ) : null}
-            </View>
+            <Text style={styles.communityName}>{task.postedBy.name}</Text>
             <CaptionText style={styles.communityMeta}>
               {task.postedBy.area} · {task.postedAgo}
             </CaptionText>
@@ -222,7 +212,7 @@ export function CommunityPostCard({ task }: { task: Task }) {
           </Pressable>
           <View style={styles.communityFooterButton}>
             <MaterialIcons name="chat-bubble-outline" size={18} color={colors.muted} />
-            <Text style={styles.communityFooterText}>{task.offerCount} responses</Text>
+            <Text style={styles.communityFooterText}>{task.responseCount ?? 0} responses</Text>
           </View>
         </View>
         <Pressable
@@ -389,11 +379,6 @@ const styles = StyleSheet.create({
   communityAvatarText: {
     fontFamily: fonts.extraBold,
     fontSize: 14,
-  },
-  communityNameRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: spacing.xxs,
   },
   communityName: {
     color: colors.text,

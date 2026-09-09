@@ -68,29 +68,32 @@ describe("TaskCard", () => {
 
     expect(queryByRole("button")).toBeNull();
   });
+
+  it("still renders offerCount as offers, unaffected by the community feed's separate responseCount", async () => {
+    const { getByText } = await render(<TaskCard task={task} />);
+
+    expect(getByText(`${task.offerCount} offers`)).toBeTruthy();
+  });
 });
 
 describe("CommunityPostCard", () => {
-  const verifiedTask = communityTasks[0];
+  const firstTask = communityTasks[0];
   const remoteTask = communityTasks[2];
 
-  it("renders the poster's name, area, and verified badge", async () => {
-    const { getByText, getByLabelText } = await render(<CommunityPostCard task={verifiedTask} />);
+  it("renders the poster's name and area, with no verification claim", async () => {
+    const { getByText, queryByLabelText, queryByText } = await render(
+      <CommunityPostCard task={firstTask} />,
+    );
 
     expect(getByText("Nusrat Jahan")).toBeTruthy();
     expect(getByText(/Dhanmondi · 25 min ago/)).toBeTruthy();
-    expect(getByLabelText("Verified neighbor")).toBeTruthy();
-  });
-
-  it("does not render a verified badge for a poster with no verification", async () => {
-    const { queryByLabelText } = await render(<CommunityPostCard task={remoteTask} />);
-
     expect(queryByLabelText("Verified neighbor")).toBeNull();
+    expect(queryByText("Verified")).toBeNull();
   });
 
   it("shows a Remote badge only for a remote task", async () => {
     const { getByText, queryByText, rerender } = await render(
-      <CommunityPostCard task={verifiedTask} />,
+      <CommunityPostCard task={firstTask} />,
     );
     expect(queryByText("Remote")).toBeNull();
 
@@ -105,7 +108,7 @@ describe("CommunityPostCard", () => {
   });
 
   it("toggles the like count locally without a backend, starting from the task's like count", async () => {
-    const { getByRole, getByText } = await render(<CommunityPostCard task={verifiedTask} />);
+    const { getByRole, getByText } = await render(<CommunityPostCard task={firstTask} />);
 
     expect(getByText("18")).toBeTruthy();
     await fireEvent.press(getByRole("button", { name: "Like" }));
@@ -116,15 +119,29 @@ describe("CommunityPostCard", () => {
   });
 
   it("toggles Save / Saved locally", async () => {
-    const { getByRole } = await render(<CommunityPostCard task={verifiedTask} />);
+    const { getByRole } = await render(<CommunityPostCard task={firstTask} />);
 
     await fireEvent.press(getByRole("button", { name: "Save" }));
     expect(getByRole("button", { name: "Saved" })).toBeTruthy();
   });
 
-  it("renders the offer count as responses, not a separate invented metric", async () => {
-    const { getByText } = await render(<CommunityPostCard task={verifiedTask} />);
+  it("renders the task's responseCount, not offerCount, as the response count", async () => {
+    // Guards against re-conflating the two: offerCount means offers/
+    // applications elsewhere in the marketplace, responseCount is this
+    // feed's own comment count — they must stay independent.
+    expect(firstTask.offerCount).not.toBe(firstTask.responseCount);
+
+    const { getByText, queryByText } = await render(<CommunityPostCard task={firstTask} />);
 
     expect(getByText("7 responses")).toBeTruthy();
+    expect(queryByText(`${firstTask.offerCount} responses`)).toBeNull();
+  });
+
+  it("falls back to 0 responses when responseCount is not set", async () => {
+    const { getByText } = await render(
+      <CommunityPostCard task={{ ...firstTask, responseCount: undefined }} />,
+    );
+
+    expect(getByText("0 responses")).toBeTruthy();
   });
 });

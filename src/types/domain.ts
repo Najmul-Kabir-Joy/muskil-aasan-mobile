@@ -64,10 +64,13 @@ export type Task = {
   // Optional — only set for tasks shown in the Provider Home "Community
   // Jobs" feed (a task posted by someone other than the current viewer,
   // rendered in a social-feed layout). Existing task list/detail screens
-  // ignore these.
-  postedBy?: { name: string; area: string; verified?: boolean };
+  // ignore these. `responseCount` is a distinct concept from `offerCount`
+  // (which means offers/applications elsewhere) — it's the feed's own
+  // comment/response count and must not be conflated with `offerCount`.
+  postedBy?: { name: string; area: string };
   postedAgo?: string;
   likes?: number;
+  responseCount?: number;
   remote?: boolean;
   photoNote?: string;
 };
