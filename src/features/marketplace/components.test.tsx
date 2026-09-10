@@ -39,6 +39,15 @@ describe("ProviderAppHeader", () => {
 
     await fireEvent.press(getByLabelText("Open navigation menu"));
   });
+
+  it("does not show a fake unread-notification badge — there's no real unread state yet", async () => {
+    const { getByLabelText } = await render(<ProviderAppHeader />);
+
+    const icon = getByLabelText("Notifications");
+    // The notification icon should be the only thing in its wrapper — no
+    // extra dot/badge view alongside it.
+    expect(icon.parent?.children.length).toBe(1);
+  });
 });
 
 describe("RoleSwitch", () => {

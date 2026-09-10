@@ -36,4 +36,24 @@ describe("ProfileScreen", () => {
 
     expect(queryByLabelText("Open navigation menu")).toBeNull();
   });
+
+  it("Contact support links to the standalone route by default", async () => {
+    const push = jest.fn();
+    mockUseRouter.mockReturnValue({ replace: jest.fn(), push });
+
+    const { getByRole } = await render(<ProfileScreen />);
+    await fireEvent.press(getByRole("button", { name: "Contact support" }));
+
+    expect(push).toHaveBeenCalledWith("/support");
+  });
+
+  it("stays inside the Provider shell when given a basePath, instead of dropping back to the standalone support route", async () => {
+    const push = jest.fn();
+    mockUseRouter.mockReturnValue({ replace: jest.fn(), push });
+
+    const { getByRole } = await render(<ProfileScreen basePath="/(poster)" />);
+    await fireEvent.press(getByRole("button", { name: "Contact support" }));
+
+    expect(push).toHaveBeenCalledWith("/(poster)/support");
+  });
 });

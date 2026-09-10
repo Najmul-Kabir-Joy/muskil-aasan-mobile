@@ -19,8 +19,11 @@ import {
  * (`app/(poster)/profile.tsx`), so there is one implementation instead of
  * two. `edges` lets a caller inside a persistent shell (which already owns
  * the top/bottom safe area) opt out of re-applying it — see `ScrollScreen`.
+ * `basePath` prefixes the "Contact support" link so navigating from inside
+ * the Provider shell stays inside it instead of dropping back to the
+ * standalone route.
  */
-export function ProfileScreen({ edges }: { edges?: Edges }) {
+export function ProfileScreen({ edges, basePath = "" }: { edges?: Edges; basePath?: string }) {
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [jobSeekerSetup, setJobSeekerSetup] = useState(false);
   const [categories, setCategories] = useState<string[]>(["Repair"]);
@@ -84,7 +87,7 @@ export function ProfileScreen({ edges }: { edges?: Edges }) {
         body={`Selected categories: ${categories.join(", ") || "none"}. Verification prompts, portfolio proof, and service areas belong here before job seekers can send high-risk offers.`}
       />
 
-      <PrimaryButton label="Contact support" href="/support" tone="secondary" />
+      <PrimaryButton label="Contact support" href={`${basePath}/support`} tone="secondary" />
     </ScrollScreen>
   );
 }

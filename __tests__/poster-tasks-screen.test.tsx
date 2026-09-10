@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react-native";
+import { fireEvent, render } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 import PosterTasksScreen from "../app/(poster)/tasks";
 
@@ -16,5 +16,18 @@ describe("PosterTasksScreen (My Jobs)", () => {
 
     expect(getByText("Compare offers safely.")).toBeTruthy();
     expect(getByText("My tasks")).toBeTruthy();
+  });
+
+  it("links to task status and support inside the Provider shell, not the standalone routes", async () => {
+    const push = jest.fn();
+    mockUseRouter.mockReturnValue({ push });
+
+    const { getByRole } = await render(<PosterTasksScreen />);
+
+    await fireEvent.press(getByRole("button", { name: "View task timeline" }));
+    expect(push).toHaveBeenCalledWith("/(poster)/task-status");
+
+    await fireEvent.press(getByRole("button", { name: "Report an issue" }));
+    expect(push).toHaveBeenCalledWith("/(poster)/support");
   });
 });

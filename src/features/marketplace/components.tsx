@@ -51,7 +51,6 @@ export function ProviderAppHeader() {
               size={22}
               color={colors.muted}
             />
-            <View style={styles.providerNotificationDot} />
           </View>
           <Pressable
             accessibilityRole="button"
@@ -363,17 +362,6 @@ const styles = StyleSheet.create({
     height: 36,
     justifyContent: "center",
     width: 36,
-  },
-  providerNotificationDot: {
-    backgroundColor: colors.danger,
-    borderColor: colors.card,
-    borderRadius: radius.pill,
-    borderWidth: 2,
-    height: 9,
-    position: "absolute",
-    right: 6,
-    top: 5,
-    width: 9,
   },
   providerMenuButton: {
     alignItems: "center",

@@ -24,6 +24,7 @@ const NOTCH_PATH =
   "M0 0H140C145.5 0 150.2 3.5 152.8 8.5C159.6 21.5 172.5 30.5 187.5 30.5C202.5 30.5 215.4 21.5 222.2 8.5C224.8 3.5 229.5 0 235 0H375V72H0V0Z";
 
 const FAB_SIZE = 58;
+const FAB_RING_WIDTH = 2;
 const FAB_LIFT = 20;
 
 /**
@@ -180,22 +181,28 @@ export function ProviderBottomNav({ state, navigation, insets }: BottomTabBarPro
         </View>
 
         <View style={styles.fabColumn} pointerEvents="box-none">
-          <View style={styles.fabTouchArea}>
-            <Animated.View
-              pointerEvents="none"
-              style={[
-                styles.fabPulseRing,
-                { opacity: pulse.opacity, transform: [{ scale: pulse.scale }] },
-              ]}
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Post a Job"
-              onPress={() => navigateTo(POST_JOB_ROUTE_NAME)}
-              style={({ pressed }) => [styles.fab, shadows.fab, pressed && styles.fabPressed]}
-            >
-              <MaterialIcons name="add" size={30} color={colors.card} />
-            </Pressable>
+          {/* Outer white ring separating the FAB from the notch/page
+              background behind it, matching the Stitch design's
+              `ring-2 ring-white` (in addition to the button's own light
+              emerald border). */}
+          <View style={styles.fabRing}>
+            <View style={styles.fabTouchArea}>
+              <Animated.View
+                pointerEvents="none"
+                style={[
+                  styles.fabPulseRing,
+                  { opacity: pulse.opacity, transform: [{ scale: pulse.scale }] },
+                ]}
+              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Post a Job"
+                onPress={() => navigateTo(POST_JOB_ROUTE_NAME)}
+                style={({ pressed }) => [styles.fab, shadows.fab, pressed && styles.fabPressed]}
+              >
+                <MaterialIcons name="add" size={30} color={colors.card} />
+              </Pressable>
+            </View>
           </View>
           <Text style={styles.fabLabel}>Post Job</Text>
         </View>
@@ -245,6 +252,14 @@ const styles = StyleSheet.create({
     right: 0,
     top: -FAB_LIFT,
   },
+  fabRing: {
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderRadius: radius.pill,
+    height: FAB_SIZE + FAB_RING_WIDTH * 2,
+    justifyContent: "center",
+    width: FAB_SIZE + FAB_RING_WIDTH * 2,
+  },
   fabTouchArea: {
     alignItems: "center",
     height: FAB_SIZE,
@@ -272,8 +287,8 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.95 }],
   },
   fabLabel: {
-    color: colors.text,
-    fontFamily: fonts.semiBold,
+    color: colors.primary,
+    fontFamily: fonts.bold,
     fontSize: 10,
     marginTop: spacing.xs,
   },

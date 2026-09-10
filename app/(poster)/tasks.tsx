@@ -108,8 +108,8 @@ export default function PosterTasksScreen() {
       )}
 
       <View style={{ gap: 12 }}>
-        <PrimaryButton label="View task timeline" href="/task-status" />
-        <PrimaryButton label="Report an issue" href="/support" tone="secondary" />
+        <PrimaryButton label="View task timeline" href="/(poster)/task-status" />
+        <PrimaryButton label="Report an issue" href="/(poster)/support" tone="secondary" />
       </View>
     </ScrollScreen>
   );

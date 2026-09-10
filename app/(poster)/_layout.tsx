@@ -23,6 +23,11 @@ export default function PosterTabsLayout() {
       <Tabs.Screen name="post-task" options={{ title: "Post Job" }} />
       <Tabs.Screen name="tasks" options={{ title: "My Jobs" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+      {/* Secondary Provider screens — reachable by navigation, not bottom-nav
+          destinations. Living here (rather than at the app root) keeps the
+          shared header/bottom nav visible instead of dropping away. */}
+      <Tabs.Screen name="task-status" options={{ title: "Task status" }} />
+      <Tabs.Screen name="support" options={{ title: "Support" }} />
     </Tabs>
   );
 }
