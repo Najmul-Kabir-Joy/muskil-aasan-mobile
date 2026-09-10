@@ -17,7 +17,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ProviderAppHeader } from "@/features/marketplace/components";
 import { ActionButton, AppText, Badge, SelectableChip } from "@/shared/components/ui";
 import { DHAKA_AREAS } from "@/shared/constants/areas";
 import { categories } from "@/data/mock";
@@ -165,14 +164,12 @@ export default function PostJobScreen() {
   ].join(" • ");
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+    <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <ProviderAppHeader />
-
         <View style={styles.localHeader}>
           <View style={styles.localHeaderText}>
             <Text style={styles.localHeaderTitle}>Post a Job</Text>

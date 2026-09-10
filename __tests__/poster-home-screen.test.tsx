@@ -2,7 +2,6 @@ import { fireEvent, render } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 import PosterHomeScreen from "../app/(poster)/index";
 import { communityTasks, tasks } from "@/data/mock";
-import { BRAND_NAME } from "@/shared/constants/brand";
 
 jest.mock("expo-router", () => ({
   useRouter: jest.fn(),
@@ -11,13 +10,12 @@ jest.mock("expo-router", () => ({
 const mockUseRouter = useRouter as jest.Mock;
 
 describe("PosterHomeScreen", () => {
-  it("renders the brand name and shows Your Latest Job for the current user's own first active task", async () => {
+  it("shows Your Latest Job for the current user's own first active task", async () => {
     mockUseRouter.mockReturnValue({ push: jest.fn() });
     const latestTask = tasks.find((task) => task.status !== "completed")!;
 
     const { getByText } = await render(<PosterHomeScreen />);
 
-    expect(getByText(BRAND_NAME)).toBeTruthy();
     expect(getByText("Your Latest Job")).toBeTruthy();
     expect(getByText(latestTask.title)).toBeTruthy();
   });
@@ -32,14 +30,12 @@ describe("PosterHomeScreen", () => {
     }
   });
 
-  it("opens the existing profile route from the header's profile button, not an invented one", async () => {
-    const push = jest.fn();
-    mockUseRouter.mockReturnValue({ push });
+  it("does not render the Provider app-shell header itself — that's owned by the (poster) layout now", async () => {
+    mockUseRouter.mockReturnValue({ push: jest.fn() });
 
-    const { getByLabelText } = await render(<PosterHomeScreen />);
-    await fireEvent.press(getByLabelText("Open profile"));
+    const { queryByLabelText } = await render(<PosterHomeScreen />);
 
-    expect(push).toHaveBeenCalledWith("/profile");
+    expect(queryByLabelText("Open navigation menu")).toBeNull();
   });
 
   it("posting a job from the top banner navigates to the existing post-task route", async () => {

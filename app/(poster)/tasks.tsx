@@ -41,7 +41,7 @@ export default function PosterTasksScreen() {
   const hiredOffer = offers.find((offer) => offer.id === hiredOfferId);
 
   return (
-    <ScrollScreen>
+    <ScrollScreen edges={["left", "right"]}>
       <AppHeader
         title="Compare offers safely."
         subtitle="Show status, budget, timeline summary, and clear hire/pass decisions before contact is unlocked."
@@ -108,8 +108,8 @@ export default function PosterTasksScreen() {
       )}
 
       <View style={{ gap: 12 }}>
-        <PrimaryButton label="View task timeline" href="/task-status" />
-        <PrimaryButton label="Report an issue" href="/support" tone="secondary" />
+        <PrimaryButton label="View task timeline" href="/(poster)/task-status" />
+        <PrimaryButton label="Report an issue" href="/(poster)/support" tone="secondary" />
       </View>
     </ScrollScreen>
   );

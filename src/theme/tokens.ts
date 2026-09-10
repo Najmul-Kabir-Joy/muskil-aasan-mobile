@@ -88,6 +88,24 @@ export const shadows = {
     shadowRadius: 20,
     elevation: 3,
   },
+  // Elevated Post Job FAB, per the "Bottom Navigation / Job Provider
+  // (Attached to Screen)" Stitch design's `.fab-shadow` spec.
+  fab: {
+    shadowColor: "#059669",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.42,
+    shadowRadius: 22,
+    elevation: 8,
+  },
+  // Soft upward shadow cast by the bottom navigation bar onto the content
+  // above it, per the same design's `.bottom-bar-filter` spec.
+  bottomBar: {
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 12,
+  },
 };
 
 // Named gradient presets, analogous to `shadows` — a role name (what the

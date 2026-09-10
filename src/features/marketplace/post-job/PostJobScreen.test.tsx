@@ -3,7 +3,6 @@ import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import PostJobScreen from "./PostJobScreen";
 import { categories } from "@/data/mock";
-import { BRAND_NAME } from "@/shared/constants/brand";
 
 jest.mock("expo-router", () => ({
   useRouter: jest.fn(),
@@ -62,10 +61,9 @@ describe("PostJobScreen", () => {
     mockLaunchCamera.mockReset();
   });
 
-  it("renders the shared Provider app header alongside the local screen header and all form sections", async () => {
+  it("renders the local screen header and all form sections (the Provider app-shell header is owned by the (poster) layout, not this screen)", async () => {
     const { getByText } = await render(<PostJobScreen />);
 
-    expect(getByText(BRAND_NAME)).toBeTruthy();
     expect(getByText("Post a Job")).toBeTruthy();
     expect(getByText("Tell people what you need help with")).toBeTruthy();
     expect(getByText(/What do you need help with\?/)).toBeTruthy();
