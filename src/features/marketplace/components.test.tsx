@@ -1,7 +1,13 @@
 import { fireEvent, render } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
-import { CommunityPostCard, RoleSwitch, TaskCard } from "@/features/marketplace/components";
+import {
+  CommunityPostCard,
+  ProviderAppHeader,
+  RoleSwitch,
+  TaskCard,
+} from "@/features/marketplace/components";
 import { communityTasks, tasks } from "@/data/mock";
+import { BRAND_NAME } from "@/shared/constants/brand";
 
 // Mock at the expo-router module boundary (per docs/engineering/testing.md)
 // rather than mounting a real navigation tree, since the only behavior under
@@ -11,6 +17,29 @@ jest.mock("expo-router", () => ({
 }));
 
 const mockUseRouter = useRouter as jest.Mock;
+
+describe("ProviderAppHeader", () => {
+  it("shows the brand and a static location, with no logo icon", async () => {
+    const { getByText } = await render(<ProviderAppHeader />);
+
+    expect(getByText(BRAND_NAME)).toBeTruthy();
+    expect(getByText("Mirpur, Dhaka")).toBeTruthy();
+  });
+
+  it("has a notification button and a navigation-menu button, and no profile button", async () => {
+    const { getByLabelText, queryByLabelText } = await render(<ProviderAppHeader />);
+
+    expect(getByLabelText("Notifications")).toBeTruthy();
+    expect(getByLabelText("Open navigation menu")).toBeTruthy();
+    expect(queryByLabelText("Open profile")).toBeNull();
+  });
+
+  it("the navigation-menu button is tappable without crashing (the drawer isn't built yet)", async () => {
+    const { getByLabelText } = await render(<ProviderAppHeader />);
+
+    await fireEvent.press(getByLabelText("Open navigation menu"));
+  });
+});
 
 describe("RoleSwitch", () => {
   it("replaces the route when switching to job seeker mode, instead of pushing", async () => {

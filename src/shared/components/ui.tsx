@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextProps, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Edges, SafeAreaView } from "react-native-safe-area-context";
 import { BRAND_NAME } from "@/shared/constants/brand";
 import { colors, fonts, radius, shadows, spacing, typography } from "@/theme/tokens";
 
@@ -23,10 +23,16 @@ export function Screen({ children }: { children: ReactNode }) {
 /**
  * Page shell for ordinary scrolling content (forms, stacked cards). This is
  * what every current prototype screen uses.
+ *
+ * `edges` defaults to every edge (react-native-safe-area-context's own
+ * default). Screens rendered inside a persistent shell that already handles
+ * an edge itself (e.g. a Provider tab screen, whose top/bottom insets are
+ * owned by the shared header and bottom navigation) should pass a narrower
+ * list — see `src/features/marketplace/provider-shell/`.
  */
-export function ScrollScreen({ children }: { children: ReactNode }) {
+export function ScrollScreen({ children, edges }: { children: ReactNode; edges?: Edges }) {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={edges}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {children}
       </ScrollView>

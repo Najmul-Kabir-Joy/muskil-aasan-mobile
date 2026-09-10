@@ -1,7 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { CommunityPostCard, ProviderAppHeader, TaskCard } from "@/features/marketplace/components";
+import { CommunityPostCard, TaskCard } from "@/features/marketplace/components";
 import { AppText, Badge, PrimaryButton, ScrollScreen } from "@/shared/components/ui";
 import { communityTasks, tasks } from "@/data/mock";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
@@ -12,9 +12,7 @@ export default function PosterHomeScreen() {
   const latestTask = activeTasks[0];
 
   return (
-    <ScrollScreen>
-      <ProviderAppHeader />
-
+    <ScrollScreen edges={["left", "right"]}>
       <View style={styles.postBanner}>
         <View style={styles.postBannerText}>
           <MaterialIcons name="add-task" size={20} color={colors.card} />

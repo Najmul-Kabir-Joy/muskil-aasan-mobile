@@ -33,4 +33,12 @@ describe("WelcomeScreen", () => {
     await fireEvent.press(getByRole("button", { name: /Log In/ }));
     expect(push).toHaveBeenCalledWith("/login");
   });
+
+  it("does not render the authenticated Provider app shell (pre-auth screen)", async () => {
+    mockUseRouter.mockReturnValue({ push: jest.fn() });
+    const { queryByLabelText } = await render(<WelcomeScreen />);
+
+    expect(queryByLabelText("Open navigation menu")).toBeNull();
+    expect(queryByLabelText("Post a Job")).toBeNull();
+  });
 });

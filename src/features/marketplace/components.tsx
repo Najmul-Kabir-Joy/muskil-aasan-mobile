@@ -2,6 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { statusTone, verificationLabel } from "@/features/marketplace/status";
 import { ActionButton, Badge, CaptionText, PrimaryButton } from "@/shared/components/ui";
 import { BRAND_NAME } from "@/shared/constants/brand";
@@ -13,40 +14,59 @@ import type { Category, Offer, Task } from "@/types/domain";
 // docs/engineering/domain-and-terminology.md.
 
 /**
- * Shared Job Provider app-shell header — brand, dummy location display, a
- * static notification icon, and a profile button. Used by every Provider
- * screen (Provider Home, Post a Job, ...) so it renders identically
- * everywhere instead of being redefined per screen. Location and
- * notifications are static prototype display only — see
+ * Shared Job Provider app-shell top bar — brand, dummy location display, a
+ * notification icon, and a navigation-menu (hamburger) icon. Rendered once
+ * by `app/(poster)/_layout.tsx` as the persistent header for every
+ * authenticated Provider screen, not re-rendered per screen — see
+ * `src/features/marketplace/provider-shell/`. Location and notifications
+ * are static prototype display only — see
  * docs/engineering/domain-and-terminology.md.
+ *
+ * Profile intentionally has no button here — it's a bottom-navigation
+ * destination now (`ProviderBottomNav`). The hamburger button is visual
+ * only for now: the navigation drawer it will open is a separate,
+ * not-yet-built piece of work.
+ *
+ * Owns its own top safe-area inset, since it now sits directly under the
+ * status bar as the layout's header rather than inside each screen's own
+ * safe-area-padded content.
  */
 export function ProviderAppHeader() {
-  const router = useRouter();
   return (
-    <View style={styles.providerTopBar}>
-      <View style={styles.providerBrandRow}>
-        <View>
+    <SafeAreaView edges={["top"]} style={styles.providerTopBarSafeArea}>
+      <View style={styles.providerTopBar}>
+        <View style={styles.providerBrandColumn}>
           <Text style={styles.providerBrandName}>{BRAND_NAME}</Text>
           <View style={styles.providerLocationRow}>
             <MaterialIcons name="location-on" size={14} color={colors.primary} />
             <Text style={styles.providerLocationText}>Mirpur, Dhaka</Text>
+            <MaterialIcons name="expand-more" size={14} color={colors.muted} />
           </View>
         </View>
-      </View>
-      <View style={styles.providerTopBarActions}>
-        <View style={styles.providerNotificationButton}>
-          <MaterialIcons name="notifications" size={22} color={colors.muted} />
+        <View style={styles.providerTopBarActions}>
+          <View style={styles.providerNotificationButton}>
+            <MaterialIcons
+              accessibilityLabel="Notifications"
+              name="notifications"
+              size={22}
+              color={colors.muted}
+            />
+            <View style={styles.providerNotificationDot} />
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Open navigation menu"
+            onPress={() => {
+              // The navigation drawer isn't built yet — see the Provider
+              // app-shell work this button ships with.
+            }}
+            style={styles.providerMenuButton}
+          >
+            <MaterialIcons name="menu" size={24} color={colors.text} />
+          </Pressable>
         </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Open profile"
-          onPress={() => router.push("/profile")}
-          style={styles.providerProfileButton}
-        >
-          <MaterialIcons name="account-circle" size={20} color={colors.primary} />
-        </Pressable>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -301,20 +321,27 @@ export function OfferCard({ offer }: { offer: Offer }) {
 }
 
 const styles = StyleSheet.create({
+  providerTopBarSafeArea: {
+    backgroundColor: colors.card,
+  },
   providerTopBar: {
     alignItems: "center",
+    backgroundColor: colors.card,
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: spacing.md,
   },
-  providerBrandRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: spacing.sm,
+  providerBrandColumn: {
+    gap: spacing.xxs,
   },
   providerBrandName: {
     color: colors.primary,
-    fontFamily: fonts.bold,
-    fontSize: 16,
+    fontFamily: fonts.extraBold,
+    fontSize: 20,
+    letterSpacing: -0.3,
   },
   providerLocationRow: {
     alignItems: "center",
@@ -324,12 +351,12 @@ const styles = StyleSheet.create({
   providerLocationText: {
     color: colors.muted,
     fontFamily: fonts.semiBold,
-    fontSize: 11,
+    fontSize: 12,
   },
   providerTopBarActions: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   providerNotificationButton: {
     alignItems: "center",
@@ -337,10 +364,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 36,
   },
-  providerProfileButton: {
-    alignItems: "center",
-    backgroundColor: colors.primarySoft,
+  providerNotificationDot: {
+    backgroundColor: colors.danger,
+    borderColor: colors.card,
     borderRadius: radius.pill,
+    borderWidth: 2,
+    height: 9,
+    position: "absolute",
+    right: 6,
+    top: 5,
+    width: 9,
+  },
+  providerMenuButton: {
+    alignItems: "center",
     height: 36,
     justifyContent: "center",
     width: 36,

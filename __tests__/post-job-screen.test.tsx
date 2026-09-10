@@ -1,7 +1,6 @@
 import { render } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 import PostJobRoute from "../app/(poster)/post-task";
-import { BRAND_NAME } from "@/shared/constants/brand";
 
 jest.mock("expo-router", () => ({
   useRouter: jest.fn(),
@@ -35,7 +34,6 @@ describe("Post a Job route", () => {
   it("renders the Post Job feature screen", async () => {
     const { getByText } = await render(<PostJobRoute />);
 
-    expect(getByText(BRAND_NAME)).toBeTruthy();
     expect(getByText("Post a Job")).toBeTruthy();
   });
 });

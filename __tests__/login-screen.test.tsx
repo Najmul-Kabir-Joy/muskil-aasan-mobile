@@ -134,4 +134,11 @@ describe("LoginScreen", () => {
     expect(queryByRole("button", { name: /Google/i })).toBeNull();
     expect(queryByText("মুশকিল আসান")).toBeNull();
   });
+
+  it("does not render the authenticated Provider app shell (pre-auth screen)", async () => {
+    const { queryByLabelText } = await render(<LoginScreen />);
+
+    expect(queryByLabelText("Open navigation menu")).toBeNull();
+    expect(queryByLabelText("Post a Job")).toBeNull();
+  });
 });

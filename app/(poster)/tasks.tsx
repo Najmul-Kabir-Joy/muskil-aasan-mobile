@@ -41,7 +41,7 @@ export default function PosterTasksScreen() {
   const hiredOffer = offers.find((offer) => offer.id === hiredOfferId);
 
   return (
-    <ScrollScreen>
+    <ScrollScreen edges={["left", "right"]}>
       <AppHeader
         title="Compare offers safely."
         subtitle="Show status, budget, timeline summary, and clear hire/pass decisions before contact is unlocked."
