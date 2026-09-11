@@ -11,7 +11,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Badge } from "@/shared/components/ui";
 import { BRAND_NAME } from "@/shared/constants/brand";
 import { PROTOTYPE_SEEKER_ROUTE } from "@/shared/constants/routes";
@@ -135,6 +135,13 @@ const SUPPORT_ROWS: {
  */
 export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const router = useRouter();
+  // Read once here, in the normal app tree, rather than via a <SafeAreaView>
+  // rendered inside the Modal below — a Modal renders into its own native
+  // root, and `react-native-safe-area-context` doesn't reliably re-measure
+  // insets for content nested inside one. The numeric values stay correct
+  // for the modal (it covers the same physical screen), so read them here
+  // and apply as plain padding instead.
+  const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const drawerWidth = Math.min(windowWidth * DRAWER_WIDTH_RATIO, DRAWER_MAX_WIDTH);
   const translateX = useRef(new Animated.Value(drawerWidth)).current;
@@ -182,13 +189,7 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
   }
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={onClose}
-      statusBarTranslucent
-    >
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
       <View style={styles.root}>
         <Animated.View style={[styles.overlay, { opacity: overlayOpacity }]}>
           <Pressable
@@ -204,7 +205,16 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
         </Animated.View>
 
         <Animated.View style={[styles.drawer, { width: drawerWidth, transform: [{ translateX }] }]}>
-          <SafeAreaView edges={["top", "bottom", "right"]} style={styles.drawerSafeArea}>
+          <View
+            style={[
+              styles.drawerSafeArea,
+              {
+                paddingTop: insets.top,
+                paddingBottom: insets.bottom,
+                paddingRight: insets.right,
+              },
+            ]}
+          >
             <View style={styles.drawerTopBar}>
               <Text style={styles.drawerBrand}>{BRAND_NAME}</Text>
               <Pressable
@@ -376,7 +386,7 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
                 <Text style={styles.versionText}>{BRAND_NAME} v1.0.0 • Dhaka, BD</Text>
               </View>
             </ScrollView>
-          </SafeAreaView>
+          </View>
         </Animated.View>
       </View>
     </Modal>

@@ -1,5 +1,7 @@
 import { fireEvent, render } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
+import type { ReactElement } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ProviderDrawer } from "./ProviderDrawer";
 
 jest.mock("expo-router", () => ({
@@ -8,13 +10,32 @@ jest.mock("expo-router", () => ({
 
 const mockUseRouter = useRouter as jest.Mock;
 
+// `ProviderDrawer` reads insets via `useSafeAreaInsets()` (see the
+// component for why), which throws without a `SafeAreaProvider` ancestor —
+// the real app gets one for free from expo-router's root layout, so tests
+// supply their own. `initialMetrics` makes it render synchronously instead
+// of waiting for a native layout event that never fires under the test
+// renderer.
+function renderDrawer(element: ReactElement) {
+  return render(
+    <SafeAreaProvider
+      initialMetrics={{
+        frame: { x: 0, y: 0, width: 390, height: 844 },
+        insets: { top: 47, left: 0, right: 0, bottom: 34 },
+      }}
+    >
+      {element}
+    </SafeAreaProvider>,
+  );
+}
+
 describe("ProviderDrawer", () => {
   beforeEach(() => {
     mockUseRouter.mockReturnValue({ push: jest.fn(), replace: jest.fn() });
   });
 
   it("renders the user summary, switch-mode section (Provider active), and every expected row", async () => {
-    const { getByText, getAllByText, getByLabelText } = await render(
+    const { getByText, getAllByText, getByLabelText } = await renderDrawer(
       <ProviderDrawer visible onClose={jest.fn()} />,
     );
 
@@ -58,7 +79,7 @@ describe("ProviderDrawer", () => {
   });
 
   it("never duplicates the primary bottom-navigation destinations as drawer rows", async () => {
-    const { queryByText } = await render(<ProviderDrawer visible onClose={jest.fn()} />);
+    const { queryByText } = await renderDrawer(<ProviderDrawer visible onClose={jest.fn()} />);
 
     // "Home", "Responses", "Post Job", "My Jobs" must not appear as their own
     // drawer row labels — those live only in the persistent bottom nav.
@@ -71,7 +92,7 @@ describe("ProviderDrawer", () => {
   });
 
   it("uses neutral identity wording, never verification/trust claims", async () => {
-    const { queryByText } = await render(<ProviderDrawer visible onClose={jest.fn()} />);
+    const { queryByText } = await renderDrawer(<ProviderDrawer visible onClose={jest.fn()} />);
 
     expect(queryByText(/verified/i)).toBeNull();
     expect(queryByText(/trusted/i)).toBeNull();
@@ -82,7 +103,7 @@ describe("ProviderDrawer", () => {
 
   it("has a clear close (X) button that closes the drawer", async () => {
     const onClose = jest.fn();
-    const { getByLabelText } = await render(<ProviderDrawer visible onClose={onClose} />);
+    const { getByLabelText } = await renderDrawer(<ProviderDrawer visible onClose={onClose} />);
 
     await fireEvent.press(getByLabelText("Close navigation menu"));
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -90,7 +111,7 @@ describe("ProviderDrawer", () => {
 
   it("tapping outside the drawer (the dimmed overlay) closes it", async () => {
     const onClose = jest.fn();
-    const { getByLabelText } = await render(<ProviderDrawer visible onClose={onClose} />);
+    const { getByLabelText } = await renderDrawer(<ProviderDrawer visible onClose={onClose} />);
 
     await fireEvent.press(getByLabelText("Close navigation menu overlay"));
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -101,7 +122,7 @@ describe("ProviderDrawer", () => {
     const onClose = jest.fn();
     mockUseRouter.mockReturnValue({ push, replace: jest.fn() });
 
-    const { getByText } = await render(<ProviderDrawer visible onClose={onClose} />);
+    const { getByText } = await renderDrawer(<ProviderDrawer visible onClose={onClose} />);
     await fireEvent.press(getByText("View Profile"));
 
     expect(push).toHaveBeenCalledWith("/(poster)/profile");
@@ -114,7 +135,7 @@ describe("ProviderDrawer", () => {
     const onClose = jest.fn();
     mockUseRouter.mockReturnValue({ push, replace });
 
-    const { getByLabelText } = await render(<ProviderDrawer visible onClose={onClose} />);
+    const { getByLabelText } = await renderDrawer(<ProviderDrawer visible onClose={onClose} />);
     await fireEvent.press(getByLabelText("Switch to Job Seeker"));
 
     expect(replace).toHaveBeenCalledWith("/(worker)/jobs");
@@ -126,7 +147,7 @@ describe("ProviderDrawer", () => {
     const push = jest.fn();
     mockUseRouter.mockReturnValue({ push, replace: jest.fn() });
 
-    const { getByText } = await render(<ProviderDrawer visible onClose={jest.fn()} />);
+    const { getByText } = await renderDrawer(<ProviderDrawer visible onClose={jest.fn()} />);
     await fireEvent.press(getByText("Help & Support"));
 
     expect(push).toHaveBeenCalledWith("/(poster)/support");
@@ -136,7 +157,7 @@ describe("ProviderDrawer", () => {
     const push = jest.fn();
     mockUseRouter.mockReturnValue({ push, replace: jest.fn() });
 
-    const { getByText } = await render(<ProviderDrawer visible onClose={jest.fn()} />);
+    const { getByText } = await renderDrawer(<ProviderDrawer visible onClose={jest.fn()} />);
     await fireEvent.press(getByText("Saved Jobs"));
 
     expect(push).toHaveBeenCalledWith({
@@ -150,7 +171,7 @@ describe("ProviderDrawer", () => {
     const onClose = jest.fn();
     mockUseRouter.mockReturnValue({ push: jest.fn(), replace });
 
-    const { getByText } = await render(<ProviderDrawer visible onClose={onClose} />);
+    const { getByText } = await renderDrawer(<ProviderDrawer visible onClose={onClose} />);
     await fireEvent.press(getByText("Log Out"));
 
     expect(replace).toHaveBeenCalledWith("/");
