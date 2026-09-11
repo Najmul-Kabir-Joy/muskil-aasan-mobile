@@ -34,10 +34,18 @@ describe("ProviderAppHeader", () => {
     expect(queryByLabelText("Open profile")).toBeNull();
   });
 
-  it("the navigation-menu button is tappable without crashing (the drawer isn't built yet)", async () => {
+  it("the navigation-menu button is tappable without crashing when no handler is given", async () => {
     const { getByLabelText } = await render(<ProviderAppHeader />);
 
     await fireEvent.press(getByLabelText("Open navigation menu"));
+  });
+
+  it("the navigation-menu button opens the drawer via the provided onOpenMenu handler", async () => {
+    const onOpenMenu = jest.fn();
+    const { getByLabelText } = await render(<ProviderAppHeader onOpenMenu={onOpenMenu} />);
+
+    await fireEvent.press(getByLabelText("Open navigation menu"));
+    expect(onOpenMenu).toHaveBeenCalledTimes(1);
   });
 
   it("does not show a fake unread-notification badge — there's no real unread state yet", async () => {
