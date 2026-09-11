@@ -137,13 +137,13 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
   const router = useRouter();
   const { width: windowWidth } = useWindowDimensions();
   const drawerWidth = Math.min(windowWidth * DRAWER_WIDTH_RATIO, DRAWER_MAX_WIDTH);
-  const translateX = useRef(new Animated.Value(-drawerWidth)).current;
+  const translateX = useRef(new Animated.Value(drawerWidth)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(translateX, {
-        toValue: visible ? 0 : -drawerWidth,
+        toValue: visible ? 0 : drawerWidth,
         duration: ANIMATION_MS,
         useNativeDriver: true,
       }),
@@ -204,7 +204,7 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
         </Animated.View>
 
         <Animated.View style={[styles.drawer, { width: drawerWidth, transform: [{ translateX }] }]}>
-          <SafeAreaView edges={["top", "bottom", "left"]} style={styles.drawerSafeArea}>
+          <SafeAreaView edges={["top", "bottom", "right"]} style={styles.drawerSafeArea}>
             <View style={styles.drawerTopBar}>
               <Text style={styles.drawerBrand}>{BRAND_NAME}</Text>
               <Pressable
@@ -395,10 +395,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     bottom: 0,
-    left: 0,
+    right: 0,
     backgroundColor: colors.card,
-    borderTopRightRadius: radius.lg,
-    borderBottomRightRadius: radius.lg,
+    borderTopLeftRadius: radius.lg,
+    borderBottomLeftRadius: radius.lg,
     ...shadows.card,
   },
   drawerSafeArea: {
