@@ -1,8 +1,9 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Easing,
   Modal,
   Pressable,
   ScrollView,
@@ -19,7 +20,8 @@ import { colors, fonts, radius, shadows, spacing } from "@/theme/tokens";
 
 const DRAWER_WIDTH_RATIO = 0.84;
 const DRAWER_MAX_WIDTH = 340;
-const ANIMATION_MS = 260;
+const OPEN_ANIMATION_MS = 300;
+const CLOSE_ANIMATION_MS = 240;
 
 // Prototype/mock user identity — the same "Nadia Rahman, Mirpur" identity
 // ProfileScreen and ProviderAppHeader already use. No real phone number
@@ -130,8 +132,11 @@ const SUPPORT_ROWS: {
  * Uses a plain RN `Modal` (transparent, `onRequestClose`) rather than a
  * drawer-navigation dependency — it's the smallest primitive that already
  * gives us Android hardware-back handling for free, and the slide/fade
- * itself is a two-value `Animated` timing, matching how the Post Job FAB
- * pulse already does its animation without `reanimated`.
+ * itself is a two-value `Animated` timing (decelerating in, accelerating
+ * out), matching how the Post Job FAB pulse already does its animation
+ * without `reanimated`. The Modal itself is kept mounted for the duration
+ * of the closing animation — its own `visible` prop would otherwise dismiss
+ * it instantly and cut the slide-out off before it can play.
  */
 export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const router = useRouter();
@@ -146,21 +151,60 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
   const drawerWidth = Math.min(windowWidth * DRAWER_WIDTH_RATIO, DRAWER_MAX_WIDTH);
   const translateX = useRef(new Animated.Value(drawerWidth)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
+  // A `Modal`'s `visible` prop dismisses it immediately (no chance for our
+  // own closing animation to play) — so this is kept true for the duration
+  // of the close animation, and only turns false once it finishes. Opening
+  // flips it true right away so the Modal is present for the open animation
+  // to animate into.
+  const [isMounted, setIsMounted] = useState(visible);
 
   useEffect(() => {
+    if (visible) {
+      setIsMounted(true);
+      return;
+    }
+
+    // Nothing to animate closed if it was never opened.
+    if (!isMounted) return;
+
     Animated.parallel([
       Animated.timing(translateX, {
-        toValue: visible ? 0 : drawerWidth,
-        duration: ANIMATION_MS,
+        toValue: drawerWidth,
+        duration: CLOSE_ANIMATION_MS,
+        easing: Easing.in(Easing.cubic),
         useNativeDriver: true,
       }),
       Animated.timing(overlayOpacity, {
-        toValue: visible ? 1 : 0,
-        duration: ANIMATION_MS,
+        toValue: 0,
+        duration: CLOSE_ANIMATION_MS,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (finished) setIsMounted(false);
+    });
+    // `isMounted` is intentionally excluded: this effect only needs to react
+    // to `visible` changing, not to the `setIsMounted` calls it makes itself.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, drawerWidth, translateX, overlayOpacity]);
+
+  useEffect(() => {
+    if (!isMounted || !visible) return;
+    Animated.parallel([
+      Animated.timing(translateX, {
+        toValue: 0,
+        duration: OPEN_ANIMATION_MS,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(overlayOpacity, {
+        toValue: 1,
+        duration: OPEN_ANIMATION_MS,
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
     ]).start();
-  }, [visible, drawerWidth, translateX, overlayOpacity]);
+  }, [isMounted, visible, drawerWidth, translateX, overlayOpacity]);
 
   function navigateTo(destination: DrawerRoute) {
     onClose();
@@ -189,7 +233,7 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
   }
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
+    <Modal visible={isMounted} transparent animationType="none" onRequestClose={onClose}>
       <View style={styles.root}>
         <Animated.View style={[styles.overlay, { opacity: overlayOpacity }]}>
           <Pressable
