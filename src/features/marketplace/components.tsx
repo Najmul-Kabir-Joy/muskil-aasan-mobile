@@ -23,15 +23,16 @@ import type { Category, Offer, Task } from "@/types/domain";
  * docs/engineering/domain-and-terminology.md.
  *
  * Profile intentionally has no button here — it's a bottom-navigation
- * destination now (`ProviderBottomNav`). The hamburger button is visual
- * only for now: the navigation drawer it will open is a separate,
- * not-yet-built piece of work.
+ * destination now (`ProviderBottomNav`). The hamburger button opens the
+ * Provider drawer (`ProviderDrawer`) — its open/close state is owned by
+ * `app/(poster)/_layout.tsx`, not this component, so `onOpenMenu` is
+ * required to actually do anything; without it the button is inert.
  *
  * Owns its own top safe-area inset, since it now sits directly under the
  * status bar as the layout's header rather than inside each screen's own
  * safe-area-padded content.
  */
-export function ProviderAppHeader() {
+export function ProviderAppHeader({ onOpenMenu }: { onOpenMenu?: () => void }) {
   return (
     <SafeAreaView edges={["top"]} style={styles.providerTopBarSafeArea}>
       <View style={styles.providerTopBar}>
@@ -55,10 +56,7 @@ export function ProviderAppHeader() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Open navigation menu"
-            onPress={() => {
-              // The navigation drawer isn't built yet — see the Provider
-              // app-shell work this button ships with.
-            }}
+            onPress={onOpenMenu}
             style={styles.providerMenuButton}
           >
             <MaterialIcons name="menu" size={24} color={colors.text} />
