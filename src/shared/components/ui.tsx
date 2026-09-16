@@ -124,16 +124,23 @@ export function ActionButton({
   tone = "primary",
   disabled = false,
   icon,
+  accessibilityLabel,
 }: {
   label: string;
   onPress: () => void;
   tone?: ButtonTone;
   disabled?: boolean;
   icon?: ReactNode;
+  // Only needed when the visible `label` is ambiguous out of context — e.g.
+  // a "Refer" button repeated once per row in a list, where a screen reader
+  // user needs to know which person it refers. See
+  // docs/engineering/accessibility.md.
+  accessibilityLabel?: string;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}

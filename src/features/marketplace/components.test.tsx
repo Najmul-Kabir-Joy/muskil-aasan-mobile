@@ -157,18 +157,44 @@ describe("CommunityPostCard", () => {
     const { getByRole, getByText } = await render(<CommunityPostCard task={firstTask} />);
 
     expect(getByText("18")).toBeTruthy();
-    await fireEvent.press(getByRole("button", { name: "Like" }));
+    await fireEvent.press(getByRole("button", { name: "Like job" }));
     expect(getByText("19")).toBeTruthy();
 
-    await fireEvent.press(getByRole("button", { name: "Unlike" }));
+    await fireEvent.press(getByRole("button", { name: "Unlike job" }));
     expect(getByText("18")).toBeTruthy();
   });
 
-  it("toggles Save / Saved locally", async () => {
+  it("shows no count or text next to the Refer action — it's an action, not a metric", async () => {
     const { getByRole } = await render(<CommunityPostCard task={firstTask} />);
 
-    await fireEvent.press(getByRole("button", { name: "Save" }));
-    expect(getByRole("button", { name: "Saved" })).toBeTruthy();
+    const referButton = getByRole("button", { name: "Refer someone" });
+    expect(referButton).toBeTruthy();
+    // Only one child (the icon) — no count/label text rendered alongside it.
+    expect(referButton.children.length).toBe(1);
+  });
+
+  it("calls onRefer with the task when the Refer action is pressed", async () => {
+    const onRefer = jest.fn();
+    const { getByRole } = await render(<CommunityPostCard task={firstTask} onRefer={onRefer} />);
+
+    await fireEvent.press(getByRole("button", { name: "Refer someone" }));
+    expect(onRefer).toHaveBeenCalledWith(firstTask);
+  });
+
+  it("calls onOverflow with the task when the top-right options button is pressed", async () => {
+    const onOverflow = jest.fn();
+    const { getByRole } = await render(
+      <CommunityPostCard task={firstTask} onOverflow={onOverflow} />,
+    );
+
+    await fireEvent.press(getByRole("button", { name: "More job options" }));
+    expect(onOverflow).toHaveBeenCalledWith(firstTask);
+  });
+
+  it("renders exactly one options ('More job options') control — no duplicate overflow menu", async () => {
+    const { getAllByRole } = await render(<CommunityPostCard task={firstTask} />);
+
+    expect(getAllByRole("button", { name: "More job options" })).toHaveLength(1);
   });
 
   it("renders the task's responseCount, not offerCount, as the response count", async () => {

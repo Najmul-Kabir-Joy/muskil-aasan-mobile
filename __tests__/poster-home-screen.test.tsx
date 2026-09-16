@@ -1,5 +1,7 @@
 import { fireEvent, render } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
+import type { ReactElement } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import PosterHomeScreen from "../app/(poster)/index";
 import { communityTasks, tasks } from "@/data/mock";
 
@@ -9,12 +11,30 @@ jest.mock("expo-router", () => ({
 
 const mockUseRouter = useRouter as jest.Mock;
 
-describe("PosterHomeScreen", () => {
+// The route renders `ProviderHomeScreen`, which always mounts the Refer
+// Someone / overflow sheets (hidden until opened) — both read insets via
+// `useSafeAreaInsets()`, so tests need a `SafeAreaProvider` ancestor. See
+// src/features/marketplace/provider-shell/ProviderDrawer.test.tsx for the
+// same pattern.
+function renderRoute(element: ReactElement) {
+  return render(
+    <SafeAreaProvider
+      initialMetrics={{
+        frame: { x: 0, y: 0, width: 390, height: 844 },
+        insets: { top: 47, left: 0, right: 0, bottom: 34 },
+      }}
+    >
+      {element}
+    </SafeAreaProvider>,
+  );
+}
+
+describe("PosterHomeScreen (app/(poster)/index route)", () => {
   it("shows Your Latest Job for the current user's own first active task", async () => {
     mockUseRouter.mockReturnValue({ push: jest.fn() });
     const latestTask = tasks.find((task) => task.status !== "completed")!;
 
-    const { getByText } = await render(<PosterHomeScreen />);
+    const { getByText } = await renderRoute(<PosterHomeScreen />);
 
     expect(getByText("Your Latest Job")).toBeTruthy();
     expect(getByText(latestTask.title)).toBeTruthy();
@@ -23,7 +43,7 @@ describe("PosterHomeScreen", () => {
   it("renders every community-posted job", async () => {
     mockUseRouter.mockReturnValue({ push: jest.fn() });
 
-    const { getByText } = await render(<PosterHomeScreen />);
+    const { getByText } = await renderRoute(<PosterHomeScreen />);
 
     for (const task of communityTasks) {
       expect(getByText(task.title)).toBeTruthy();
@@ -33,7 +53,7 @@ describe("PosterHomeScreen", () => {
   it("does not render the Provider app-shell header itself — that's owned by the (poster) layout now", async () => {
     mockUseRouter.mockReturnValue({ push: jest.fn() });
 
-    const { queryByLabelText } = await render(<PosterHomeScreen />);
+    const { queryByLabelText } = await renderRoute(<PosterHomeScreen />);
 
     expect(queryByLabelText("Open navigation menu")).toBeNull();
   });
@@ -42,18 +62,18 @@ describe("PosterHomeScreen", () => {
     const push = jest.fn();
     mockUseRouter.mockReturnValue({ push });
 
-    const { getByRole } = await render(<PosterHomeScreen />);
+    const { getByRole } = await renderRoute(<PosterHomeScreen />);
     await fireEvent.press(getByRole("button", { name: "+ Post a Job" }));
 
     expect(push).toHaveBeenCalledWith("/(poster)/post-task");
   });
 
-  it("View All My Listings navigates to the existing tasks route", async () => {
+  it("View All My Jobs navigates to the existing tasks route", async () => {
     const push = jest.fn();
     mockUseRouter.mockReturnValue({ push });
 
-    const { getByText } = await render(<PosterHomeScreen />);
-    await fireEvent.press(getByText("View All My Listings"));
+    const { getByText } = await renderRoute(<PosterHomeScreen />);
+    await fireEvent.press(getByText("View All My Jobs"));
 
     expect(push).toHaveBeenCalledWith("/(poster)/tasks");
   });
