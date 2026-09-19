@@ -1,4 +1,4 @@
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { fireEvent, render } from "@testing-library/react-native";
 import { ProviderBottomNav } from "./ProviderBottomNav";
 

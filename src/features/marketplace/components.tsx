@@ -174,14 +174,28 @@ function initialsFor(name: string) {
 /**
  * A task posted by someone other than the current viewer, shown in the
  * Provider Home "Community Jobs" feed — a social-feed layout (poster
- * identity, like/save) rather than TaskCard's compact list-item layout.
+ * identity, like/refer) rather than TaskCard's compact list-item layout.
  * `task.postedBy` must be set; this is not meant for the current user's own
- * tasks. Like/save are local-only UI state (no backend, nothing persisted —
- * see docs/engineering/domain-and-terminology.md).
+ * tasks. Like is local-only UI state (no backend, nothing persisted — see
+ * docs/engineering/domain-and-terminology.md).
+ *
+ * The bottom action row is Like + Responses (both informational/toggleable)
+ * plus a Refer action. Refer has no public count — it's an action, not a
+ * metric — and there is deliberately only one "more options" affordance
+ * (the top-right `onOverflow` button); do not add a second one here.
+ * `onRefer`/`onOverflow` are optional so the card still renders standalone
+ * (e.g. in isolation tests) without requiring a sheet to exist.
  */
-export function CommunityPostCard({ task }: { task: Task }) {
+export function CommunityPostCard({
+  task,
+  onRefer,
+  onOverflow,
+}: {
+  task: Task;
+  onRefer?: (task: Task) => void;
+  onOverflow?: (task: Task) => void;
+}) {
   const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
   const baseLikes = task.likes ?? 0;
 
   if (!task.postedBy) return null;
@@ -210,7 +224,15 @@ export function CommunityPostCard({ task }: { task: Task }) {
             </CaptionText>
           </View>
         </View>
-        <MaterialIcons name="more-horiz" size={20} color={colors.muted} />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="More job options"
+          onPress={() => onOverflow?.(task)}
+          style={styles.communityOverflowButton}
+          hitSlop={6}
+        >
+          <MaterialIcons name="more-horiz" size={20} color={colors.muted} />
+        </Pressable>
       </View>
 
       <View style={styles.communityBadgeRow}>
@@ -252,13 +274,14 @@ export function CommunityPostCard({ task }: { task: Task }) {
         <View style={styles.communityFooterActions}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={liked ? "Unlike" : "Like"}
+            accessibilityLabel={liked ? "Unlike job" : "Like job"}
             accessibilityState={{ selected: liked }}
             onPress={() => setLiked((current) => !current)}
             style={styles.communityFooterButton}
+            hitSlop={12}
           >
             <MaterialIcons
-              name={liked ? "thumb-up" : "thumb-up-off-alt"}
+              name={liked ? "favorite" : "favorite-border"}
               size={18}
               color={liked ? colors.primary : colors.muted}
             />
@@ -273,19 +296,12 @@ export function CommunityPostCard({ task }: { task: Task }) {
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={saved ? "Saved" : "Save"}
-          accessibilityState={{ selected: saved }}
-          onPress={() => setSaved((current) => !current)}
+          accessibilityLabel="Refer someone"
+          onPress={() => onRefer?.(task)}
           style={styles.communityFooterButton}
+          hitSlop={12}
         >
-          <MaterialIcons
-            name={saved ? "bookmark" : "bookmark-border"}
-            size={18}
-            color={saved ? colors.primary : colors.muted}
-          />
-          <Text style={[styles.communityFooterText, saved && styles.communityFooterTextActive]}>
-            {saved ? "Saved" : "Save"}
-          </Text>
+          <MaterialIcons name="person-add" size={18} color={colors.muted} />
         </Pressable>
       </View>
     </View>
@@ -467,6 +483,13 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  communityOverflowButton: {
+    alignItems: "center",
+    height: 32,
+    justifyContent: "center",
+    marginTop: -spacing.xs,
+    width: 32,
   },
   communityPosterRow: {
     alignItems: "center",

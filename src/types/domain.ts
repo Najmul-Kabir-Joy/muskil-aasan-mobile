@@ -75,6 +75,24 @@ export type Task = {
   photoNote?: string;
 };
 
+// A completed Muskill Asaan job connecting the current Job Provider to a
+// specific Job Seeker they worked with — the only thing that can make that
+// Job Seeker eligible to be referred on a Community Job (see
+// `getEligibleReferrals` in src/data/mock.ts and
+// docs/engineering/domain-and-terminology.md). Referral eligibility must be
+// derived from records like this rather than hardcoded per screen.
+export type CompletedReferralJob = {
+  workerId: string;
+  jobTitle: string;
+};
+
+// One Job Seeker eligible to be referred, with the specific completed job
+// that makes them eligible — the shape `getEligibleReferrals` returns.
+export type EligibleReferral = {
+  worker: WorkerProfile;
+  jobTitle: string;
+};
+
 export type Offer = {
   id: string;
   taskId: string;

@@ -1,7 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { BottomTabBarHeightCallbackContext } from "@react-navigation/bottom-tabs";
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { useContext, useEffect, useRef, useState } from "react";
+import { BottomTabBarHeightCallbackContext, type BottomTabBarProps } from "expo-router/js-tabs";
+import { useContext, useEffect, useState } from "react";
 import {
   AccessibilityInfo,
   Animated,
@@ -76,7 +75,11 @@ function useReducedMotionPreference(): boolean {
  * never depends on this for tappability.
  */
 function usePostJobPulse(enabled: boolean) {
-  const progress = useRef(new Animated.Value(0)).current;
+  // A plain `useState` initializer (not `useRef`) keeps this a stable,
+  // one-time-created `Animated.Value` without tripping the
+  // react-hooks/refs rule, which disallows reading a ref's `.current`
+  // during render (the `.interpolate()` calls below).
+  const [progress] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     if (!enabled) {
