@@ -229,6 +229,7 @@ export function CommunityPostCard({
           accessibilityLabel="More job options"
           onPress={() => onOverflow?.(task)}
           style={styles.communityOverflowButton}
+          hitSlop={6}
         >
           <MaterialIcons name="more-horiz" size={20} color={colors.muted} />
         </Pressable>
@@ -277,6 +278,7 @@ export function CommunityPostCard({
             accessibilityState={{ selected: liked }}
             onPress={() => setLiked((current) => !current)}
             style={styles.communityFooterButton}
+            hitSlop={12}
           >
             <MaterialIcons
               name={liked ? "favorite" : "favorite-border"}
@@ -297,6 +299,7 @@ export function CommunityPostCard({
           accessibilityLabel="Refer someone"
           onPress={() => onRefer?.(task)}
           style={styles.communityFooterButton}
+          hitSlop={12}
         >
           <MaterialIcons name="person-add" size={18} color={colors.muted} />
         </Pressable>

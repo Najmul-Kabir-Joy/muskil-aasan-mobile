@@ -42,7 +42,7 @@ export function CommunityJobOverflowSheet({
 
   function handleReport() {
     onClose();
-    Alert.alert("Job reported", "Thanks for letting us know — our team will review this post.");
+    Alert.alert("Job reported", "Report recorded for this prototype.");
   }
 
   return (
@@ -85,7 +85,7 @@ export function CommunityJobOverflowSheet({
               </View>
               <View style={styles.optionTextColumn}>
                 <Text style={styles.optionLabel}>Share Job</Text>
-                <CaptionText>Share public job link or details externally</CaptionText>
+                <CaptionText>Share this job&apos;s details as text</CaptionText>
               </View>
             </Pressable>
             <Pressable

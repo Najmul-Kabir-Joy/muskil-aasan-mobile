@@ -104,6 +104,42 @@ describe("ReferSomeoneSheet — eligible state", () => {
     expect(getByRole("button", { name: `${workers[0].name} referred` })).toBeTruthy();
   });
 
+  it("keeps a worker Referred for the job they were referred to, even after opening a different job and coming back", async () => {
+    const jobA = communityTasks[0];
+    const jobB = communityTasks[1];
+    const sheetFor = (job: (typeof communityTasks)[number]) => (
+      <SafeAreaProvider
+        initialMetrics={{
+          frame: { x: 0, y: 0, width: 390, height: 844 },
+          insets: { top: 47, left: 0, right: 0, bottom: 34 },
+        }}
+      >
+        <ReferSomeoneSheet
+          visible
+          onClose={jest.fn()}
+          job={job}
+          eligibleReferrals={eligibleReferrals}
+        />
+      </SafeAreaProvider>
+    );
+
+    const { getByRole, rerender } = await render(sheetFor(jobA));
+
+    await act(async () => {
+      await fireEvent.press(getByRole("button", { name: `Refer ${workers[0].name}` }));
+    });
+    expect(getByRole("button", { name: `${workers[0].name} referred` })).toBeTruthy();
+
+    // Open a different job — its own referral state starts fresh.
+    await rerender(sheetFor(jobB));
+    expect(getByRole("button", { name: `Refer ${workers[0].name}` })).toBeTruthy();
+
+    // Back to Job A — the earlier referral must still be remembered, not
+    // wiped just because a different job was opened in between.
+    await rerender(sheetFor(jobA));
+    expect(getByRole("button", { name: `${workers[0].name} referred` })).toBeTruthy();
+  });
+
   it("closes via the header close button without requiring any other action", async () => {
     const onClose = jest.fn();
     const { getByLabelText } = await renderSheet(

@@ -48,14 +48,21 @@ export function ReferSomeoneSheet({
   eligibleReferrals: EligibleReferral[];
 }) {
   const insets = useSafeAreaInsets();
-  const [referredWorkerIds, setReferredWorkerIds] = useState<Set<string>>(new Set());
+  // Referred state is session-local (never persisted) but keyed by job id,
+  // not a single flat Set — referring someone for one Community Job must
+  // stay remembered if the poster navigates away and reopens the same job
+  // later, while still staying independent per job.
+  const [referredWorkerIdsByJobId, setReferredWorkerIdsByJobId] = useState<
+    Map<string, Set<string>>
+  >(new Map());
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const referredWorkerIds = job
+    ? (referredWorkerIdsByJobId.get(job.id) ?? new Set<string>())
+    : new Set<string>();
 
-  // A fresh job should never inherit a previous job's "Referred" state —
-  // referring someone for one Community Job doesn't mean they're referred
-  // for a different one.
+  // A newly opened job shouldn't show a stale success toast left over from
+  // referring someone on a previous job.
   useEffect(() => {
-    setReferredWorkerIds(new Set());
     setToastMessage(null);
   }, [job?.id]);
 
@@ -66,10 +73,15 @@ export function ReferSomeoneSheet({
   }, [toastMessage]);
 
   function handleRefer(worker: WorkerProfile) {
-    if (referredWorkerIds.has(worker.id)) return;
-    setReferredWorkerIds((current) => new Set(current).add(worker.id));
-    const posterName = job?.postedBy?.name ?? "The job provider";
-    setToastMessage(`${posterName} received ${worker.name}'s profile.`);
+    if (!job || referredWorkerIds.has(worker.id)) return;
+    setReferredWorkerIdsByJobId((current) => {
+      const next = new Map(current);
+      next.set(job.id, new Set(next.get(job.id)).add(worker.id));
+      return next;
+    });
+    setToastMessage(
+      `${job.postedBy?.name ?? "The job provider"} received ${worker.name}'s profile.`,
+    );
   }
 
   return (

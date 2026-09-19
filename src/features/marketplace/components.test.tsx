@@ -197,6 +197,14 @@ describe("CommunityPostCard", () => {
     expect(getAllByRole("button", { name: "More job options" })).toHaveLength(1);
   });
 
+  it("gives the small icon-only controls a hitSlop so their touch target is close to 44x44 despite a smaller visual size", async () => {
+    const { getByRole } = await render(<CommunityPostCard task={firstTask} />);
+
+    expect(getByRole("button", { name: "More job options" }).props.hitSlop).toBe(6);
+    expect(getByRole("button", { name: "Like job" }).props.hitSlop).toBe(12);
+    expect(getByRole("button", { name: "Refer someone" }).props.hitSlop).toBe(12);
+  });
+
   it("renders the task's responseCount, not offerCount, as the response count", async () => {
     // Guards against re-conflating the two: offerCount means offers/
     // applications elsewhere in the marketplace, responseCount is this

@@ -46,6 +46,15 @@ describe("CommunityJobOverflowSheet", () => {
     expect(getByText(`Posted by ${job.postedBy?.name} · ${job.postedBy?.area}`)).toBeTruthy();
   });
 
+  it("describes Share as sharing text details, not a public job link, since only text is shared", async () => {
+    const { getByText, queryByText } = await renderSheet(
+      <CommunityJobOverflowSheet visible onClose={jest.fn()} job={job} />,
+    );
+
+    expect(getByText("Share this job's details as text")).toBeTruthy();
+    expect(queryByText(/public job link/i)).toBeNull();
+  });
+
   it("Share Job invokes the platform share sheet and closes", async () => {
     const shareSpy = jest.spyOn(Share, "share").mockResolvedValue({ action: "sharedAction" });
     const onClose = jest.fn();
@@ -69,7 +78,9 @@ describe("CommunityJobOverflowSheet", () => {
 
     await fireEvent.press(getByText("Report Job"));
 
-    expect(alertSpy).toHaveBeenCalledWith("Job reported", expect.any(String));
+    // Neutral prototype-scoped wording — never implies a moderation team
+    // exists to review the report, since no such backend exists.
+    expect(alertSpy).toHaveBeenCalledWith("Job reported", "Report recorded for this prototype.");
     expect(onClose).toHaveBeenCalledTimes(1);
     alertSpy.mockRestore();
   });
