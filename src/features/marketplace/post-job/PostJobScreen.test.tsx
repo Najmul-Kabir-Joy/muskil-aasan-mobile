@@ -21,6 +21,10 @@ jest.mock("expo-image-picker", () => ({
 // `minimumDate`, so tests can assert past dates are disallowed) with an
 // `onChange` handler tests can invoke via `fireEvent(el, "onChange", ...)`.
 jest.mock("@react-native-community/datetimepicker", () => {
+  // `jest.mock` factories are hoisted above top-level imports, so the real
+  // `react-native` module must be pulled in with `require` here rather than
+  // a module-level `import`.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { View } = require("react-native");
   return {
     __esModule: true,

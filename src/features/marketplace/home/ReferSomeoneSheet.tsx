@@ -61,10 +61,14 @@ export function ReferSomeoneSheet({
     : new Set<string>();
 
   // A newly opened job shouldn't show a stale success toast left over from
-  // referring someone on a previous job.
-  useEffect(() => {
+  // referring someone on a previous job. Adjusted directly during render
+  // (not in an effect) per React's guidance for deriving state from a prop
+  // change — avoids an extra render pass just to clear the toast.
+  const [lastJobId, setLastJobId] = useState(job?.id);
+  if (job?.id !== lastJobId) {
+    setLastJobId(job?.id);
     setToastMessage(null);
-  }, [job?.id]);
+  }
 
   useEffect(() => {
     if (!toastMessage) return;

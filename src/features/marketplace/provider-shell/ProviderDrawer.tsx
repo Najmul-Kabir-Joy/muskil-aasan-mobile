@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Animated,
   Easing,
@@ -149,8 +149,12 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const drawerWidth = Math.min(windowWidth * DRAWER_WIDTH_RATIO, DRAWER_MAX_WIDTH);
-  const translateX = useRef(new Animated.Value(drawerWidth)).current;
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
+  // Plain `useState` initializers (not `useRef`) keep these stable,
+  // one-time-created `Animated.Value`s without tripping the
+  // react-hooks/refs rule, which disallows reading a ref's `.current`
+  // during render (the `transform` style and effect deps below).
+  const [translateX] = useState(() => new Animated.Value(drawerWidth));
+  const [overlayOpacity] = useState(() => new Animated.Value(0));
   // A `Modal`'s `visible` prop dismisses it immediately (no chance for our
   // own closing animation to play) — so this is kept true for the duration
   // of the close animation, and only turns false once it finishes. Opening
@@ -158,14 +162,17 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
   // to animate into.
   const [isMounted, setIsMounted] = useState(visible);
 
-  useEffect(() => {
-    if (visible) {
-      setIsMounted(true);
-      return;
-    }
+  // Adjusted directly during render (not in an effect) per React's guidance
+  // for deriving state from a prop change — this makes the Modal present
+  // for the open-animation effect below in the same render pass, with no
+  // extra flicker frame where the Modal is still hidden.
+  if (visible && !isMounted) {
+    setIsMounted(true);
+  }
 
-    // Nothing to animate closed if it was never opened.
-    if (!isMounted) return;
+  useEffect(() => {
+    // Nothing to animate closed if it's opening, or was never opened.
+    if (visible || !isMounted) return;
 
     Animated.parallel([
       Animated.timing(translateX, {
@@ -183,10 +190,7 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
     ]).start(({ finished }) => {
       if (finished) setIsMounted(false);
     });
-    // `isMounted` is intentionally excluded: this effect only needs to react
-    // to `visible` changing, not to the `setIsMounted` calls it makes itself.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, drawerWidth, translateX, overlayOpacity]);
+  }, [visible, isMounted, drawerWidth, translateX, overlayOpacity]);
 
   useEffect(() => {
     if (!isMounted || !visible) return;
