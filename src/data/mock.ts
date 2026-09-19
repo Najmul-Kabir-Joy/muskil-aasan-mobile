@@ -222,12 +222,24 @@ export const completedReferralJobs: CompletedReferralJob[] = [
 ];
 
 // Derives who the current Provider may refer from completedReferralJobs
-// rather than hardcoding eligibility in a screen or component.
-export function getEligibleReferrals(): EligibleReferral[] {
-  return completedReferralJobs.flatMap((completed) => {
-    const worker = workers.find((candidate) => candidate.id === completed.workerId);
-    return worker ? [{ worker, jobTitle: completed.jobTitle }] : [];
-  });
+// rather than hardcoding eligibility in a screen or component. A worker can
+// appear in completedReferralJobs more than once (multiple completed jobs
+// together); eligibility is per-worker, not per-job, so results are
+// deduplicated by workerId, keeping the most recent job as the example —
+// otherwise the same worker renders more than once wherever this list is
+// keyed by worker id (e.g. ReferSomeoneSheet).
+export function getEligibleReferrals(
+  completedJobs: CompletedReferralJob[] = completedReferralJobs,
+): EligibleReferral[] {
+  const latestJobByWorkerId = new Map<string, string>();
+  for (const completed of completedJobs) {
+    latestJobByWorkerId.set(completed.workerId, completed.jobTitle);
+  }
+
+  return Array.from(latestJobByWorkerId, ([workerId, jobTitle]) => {
+    const worker = workers.find((candidate) => candidate.id === workerId);
+    return worker ? [{ worker, jobTitle }] : [];
+  }).flat();
 }
 
 export const taskTimeline: TimelineEvent[] = [

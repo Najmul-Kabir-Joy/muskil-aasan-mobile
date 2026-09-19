@@ -44,4 +44,19 @@ describe("getEligibleReferrals", () => {
   it("is non-empty by default, so the canonical Refer Someone flow has eligible people to show", () => {
     expect(getEligibleReferrals().length).toBeGreaterThan(0);
   });
+
+  it("returns one entry per worker even if they appear in multiple completed jobs", () => {
+    const eligible = getEligibleReferrals([
+      { workerId: "w1", jobTitle: "Ceiling fan repair" },
+      { workerId: "w1", jobTitle: "AC servicing" },
+      { workerId: "w1", jobTitle: "Wiring fix" },
+      { workerId: "w3", jobTitle: "Logo design for home bakery" },
+    ]);
+
+    expect(eligible).toHaveLength(2);
+    const worker1Entries = eligible.filter(({ worker }) => worker.id === "w1");
+    expect(worker1Entries).toHaveLength(1);
+    // Keeps the most recent job as the referral example, not the first.
+    expect(worker1Entries[0].jobTitle).toBe("Wiring fix");
+  });
 });

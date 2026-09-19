@@ -169,7 +169,7 @@ function LatestJobCard({ job }: { job: Task }) {
         <View style={styles.latestButtonFlex}>
           <ActionButton
             label={`View Responses (${job.offerCount})`}
-            onPress={() => router.push("/(poster)/tasks")}
+            onPress={() => router.push("/(poster)/responses")}
           />
         </View>
         <View style={styles.latestButtonFlex}>

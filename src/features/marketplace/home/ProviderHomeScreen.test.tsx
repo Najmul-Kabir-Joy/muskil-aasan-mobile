@@ -70,6 +70,30 @@ describe("ProviderHomeScreen — canonical (has a latest job)", () => {
     expect(queryByText(/responded/i)).toBeNull();
   });
 
+  it("View Responses navigates to the Provider Responses route, not My Jobs", async () => {
+    const push = jest.fn();
+    mockUseRouter.mockReturnValue({ push, replace: jest.fn() });
+
+    const { getByText } = await renderHome(
+      <ProviderHomeScreen latestJob={latestJob} communityJobs={communityTasks} />,
+    );
+    await fireEvent.press(getByText(`View Responses (${latestJob.offerCount})`));
+
+    expect(push).toHaveBeenCalledWith("/(poster)/responses");
+  });
+
+  it("View Job navigates to My Jobs (no dedicated Job Detail screen yet)", async () => {
+    const push = jest.fn();
+    mockUseRouter.mockReturnValue({ push, replace: jest.fn() });
+
+    const { getByText } = await renderHome(
+      <ProviderHomeScreen latestJob={latestJob} communityJobs={communityTasks} />,
+    );
+    await fireEvent.press(getByText("View Job"));
+
+    expect(push).toHaveBeenCalledWith("/(poster)/tasks");
+  });
+
   it("tapping a Community Job's Refer icon opens the Refer Someone sheet for that job", async () => {
     const { getAllByRole, getByText } = await renderHome(
       <ProviderHomeScreen
