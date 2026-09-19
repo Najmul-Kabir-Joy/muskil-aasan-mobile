@@ -1,6 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { BottomTabBarHeightCallbackContext } from "@react-navigation/bottom-tabs";
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { BottomTabBarHeightCallbackContext, type BottomTabBarProps } from "expo-router/js-tabs";
 import { useContext, useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
