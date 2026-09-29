@@ -1,6 +1,6 @@
-# Muskill Asaan Mobile
+# MuSkill Aasan Mobile
 
-Expo + React Native prototype for the Muskill Asaan micro-job marketplace
+Expo + React Native prototype for the MuSkill Aasan micro-job marketplace
 (Bangladesh, initially Dhaka).
 
 ## Stack

@@ -31,7 +31,7 @@ These are approved. **"Confirmed" means the sentence itself is true — it
 does not mean any implementation detail of _how_ it works is decided.** See
 the explicit non-example after the list.
 
-1. Muskill Asaan is a micro-job marketplace.
+1. MuSkill Aasan is a micro-job marketplace.
 2. Initial market is Bangladesh.
 3. Initial launch area is Dhaka.
 4. There is currently no international launch plan.
@@ -154,6 +154,15 @@ preferred terms:
 | Job Seeker             | worker / jobSeeker                  | `Role = "jobSeeker"`, route group `app/(worker)/`, `WorkerProfile` type  |
 | Job                    | task                                | `Task` type, `TaskCard`, `TaskStatus`, `data/mock.ts`'s `tasks`          |
 | Response / Application | offer                               | `Offer` type, `OfferCard`, `OfferStatus`                                 |
+
+`JobResponse` (`src/types/domain.ts`), added for the Provider Responses feature
+(`src/features/marketplace/responses/`), is the current preferred-terminology
+shape for a Job Seeker's response to a job. It is deliberately separate from
+the legacy `Offer` type (which models a bid — `amount`, `estimatedTime`,
+`status` — none of which apply to a plain response) rather than overloading
+`Offer`'s fields. `Offer`/`OfferCard` remain in place for the screens that
+already use them (`app/(poster)/tasks.tsx`, the Job Seeker's own `Offer`
+screens) — this is not a signal to migrate them.
 
 **This is documentation, not a rename mandate.** The legacy names above are
 still what the code actually uses today, and that's deliberate — renaming all

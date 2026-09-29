@@ -1,5 +1,5 @@
-import { ResponsesScreen } from "@/features/marketplace/responses/ResponsesScreen";
+import { ProviderResponsesScreen } from "@/features/marketplace/responses/ProviderResponsesScreen";
 
 export default function ResponsesRoute() {
-  return <ResponsesScreen edges={["left", "right"]} />;
+  return <ProviderResponsesScreen edges={["left", "right"]} />;
 }

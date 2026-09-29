@@ -1,4 +1,4 @@
-# AGENTS.md — Muskill Asaan Mobile
+# AGENTS.md — MuSkill Aasan Mobile
 
 This is the canonical, tool-agnostic engineering contract for this repository.
 Claude, Codex, Cursor, and human contributors all follow this document. Tool-
@@ -8,7 +8,7 @@ of truth.
 
 ## What this is
 
-Muskill Asaan is a consumer mobile micro-job marketplace for Bangladesh
+MuSkill Aasan is a consumer mobile micro-job marketplace for Bangladesh
 (initially Dhaka), built with **React Native + Expo + TypeScript** (Expo
 Router, Expo SDK 54, React 19, RN 0.81). It is intended to become a real
 production application. The repository is currently an early-stage prototype:
@@ -176,7 +176,7 @@ is communicated. Touch targets need real tappable area.
 
 ## Localization readiness
 
-Muskill Asaan targets English and Bangla. Don't design components or layouts
+MuSkill Aasan targets English and Bangla. Don't design components or layouts
 that assume short, fixed-length English strings — Bangla text and mixed-script
 rendering can run longer. Don't concatenate translated sentence fragments
 (`"Post " + count + " tasks"`) — that breaks translation and grammar. A full
@@ -228,7 +228,7 @@ percentage.
 
 ## Do not invent product behavior
 
-A small set of **high-level** Muskill Asaan product requirements are
+A small set of **high-level** MuSkill Aasan product requirements are
 confirmed (see
 [domain-and-terminology.md](docs/engineering/domain-and-terminology.md)'s
 "Confirmed high-level product requirements") — e.g. it's confirmed that one

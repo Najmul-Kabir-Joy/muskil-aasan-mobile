@@ -10,12 +10,30 @@ type ButtonTone = "primary" | "secondary" | "inverted" | "outlined";
 /**
  * Non-scrolling page shell: safe area + a plain View. Use this when the
  * screen's content is (or will be) a virtualized list — put the FlatList
- * directly inside it. Do not nest a FlatList inside ScrollScreen.
+ * directly inside it — or when a screen needs its own scrollable body plus
+ * a fixed (non-scrolling) footer, such as a sticky CTA. Do not nest a
+ * FlatList inside ScrollScreen.
+ *
+ * `edges` defaults to every edge, same as `ScrollScreen` — pass a narrower
+ * list for a screen rendered inside a persistent shell that already owns an
+ * edge itself (e.g. a Provider tab screen).
+ *
+ * `padded` defaults to true (the standard page gutter). Pass `false` when a
+ * screen needs full-bleed regions — e.g. a sub-header bar that spans the
+ * whole width — and applies its own gutters to the rest of its content.
  */
-export function Screen({ children }: { children: ReactNode }) {
+export function Screen({
+  children,
+  edges,
+  padded = true,
+}: {
+  children: ReactNode;
+  edges?: Edges;
+  padded?: boolean;
+}) {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.screen}>{children}</View>
+    <SafeAreaView style={styles.safeArea} edges={edges}>
+      <View style={[styles.screen, !padded && styles.screenFlush]}>{children}</View>
     </SafeAreaView>
   );
 }
@@ -270,6 +288,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
   },
+  screenFlush: {
+    padding: 0,
+  },
   scrollContent: {
     flexGrow: 1,
     gap: spacing.xl,
@@ -282,12 +303,14 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     justifyContent: "space-between",
   },
+  // Not upper-cased: the kicker shows the brand name, which must render
+  // exactly as `BRAND_NAME` ("MuSkill Aasan") — an all-caps transform would
+  // lose the internal capital S.
   kicker: {
     color: colors.primary,
     fontFamily: fonts.bold,
     fontSize: 12,
     letterSpacing: 1,
-    textTransform: "uppercase",
   },
   appText: {
     fontFamily: fonts.medium,

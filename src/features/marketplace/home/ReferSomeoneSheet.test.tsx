@@ -165,7 +165,7 @@ describe("ReferSomeoneSheet — no eligible people", () => {
     expect(getByText("No one to refer yet")).toBeTruthy();
     expect(
       getByText(
-        "Once you've completed a job with someone through Muskill Asaan, you'll be able to recommend their profile here.",
+        "Once you've completed a job with someone through MuSkill Aasan, you'll be able to recommend their profile here.",
       ),
     ).toBeTruthy();
     expect(getByRole("button", { name: "Got it, close" })).toBeTruthy();

@@ -15,6 +15,10 @@ import { ProviderDrawer } from "@/features/marketplace/provider-shell/ProviderDr
  * Drawer open/close state is owned here (not by `ProviderAppHeader` or by
  * individual screens) so there is exactly one drawer instance, reachable
  * identically from every screen in this layout.
+ *
+ * `backBehavior="history"`: Back returns to the previously visited screen.
+ * The default (`firstRoute`) would send Back from a secondary screen such as
+ * Response Detail to Home instead of the Responses list it was opened from.
  */
 export default function PosterTabsLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -22,6 +26,7 @@ export default function PosterTabsLayout() {
   return (
     <>
       <Tabs
+        backBehavior="history"
         screenOptions={{
           headerShown: true,
           header: () => <ProviderAppHeader onOpenMenu={() => setDrawerOpen(true)} />,
@@ -40,6 +45,7 @@ export default function PosterTabsLayout() {
         <Tabs.Screen name="task-status" options={{ title: "Task status" }} />
         <Tabs.Screen name="support" options={{ title: "Support" }} />
         <Tabs.Screen name="coming-soon" options={{ title: "Coming soon" }} />
+        <Tabs.Screen name="response-detail" options={{ title: "Response Detail" }} />
       </Tabs>
       <ProviderDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </>

@@ -7,13 +7,9 @@ import { CommunityJobOverflowSheet } from "@/features/marketplace/home/Community
 import { ReferSomeoneSheet } from "@/features/marketplace/home/ReferSomeoneSheet";
 import { CommunityPostCard } from "@/features/marketplace/components";
 import { ActionButton, AppText, PrimaryButton, ScrollScreen } from "@/shared/components/ui";
-import { communityTasks, getEligibleReferrals, tasks } from "@/data/mock";
+import { communityTasks, getActiveJob, getEligibleReferrals } from "@/data/mock";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 import type { EligibleReferral, Task } from "@/types/domain";
-
-function defaultLatestJob(): Task | null {
-  return tasks.find((task) => task.status !== "completed") ?? null;
-}
 
 /**
  * The Job Provider Home screen — greeting, Post Job banner, "Your Latest
@@ -29,7 +25,7 @@ function defaultLatestJob(): Task | null {
  */
 export function ProviderHomeScreen({
   edges,
-  latestJob = defaultLatestJob(),
+  latestJob = getActiveJob(),
   communityJobs = communityTasks,
   eligibleReferrals = getEligibleReferrals(),
 }: {
@@ -108,7 +104,7 @@ export function ProviderHomeScreen({
             <View style={styles.communityHeaderText}>
               <Text style={styles.sectionTitle}>Community Jobs</Text>
               <AppText style={styles.communitySubtitle}>
-                Recent jobs from the Muskill Asaan community
+                Recent jobs from the MuSkill Aasan community
               </AppText>
             </View>
             <View style={styles.nearbyChip}>

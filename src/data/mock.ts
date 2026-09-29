@@ -2,6 +2,8 @@ import type {
   Category,
   CompletedReferralJob,
   EligibleReferral,
+  JobResponse,
+  JobWithResponses,
   Offer,
   Task,
   TimelineEvent,
@@ -60,6 +62,7 @@ export const workers: WorkerProfile[] = [
     id: "w1",
     name: "Rafiq Islam",
     rating: 4.8,
+    ratingCount: 39,
     completedJobs: 42,
     area: "Mirpur",
     verification: "verified",
@@ -69,6 +72,7 @@ export const workers: WorkerProfile[] = [
     id: "w2",
     name: "Nusrat Jahan",
     rating: 4.9,
+    ratingCount: 28,
     completedJobs: 31,
     area: "Dhanmondi",
     verification: "verified",
@@ -78,10 +82,41 @@ export const workers: WorkerProfile[] = [
     id: "w3",
     name: "Arman Hossain",
     rating: 4.7,
+    ratingCount: 15,
     completedJobs: 18,
     area: "Banani",
     verification: "pending",
     categories: ["Design", "Photo"],
+  },
+  {
+    id: "w4",
+    name: "Kamal Hossain",
+    rating: 4.6,
+    ratingCount: 22,
+    completedJobs: 25,
+    area: "Mirpur",
+    verification: "verified",
+    categories: ["Repair", "Electrician"],
+  },
+  {
+    id: "w5",
+    name: "Shirin Akter",
+    rating: 4.9,
+    ratingCount: 51,
+    completedJobs: 58,
+    area: "Mirpur 10",
+    verification: "verified",
+    categories: ["Repair", "Electrician"],
+  },
+  {
+    id: "w6",
+    name: "Jasim Uddin",
+    rating: 4.5,
+    ratingCount: 12,
+    completedJobs: 14,
+    area: "Mirpur",
+    verification: "pending",
+    categories: ["Repair"],
   },
 ];
 
@@ -97,6 +132,7 @@ export const tasks: Task[] = [
     urgent: true,
     offerCount: 4,
     description: "Split AC needs cleaning and cooling check before evening.",
+    postedAgo: "today",
   },
   {
     id: "t2",
@@ -109,6 +145,7 @@ export const tasks: Task[] = [
     urgent: false,
     offerCount: 7,
     description: "Need in-person help twice a week for NCTB physics.",
+    postedAgo: "3 days ago",
   },
   {
     id: "t3",
@@ -153,6 +190,118 @@ export const offers: Offer[] = [
     status: "accepted",
   },
 ];
+
+// The current Provider's own most relevant open job — shared by
+// ProviderHomeScreen's "Your Latest Job" card and the Responses feature's
+// empty-state active-job preview, so both derive the same "which job is
+// current" answer from one place rather than duplicating this pick.
+export function getActiveJob(): Task | null {
+  return tasks.find((task) => task.status !== "completed") ?? null;
+}
+
+// Job Seeker responses to the current Provider's own jobs (`tasks`),
+// visible only to that job's owner — see docs/engineering/domain-and-
+// terminology.md's Offer/Response distinction for why this isn't `Offer`.
+export const jobResponses: JobResponse[] = [
+  {
+    id: "r1",
+    taskId: "t1",
+    worker: workers[0],
+    message:
+      "I can come this afternoon with my ladder and toolkit — I've serviced a few AC units in Mirpur before.",
+    receivedAgo: "25m ago",
+    previousWork: {
+      jobTitle: "Ceiling fan repair",
+      rating: 5,
+      comment: "Fixed it quickly and cleaned up after. Would call again.",
+    },
+  },
+  {
+    id: "r2",
+    taskId: "t1",
+    worker: workers[3],
+    message:
+      "I can check the gas pressure and clean the filter today evening if that works for you.",
+    receivedAgo: "1h ago",
+    previousWork: {
+      jobTitle: "Water pump installation",
+      rating: 4,
+      comment: "Solid work, arrived a little later than planned but finished the same day.",
+    },
+  },
+  {
+    id: "r3",
+    taskId: "t1",
+    worker: workers[4],
+    message:
+      "Available now — I specialize in split AC servicing and can bring a spare filter just in case.",
+    receivedAgo: "2h ago",
+    previousWork: {
+      jobTitle: "Kitchen exhaust fan fix",
+      rating: 5,
+      comment: "Very thorough, explained what was wrong before fixing it.",
+    },
+  },
+  {
+    id: "r4",
+    taskId: "t1",
+    worker: workers[5],
+    message:
+      "I can come by tomorrow morning with a full servicing kit if today doesn't work for you.",
+    receivedAgo: "3h ago",
+    previousWork: {
+      jobTitle: "Bathroom light fixture repair",
+      rating: 4,
+      comment: "Good work, would recommend for small electrical fixes.",
+    },
+  },
+  {
+    id: "r5",
+    taskId: "t2",
+    worker: workers[1],
+    message:
+      "I've taught NCTB physics for three years and can start this weekend. Happy to share a sample lesson plan first.",
+    receivedAgo: "4h ago",
+    previousWork: {
+      jobTitle: "Class 8 math tutoring",
+      rating: 5,
+      comment: "Explained concepts clearly and was very patient with my son.",
+    },
+  },
+];
+
+// Derives which of the current Provider's jobs have received responses,
+// and groups each job with its own responses — the Responses List's unit
+// of grouping. Accepts an explicit list (rather than always reading
+// `jobResponses`) so it stays testable against arbitrary data, matching
+// `getEligibleReferrals`'s own pattern.
+export function getJobsWithResponses(responses: JobResponse[] = jobResponses): JobWithResponses[] {
+  const responsesByTaskId = new Map<string, JobResponse[]>();
+  for (const response of responses) {
+    const existing = responsesByTaskId.get(response.taskId);
+    if (existing) {
+      existing.push(response);
+    } else {
+      responsesByTaskId.set(response.taskId, [response]);
+    }
+  }
+
+  return Array.from(responsesByTaskId, ([taskId, taskResponses]) => {
+    const task = tasks.find((candidate) => candidate.id === taskId);
+    return task ? [{ task, responses: taskResponses }] : [];
+  }).flat();
+}
+
+// The one lookup the Response Detail route needs: a response plus the job
+// it was made on, bundled together so a missing task can't leave the route
+// with only half the data it needs.
+export function getResponseWithJob(id: string): { task: Task; response: JobResponse } | undefined {
+  const response = jobResponses.find((candidate) => candidate.id === id);
+  if (!response) return undefined;
+  const task = tasks.find((candidate) => candidate.id === response.taskId);
+  if (!task) return undefined;
+  return { task, response };
+}
 
 // Tasks posted by other neighbors, shown in the Provider Home "Community
 // Jobs" feed — distinct from `tasks` (the current dummy user's own posts).

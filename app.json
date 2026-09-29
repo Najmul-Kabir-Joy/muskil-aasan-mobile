@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Muskill Asaan",
+    "name": "MuSkill Aasan",
     "slug": "muskill-asaan-mobile",
     "scheme": "muskillasaan",
     "version": "1.0.0",
@@ -36,8 +36,8 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "Muskill Asaan needs camera access so you can take photos for identity setup and job posts.",
-          "photosPermission": "Muskill Asaan needs photo library access so you can choose photos for identity setup and job posts."
+          "cameraPermission": "MuSkill Aasan needs camera access so you can take photos for identity setup and job posts.",
+          "photosPermission": "MuSkill Aasan needs photo library access so you can choose photos for identity setup and job posts."
         }
       ],
       "@react-native-community/datetimepicker"

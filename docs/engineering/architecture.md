@@ -1,6 +1,6 @@
 # Architecture
 
-Muskill Asaan is an Expo Router app. This document defines where code lives and
+MuSkill Aasan is an Expo Router app. This document defines where code lives and
 why. For what the domain types/terms in this codebase do and don't mean as
 product truth, see
 [domain-and-terminology.md](./domain-and-terminology.md) first.
@@ -90,9 +90,17 @@ consumer. One usage is not a pattern; it's just where the code happens to live.
   (double-virtualization breaks scroll performance and, on some RN versions,
   warns or crashes).
 
-No screen currently needs `Screen` (nothing renders a `FlatList` yet) — it
-exists so the first list/feed screen doesn't have to fight `ScrollScreen`'s
-`ScrollView`.
+`Screen` is also the right shell for a screen that needs its own scrollable
+body plus a fixed (non-scrolling) footer, such as a sticky CTA — put a
+`ScrollView` and the footer inside it (see `ProviderResponseDetailScreen`).
+Pass `padded={false}` when the screen needs full-bleed regions (e.g. a
+sub-header bar spanning the whole width) and applies its own gutters. Nothing
+renders a `FlatList` yet — `Screen` exists so the first list/feed screen
+doesn't have to fight `ScrollScreen`'s `ScrollView`.
+
+Both take `edges`: a screen inside the Provider shell (whose header and
+bottom navigation already own the top and bottom insets) passes
+`["left", "right"]`.
 
 ## Data and services
 

@@ -1,5 +1,15 @@
 import { fireEvent, render } from "@testing-library/react-native";
-import { ActionButton, Badge, SelectableChip } from "@/shared/components/ui";
+import { StyleSheet } from "react-native";
+import { ActionButton, AppHeader, Badge, SelectableChip } from "@/shared/components/ui";
+
+describe("AppHeader", () => {
+  it("shows the brand name exactly as spelled, without forcing it to upper case", async () => {
+    const { getByText } = await render(<AppHeader title="My Jobs" />);
+
+    const kicker = getByText("MuSkill Aasan");
+    expect(StyleSheet.flatten(kicker.props.style).textTransform).not.toBe("uppercase");
+  });
+});
 
 describe("Badge", () => {
   it("renders the given label", async () => {
