@@ -17,11 +17,23 @@ type ButtonTone = "primary" | "secondary" | "inverted" | "outlined";
  * `edges` defaults to every edge, same as `ScrollScreen` — pass a narrower
  * list for a screen rendered inside a persistent shell that already owns an
  * edge itself (e.g. a Provider tab screen).
+ *
+ * `padded` defaults to true (the standard page gutter). Pass `false` when a
+ * screen needs full-bleed regions — e.g. a sub-header bar that spans the
+ * whole width — and applies its own gutters to the rest of its content.
  */
-export function Screen({ children, edges }: { children: ReactNode; edges?: Edges }) {
+export function Screen({
+  children,
+  edges,
+  padded = true,
+}: {
+  children: ReactNode;
+  edges?: Edges;
+  padded?: boolean;
+}) {
   return (
     <SafeAreaView style={styles.safeArea} edges={edges}>
-      <View style={styles.screen}>{children}</View>
+      <View style={[styles.screen, !padded && styles.screenFlush]}>{children}</View>
     </SafeAreaView>
   );
 }
@@ -275,6 +287,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     padding: spacing.lg,
+  },
+  screenFlush: {
+    padding: 0,
   },
   scrollContent: {
     flexGrow: 1,

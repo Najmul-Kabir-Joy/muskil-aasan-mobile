@@ -15,16 +15,18 @@ describe("JobResponsesSection", () => {
     mockUseRouter.mockReturnValue({ push: jest.fn(), replace: jest.fn() });
   });
 
-  it("shows the job's title, area, and budget", async () => {
+  it("shows the job's timing, title, area, and budget as the group's context", async () => {
     const { getByText, getAllByText } = await render(
       <JobResponsesSection task={jobWithResponses.task} responses={jobWithResponses.responses} />,
     );
 
+    expect(getByText(jobWithResponses.task.timing)).toBeTruthy();
     expect(getByText(jobWithResponses.task.title)).toBeTruthy();
     // Some of this job's own responders happen to share its area string in
     // the mock data, so more than one match is expected here.
     expect(getAllByText(jobWithResponses.task.area).length).toBeGreaterThan(0);
     expect(getByText(jobWithResponses.task.budget)).toBeTruthy();
+    expect(getByText(`${jobWithResponses.task.budget} Budget`)).toBeTruthy();
   });
 
   it("displays the actual response count, derived from the responses it renders", async () => {
@@ -57,5 +59,26 @@ describe("JobResponsesSection", () => {
     expect(getAllByRole("button", { name: /^View response from/ })).toHaveLength(
       jobWithResponses.responses.length,
     );
+  });
+
+  it("shows the job's category on each responder card", async () => {
+    const { getAllByText } = await render(
+      <JobResponsesSection task={jobWithResponses.task} responses={jobWithResponses.responses} />,
+    );
+
+    expect(getAllByText(jobWithResponses.task.category)).toHaveLength(
+      jobWithResponses.responses.length,
+    );
+  });
+
+  it("does not expose any responder identity in the job summary itself — only in the cards beneath it", async () => {
+    const { getAllByText } = await render(
+      <JobResponsesSection task={jobWithResponses.task} responses={jobWithResponses.responses} />,
+    );
+
+    for (const response of jobWithResponses.responses) {
+      // Each name appears once: on that Seeker's own card.
+      expect(getAllByText(response.worker.name)).toHaveLength(1);
+    }
   });
 });

@@ -26,25 +26,60 @@ describe("ResponsePreviewCard", () => {
       getByText(`${response.worker.rating} · ${response.worker.ratingCount} ratings`),
     ).toBeTruthy();
     expect(getByText("Repair")).toBeTruthy();
+    expect(getByText(`“${response.message}”`)).toBeTruthy();
     expect(getByText(`Received ${response.receivedAgo}`)).toBeTruthy();
   });
 
-  it("truncates the message to a preview rather than showing it in full", async () => {
+  it("uses the singular for a Seeker with a single rating", async () => {
+    const singleRating = {
+      ...response,
+      worker: { ...response.worker, ratingCount: 1 },
+    };
+    const { getByText } = await render(
+      <ResponsePreviewCard response={singleRating} category="Repair" />,
+    );
+
+    expect(getByText(`${response.worker.rating} · 1 rating`)).toBeTruthy();
+  });
+
+  it("truncates the message to a three-line preview rather than showing it in full", async () => {
     const { getByText } = await render(
       <ResponsePreviewCard response={response} category="Repair" />,
     );
 
     const preview = getByText(`“${response.message}”`);
-    expect(preview.props.numberOfLines).toBe(2);
+    expect(preview.props.numberOfLines).toBe(3);
   });
 
-  it("never shows a hire/select action, verification badge, or trust wording on the list card", async () => {
+  it("still renders a very long message and a very long name without dropping the View Response action", async () => {
+    const longResponse = {
+      ...response,
+      message: "I can help with this job. ".repeat(40).trim(),
+      worker: { ...response.worker, name: "Muhammad Abdur Rahman Chowdhury Al-Mamun" },
+    };
+    const { getByText, getByRole } = await render(
+      <ResponsePreviewCard response={longResponse} category="Repair" />,
+    );
+
+    // The name is never ellipsized — a Provider is choosing between people.
+    expect(getByText(longResponse.worker.name).props.numberOfLines).toBeUndefined();
+    expect(getByText(`“${longResponse.message}”`).props.numberOfLines).toBe(3);
+    expect(
+      getByRole("button", { name: `View response from ${longResponse.worker.name}` }),
+    ).toBeTruthy();
+  });
+
+  it("never shows a hire/select action, contact details, distance, verification badge, or trust wording on the list card", async () => {
     const { queryByText, queryByRole } = await render(
       <ResponsePreviewCard response={response} category="Repair" />,
     );
 
     expect(queryByRole("button", { name: /select/i })).toBeNull();
     expect(queryByRole("button", { name: /hire/i })).toBeNull();
+    expect(queryByRole("button", { name: /message|chat|call/i })).toBeNull();
+    expect(queryByText(/\+880/)).toBeNull();
+    expect(queryByText(/@/)).toBeNull();
+    expect(queryByText(/\d\s?km/i)).toBeNull();
     expect(queryByText(/verified/i)).toBeNull();
     expect(queryByText(/trusted/i)).toBeNull();
   });
