@@ -22,7 +22,7 @@ describe("ProviderResponseDetailScreen", () => {
 
     expect(getByRole("button", { name: "Back" })).toBeTruthy();
     expect(getByRole("header", { name: "Response Detail" })).toBeTruthy();
-    expect(queryByText("Muskill Asaan")).toBeNull();
+    expect(queryByText("MuSkill Aasan")).toBeNull();
   });
 
   it("shows the original job context: title, area, budget, posted timing", async () => {
@@ -105,7 +105,7 @@ describe("ProviderResponseDetailScreen", () => {
 
     expect(getAllByText("Previous Work & Feedback")).toHaveLength(1);
     expect(getAllByText(response.previousWork.jobTitle)).toHaveLength(1);
-    expect(getAllByText("Completed through Muskill Asaan")).toHaveLength(1);
+    expect(getAllByText("Completed through MuSkill Aasan")).toHaveLength(1);
     expect(getByText(`“${response.previousWork.comment}”`)).toBeTruthy();
     expect(getByText(response.previousWork.rating.toFixed(1))).toBeTruthy();
   });

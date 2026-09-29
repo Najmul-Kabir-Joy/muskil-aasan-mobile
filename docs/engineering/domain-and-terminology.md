@@ -31,7 +31,7 @@ These are approved. **"Confirmed" means the sentence itself is true — it
 does not mean any implementation detail of _how_ it works is decided.** See
 the explicit non-example after the list.
 
-1. Muskill Asaan is a micro-job marketplace.
+1. MuSkill Aasan is a micro-job marketplace.
 2. Initial market is Bangladesh.
 3. Initial launch area is Dhaka.
 4. There is currently no international launch plan.

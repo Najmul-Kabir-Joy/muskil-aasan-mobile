@@ -2,7 +2,7 @@
  * PROTOTYPE / MOCK domain types.
  *
  * Everything in this file describes the current UI prototype's mock data
- * shape only. It is NOT an approved Muskill Asaan product specification.
+ * shape only. It is NOT an approved MuSkill Aasan product specification.
  * Job lifecycle, verification, offer/response flow, and every status enum
  * below can (and likely will) change once real product/business rules are
  * defined — do not treat a status value existing here as evidence that the
@@ -80,7 +80,7 @@ export type Task = {
   photoNote?: string;
 };
 
-// A completed Muskill Asaan job connecting the current Job Provider to a
+// A completed MuSkill Aasan job connecting the current Job Provider to a
 // specific Job Seeker they worked with — the only thing that can make that
 // Job Seeker eligible to be referred on a Community Job (see
 // `getEligibleReferrals` in src/data/mock.ts and
@@ -98,7 +98,7 @@ export type EligibleReferral = {
   jobTitle: string;
 };
 
-// A single previously completed Muskill Asaan job used as the "Previous
+// A single previously completed MuSkill Aasan job used as the "Previous
 // Work & Feedback" preview on a Job Seeker's response — deliberately
 // anonymous (no reviewer identity) and stars-only-plus-comment, distinct
 // from the Job Provider's own reputation system (Provider ratings are

@@ -17,7 +17,7 @@ this project. Read it first.
    workflows: `implement-feature`, `fix-bug`, `create-ui-component`,
    `write-unit-tests`, `review-change`. Each one is a checklist grounded in
    AGENTS.md — use the one matching your task.
-4. **Never invent undefined Muskill Asaan product requirements** (payments,
+4. **Never invent undefined MuSkill Aasan product requirements** (payments,
    verification/NID, escrow, job lifecycle, cancellation, ratings, matching,
    location privacy, platform fees, trust guarantees), and never treat the
    prototype's mock domain types (`src/types/domain.ts`) as approved product

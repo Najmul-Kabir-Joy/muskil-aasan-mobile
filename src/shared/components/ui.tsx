@@ -303,12 +303,14 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     justifyContent: "space-between",
   },
+  // Not upper-cased: the kicker shows the brand name, which must render
+  // exactly as `BRAND_NAME` ("MuSkill Aasan") — an all-caps transform would
+  // lose the internal capital S.
   kicker: {
     color: colors.primary,
     fontFamily: fonts.bold,
     fontSize: 12,
     letterSpacing: 1,
-    textTransform: "uppercase",
   },
   appText: {
     fontFamily: fonts.medium,

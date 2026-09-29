@@ -33,7 +33,7 @@ export function CommunityJobOverflowSheet({
     onClose();
     try {
       await Share.share({
-        message: `${job.title} — ${job.budget} · ${job.area}\nPosted on Muskill Asaan.`,
+        message: `${job.title} — ${job.budget} · ${job.area}\nPosted on MuSkill Aasan.`,
       });
     } catch {
       // Share sheet dismissed/cancelled by the user — nothing else to do.

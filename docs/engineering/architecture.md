@@ -1,6 +1,6 @@
 # Architecture
 
-Muskill Asaan is an Expo Router app. This document defines where code lives and
+MuSkill Aasan is an Expo Router app. This document defines where code lives and
 why. For what the domain types/terms in this codebase do and don't mean as
 product truth, see
 [domain-and-terminology.md](./domain-and-terminology.md) first.

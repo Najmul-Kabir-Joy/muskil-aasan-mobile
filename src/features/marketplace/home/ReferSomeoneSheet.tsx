@@ -113,7 +113,7 @@ export function ReferSomeoneSheet({
             <View style={styles.headerTextColumn}>
               <Text style={styles.title}>Refer Someone</Text>
               <CaptionText>
-                Recommend someone you&apos;ve previously worked with on Muskill Asaan.
+                Recommend someone you&apos;ve previously worked with on MuSkill Aasan.
               </CaptionText>
             </View>
             <Pressable
@@ -143,7 +143,7 @@ export function ReferSomeoneSheet({
               </View>
               <Text style={styles.emptyTitle}>No one to refer yet</Text>
               <CaptionText style={styles.emptyBody}>
-                Once you&apos;ve completed a job with someone through Muskill Asaan, you&apos;ll be
+                Once you&apos;ve completed a job with someone through MuSkill Aasan, you&apos;ll be
                 able to recommend their profile here.
               </CaptionText>
               <ActionButton label="Got it, close" onPress={onClose} tone="secondary" />

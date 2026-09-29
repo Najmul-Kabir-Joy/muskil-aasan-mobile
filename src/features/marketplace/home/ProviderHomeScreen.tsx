@@ -104,7 +104,7 @@ export function ProviderHomeScreen({
             <View style={styles.communityHeaderText}>
               <Text style={styles.sectionTitle}>Community Jobs</Text>
               <AppText style={styles.communitySubtitle}>
-                Recent jobs from the Muskill Asaan community
+                Recent jobs from the MuSkill Aasan community
               </AppText>
             </View>
             <View style={styles.nearbyChip}>

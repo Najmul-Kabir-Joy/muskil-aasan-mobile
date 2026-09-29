@@ -1,6 +1,6 @@
 # Security & Privacy
 
-Muskill Asaan will eventually handle user identity, location, payments-adjacent
+MuSkill Aasan will eventually handle user identity, location, payments-adjacent
 data, and marketplace trust signals (verification, ratings). Treat privacy and
 security as first-class from the start, even while the app is a prototype.
 
@@ -45,7 +45,7 @@ security as first-class from the start, even while the app is a prototype.
   need (e.g. area name), not raw coordinates, unless actively debugging
   location logic.
 
-## Location & identity (Muskill Asaan specifics)
+## Location & identity (MuSkill Aasan specifics)
 
 - Don't expose more location precision than a feature requires. A job feed
   showing "Mirpur, Dhaka" doesn't need exact GPS coordinates rendered or

@@ -84,7 +84,7 @@ describe("ProviderResponsesScreen — canonical (has responses)", () => {
     );
 
     expect(queryByLabelText("Open navigation menu")).toBeNull();
-    expect(queryByText("Muskill Asaan")).toBeNull();
+    expect(queryByText("MuSkill Aasan")).toBeNull();
   });
 
   it("does not expose phone, email, precise distance, verification, or trust signals on any card", async () => {
@@ -234,6 +234,6 @@ describe("ProviderResponsesScreen — empty (no responses)", () => {
     );
 
     expect(queryByText("All Jobs")).toBeNull();
-    expect(queryByText("Muskill Asaan")).toBeNull();
+    expect(queryByText("MuSkill Aasan")).toBeNull();
   });
 });
