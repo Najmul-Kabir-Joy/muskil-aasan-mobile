@@ -10,11 +10,17 @@ type ButtonTone = "primary" | "secondary" | "inverted" | "outlined";
 /**
  * Non-scrolling page shell: safe area + a plain View. Use this when the
  * screen's content is (or will be) a virtualized list — put the FlatList
- * directly inside it. Do not nest a FlatList inside ScrollScreen.
+ * directly inside it — or when a screen needs its own scrollable body plus
+ * a fixed (non-scrolling) footer, such as a sticky CTA. Do not nest a
+ * FlatList inside ScrollScreen.
+ *
+ * `edges` defaults to every edge, same as `ScrollScreen` — pass a narrower
+ * list for a screen rendered inside a persistent shell that already owns an
+ * edge itself (e.g. a Provider tab screen).
  */
-export function Screen({ children }: { children: ReactNode }) {
+export function Screen({ children, edges }: { children: ReactNode; edges?: Edges }) {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={edges}>
       <View style={styles.screen}>{children}</View>
     </SafeAreaView>
   );

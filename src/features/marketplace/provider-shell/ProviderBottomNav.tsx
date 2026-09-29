@@ -46,6 +46,16 @@ export const PROVIDER_NAV_ITEMS = [
 
 const POST_JOB_ROUTE_NAME = "post-task";
 
+// Secondary, non-bottom-tab Provider routes that should still show a
+// specific tab as active while visible — e.g. drilling into a Response
+// from the Responses list must keep "Responses" highlighted, even though
+// `response-detail` isn't itself one of `PROVIDER_NAV_ITEMS`. Only affects
+// which tab is drawn as selected, not which route actually gets navigated
+// to when a tab is pressed.
+const ACTIVE_TAB_ALIASES: Record<string, string> = {
+  "response-detail": "responses",
+};
+
 function useReducedMotionPreference(): boolean {
   const [reduced, setReduced] = useState(false);
 
@@ -114,7 +124,10 @@ function usePostJobPulse(enabled: boolean) {
  * reimplemented here.
  */
 export function ProviderBottomNav({ state, navigation, insets }: BottomTabBarProps) {
-  const activeRouteName = state.routes[state.index]?.name;
+  const currentRouteName = state.routes[state.index]?.name;
+  const highlightedRouteName = currentRouteName
+    ? (ACTIVE_TAB_ALIASES[currentRouteName] ?? currentRouteName)
+    : currentRouteName;
   const reduceMotion = useReducedMotionPreference();
   const pulse = usePostJobPulse(!reduceMotion);
   const bottomInset = insets.bottom;
@@ -125,7 +138,7 @@ export function ProviderBottomNav({ state, navigation, insets }: BottomTabBarPro
   const reportHeight = useContext(BottomTabBarHeightCallbackContext);
 
   function navigateTo(routeName: string) {
-    if (routeName !== activeRouteName) {
+    if (routeName !== currentRouteName) {
       navigation.navigate(routeName);
     }
   }
@@ -161,7 +174,7 @@ export function ProviderBottomNav({ state, navigation, insets }: BottomTabBarPro
                 />
               );
             }
-            const active = item.routeName === activeRouteName;
+            const active = item.routeName === highlightedRouteName;
             const tintColor = active ? colors.primary : colors.muted;
             return (
               <Pressable

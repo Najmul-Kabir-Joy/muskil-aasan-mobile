@@ -81,4 +81,41 @@ describe("ProviderBottomNav", () => {
     await fireEvent.press(getByLabelText("Post a Job"));
     expect(navigate).toHaveBeenCalledWith("post-task");
   });
+
+  it("keeps Responses highlighted while on the response-detail secondary route", async () => {
+    const props = buildProps(0);
+    props.state = {
+      index: 5,
+      routes: [
+        ...ROUTES,
+        { key: "response-detail-1", name: "response-detail", params: { id: "r1" } },
+      ],
+    } as unknown as BottomTabBarProps["state"];
+
+    const { getByLabelText } = await render(<ProviderBottomNav {...props} />);
+
+    expect(getByLabelText("Responses").props.accessibilityState).toEqual(
+      expect.objectContaining({ selected: true }),
+    );
+    expect(getByLabelText("Home").props.accessibilityState).toEqual(
+      expect.objectContaining({ selected: false }),
+    );
+  });
+
+  it("pressing Responses while on response-detail still navigates to the Responses list", async () => {
+    const navigate = jest.fn();
+    const props = buildProps(0, navigate);
+    props.state = {
+      index: 5,
+      routes: [
+        ...ROUTES,
+        { key: "response-detail-1", name: "response-detail", params: { id: "r1" } },
+      ],
+    } as unknown as BottomTabBarProps["state"];
+
+    const { getByLabelText } = await render(<ProviderBottomNav {...props} />);
+    await fireEvent.press(getByLabelText("Responses"));
+
+    expect(navigate).toHaveBeenCalledWith("responses");
+  });
 });

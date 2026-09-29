@@ -155,6 +155,15 @@ preferred terms:
 | Job                    | task                                | `Task` type, `TaskCard`, `TaskStatus`, `data/mock.ts`'s `tasks`          |
 | Response / Application | offer                               | `Offer` type, `OfferCard`, `OfferStatus`                                 |
 
+`JobResponse` (`src/types/domain.ts`), added for the Provider Responses feature
+(`src/features/marketplace/responses/`), is the current preferred-terminology
+shape for a Job Seeker's response to a job. It is deliberately separate from
+the legacy `Offer` type (which models a bid — `amount`, `estimatedTime`,
+`status` — none of which apply to a plain response) rather than overloading
+`Offer`'s fields. `Offer`/`OfferCard` remain in place for the screens that
+already use them (`app/(poster)/tasks.tsx`, the Job Seeker's own `Offer`
+screens) — this is not a signal to migrate them.
+
 **This is documentation, not a rename mandate.** The legacy names above are
 still what the code actually uses today, and that's deliberate — renaming all
 of them is a broad, separate change with real risk (dozens of files, route
