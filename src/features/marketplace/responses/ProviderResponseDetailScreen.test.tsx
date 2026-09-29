@@ -233,7 +233,7 @@ describe("ProviderResponseDetailScreen", () => {
     expect(push).toHaveBeenCalledWith("/(poster)/tasks");
   });
 
-  it("View Full Seeker Profile routes to the existing prototype placeholder, not a fake profile feature", async () => {
+  it("View Full Seeker Profile opens that Job Seeker's public profile on its Seeker side", async () => {
     const push = jest.fn();
     mockUseRouter.mockReturnValue({ push, replace: jest.fn(), back: jest.fn() });
 
@@ -243,8 +243,8 @@ describe("ProviderResponseDetailScreen", () => {
     await fireEvent.press(getByRole("button", { name: `View ${response.worker.name}'s profile` }));
 
     expect(push).toHaveBeenCalledWith({
-      pathname: "/(poster)/coming-soon",
-      params: { title: `${response.worker.name}'s Profile` },
+      pathname: "/(poster)/public-profile",
+      params: { id: response.worker.id, view: "seeker" },
     });
   });
 

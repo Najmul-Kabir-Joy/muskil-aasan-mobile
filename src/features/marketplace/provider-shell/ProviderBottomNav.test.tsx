@@ -102,6 +102,51 @@ describe("ProviderBottomNav", () => {
     );
   });
 
+  it("keeps Profile highlighted on the Profile tab", async () => {
+    const { getByLabelText } = await render(<ProviderBottomNav {...buildProps(4)} />);
+
+    expect(getByLabelText("Profile").props.accessibilityState).toEqual(
+      expect.objectContaining({ selected: true }),
+    );
+    expect(getByLabelText("Home").props.accessibilityState).toEqual(
+      expect.objectContaining({ selected: false }),
+    );
+  });
+
+  it("keeps Profile highlighted while viewing someone's public profile", async () => {
+    const props = buildProps(0);
+    props.state = {
+      index: 5,
+      routes: [
+        ...ROUTES,
+        { key: "public-profile-1", name: "public-profile", params: { id: "w1" } },
+      ],
+    } as unknown as BottomTabBarProps["state"];
+
+    const { getByLabelText } = await render(<ProviderBottomNav {...props} />);
+
+    expect(getByLabelText("Profile").props.accessibilityState).toEqual(
+      expect.objectContaining({ selected: true }),
+    );
+  });
+
+  it("pressing Profile from someone's public profile returns to the user's own Profile tab", async () => {
+    const navigate = jest.fn();
+    const props = buildProps(0, navigate);
+    props.state = {
+      index: 5,
+      routes: [
+        ...ROUTES,
+        { key: "public-profile-1", name: "public-profile", params: { id: "w1" } },
+      ],
+    } as unknown as BottomTabBarProps["state"];
+
+    const { getByLabelText } = await render(<ProviderBottomNav {...props} />);
+    await fireEvent.press(getByLabelText("Profile"));
+
+    expect(navigate).toHaveBeenCalledWith("profile");
+  });
+
   it("pressing Responses while on response-detail still navigates to the Responses list", async () => {
     const navigate = jest.fn();
     const props = buildProps(0, navigate);

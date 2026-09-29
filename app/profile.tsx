@@ -1,5 +1,6 @@
-import { ProfileScreen } from "@/features/profile/ProfileScreen";
+import { MarketplaceProfileScreen } from "@/features/marketplace/profile/MarketplaceProfileScreen";
+import { getCurrentUserProfile } from "@/data/mock";
 
 export default function ProfileRoute() {
-  return <ProfileScreen />;
+  return <MarketplaceProfileScreen profile={getCurrentUserProfile()} viewer="owner" />;
 }

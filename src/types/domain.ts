@@ -135,6 +135,73 @@ export type JobWithResponses = {
   responses: JobResponse[];
 };
 
+// Whether a profile section or item shows to other people. The MVP has
+// exactly two states: hidden content stays visible to its owner (marked as
+// hidden) and never renders for anyone else. See
+// docs/engineering/domain-and-terminology.md.
+export type ProfileVisibility = "public" | "hidden";
+
+// A completed MuSkill Aasan job between one Job Provider and one Job Seeker.
+// The one record behind both the Provider's "Previous Job Posts" and the
+// Seeker's "Previous Work & Feedback", so the same job never exists twice.
+// The two sides' ratings are separate: the Provider receives stars only; the
+// Seeker receives stars plus written feedback. Each side controls, on their
+// own profile, whether the job shows publicly.
+export type CompletedJob = {
+  id: string;
+  title: string;
+  area: string;
+  // Display date, e.g. "12 Oct" — a display string like `JobResponse`'s
+  // `receivedAgo`, not a real Date.
+  completedOn: string;
+  providerId: string;
+  seekerId: string;
+  providerRating: number;
+  seekerFeedback: Omit<SeekerFeedback, "jobTitle">;
+  providerVisibility: ProfileVisibility;
+  seekerVisibility: ProfileVisibility;
+};
+
+// A star rating averaged over `ratingCount` ratings. Stored rather than
+// recomputed from the jobs a profile lists: a profile shows only some of a
+// person's history, and hiding a job never removes its rating from the
+// average.
+export type RatingSummary = {
+  rating: number;
+  ratingCount: number;
+};
+
+// The profile sections that carry their own Public/Hidden control, per the
+// finalized Profile Stitch designs.
+export type ProfileSection =
+  "providerReputation" | "previousJobPosts" | "seekerReputation" | "previousWork";
+
+// One of the current user's own open job posts, as the Provider Profile
+// shows it — with only a count of its (private) Responses.
+export type CurrentJobPost = {
+  task: Task;
+  responseCount: number;
+};
+
+// One account's marketplace identity. The same person has a Provider side
+// and a Seeker side — the profile's Provider/Seeker switch only chooses
+// which side is shown; it is not the Job Provider / Job Seeker app mode.
+export type MarketplaceProfile = {
+  id: string;
+  name: string;
+  area: string;
+  providerBio: string;
+  seekerBio: string;
+  providerRating: RatingSummary;
+  seekerRating: RatingSummary & { completedJobs: number };
+  // Labels from the app-wide `categories` list — never a separate taxonomy.
+  canHelpWith: string[];
+  currentJobPosts: CurrentJobPost[];
+  jobsAsProvider: CompletedJob[];
+  jobsAsSeeker: CompletedJob[];
+  sectionVisibility: Record<ProfileSection, ProfileVisibility>;
+};
+
 export type Offer = {
   id: string;
   taskId: string;

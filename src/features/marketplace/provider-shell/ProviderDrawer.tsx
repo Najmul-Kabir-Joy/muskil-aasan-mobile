@@ -24,9 +24,9 @@ const OPEN_ANIMATION_MS = 300;
 const CLOSE_ANIMATION_MS = 240;
 
 // Prototype/mock user identity — the same "Nadia Rahman, Mirpur" identity
-// ProfileScreen and ProviderAppHeader already use. No real phone number
-// exists anywhere in the app, so it's shown masked, matching the Stitch
-// design's own masked-phone treatment. See
+// the Profile tab (`getCurrentUserProfile`) and ProviderAppHeader use. No
+// real phone number exists anywhere in the app, so it's shown masked,
+// matching the Stitch design's own masked-phone treatment. See
 // docs/engineering/domain-and-terminology.md.
 const CURRENT_USER = {
   name: "Nadia Rahman",

@@ -117,8 +117,8 @@ export function ProviderResponseDetailScreen({
             accessibilityLabel={`View ${worker.name}'s profile`}
             onPress={() =>
               router.push({
-                pathname: "/(poster)/coming-soon",
-                params: { title: `${worker.name}'s Profile` },
+                pathname: "/(poster)/public-profile",
+                params: { id: worker.id, view: "seeker" },
               })
             }
             style={styles.profileButton}
