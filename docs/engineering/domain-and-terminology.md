@@ -176,9 +176,11 @@ preferred terms:
 shape for a Job Seeker's response to a job. It is deliberately separate from
 the legacy `Offer` type (which models a bid — `amount`, `estimatedTime`,
 `status` — none of which apply to a plain response) rather than overloading
-`Offer`'s fields. `Offer`/`OfferCard` remain in place for the screens that
-already use them (`app/(poster)/tasks.tsx`, the Job Seeker's own `Offer`
-screens) — this is not a signal to migrate them.
+`Offer`'s fields. `Offer`/`OfferCard` remain in place for the Job Seeker's own
+Offers screen (`app/(worker)/offers.tsx`), which still uses them — this is
+not a signal to migrate it. The Provider's My Jobs route
+(`app/(poster)/tasks.tsx`) no longer uses them; it renders the My Jobs
+screen described below.
 
 The Profile feature (`src/features/marketplace/profile/`) adds its own
 prototype shapes in `src/types/domain.ts`: `MarketplaceProfile` (one
@@ -189,6 +191,13 @@ previous-work preview and Refer Someone eligibility), and
 `ProfileVisibility`. Aggregate ratings are stored `RatingSummary` values, not
 recalculated from the jobs a profile lists. Like the rest of that file, these
 are mock shapes, not backend contracts.
+
+My Jobs (`src/features/marketplace/my-jobs/`, rendered by
+`app/(poster)/tasks.tsx`) groups the Provider's jobs as
+`ProviderJobs` — Open, In progress, Completed — using prototype `TaskStatus`
+mappings plus `AcceptedJobRequest` (a job request the Job Seeker accepted,
+per #12–13). It shows no lifecycle actions and no "waiting for the Job Seeker
+to accept" stage, because those behaviors are still undefined (see below).
 
 **This is documentation, not a rename mandate.** The legacy names above are
 still what the code actually uses today, and that's deliberate — renaming all

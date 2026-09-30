@@ -183,6 +183,25 @@ export type CurrentJobPost = {
   responseCount: number;
 };
 
+// A job request a Job Seeker has accepted (confirmed: the Provider sends a
+// request to someone chosen from the Responses, and they must accept).
+// Nothing here decides whether one job can have more than one — that's
+// undefined — so a job simply lists every request accepted for it.
+export type AcceptedJobRequest = {
+  taskId: string;
+  seekerId: string;
+};
+
+// The current Provider's own jobs, grouped the way My Jobs shows them.
+// `open` and `inProgress` come from the prototype `TaskStatus` values (see
+// `getProviderJobs` in src/data/mock.ts); `completed` comes from
+// `CompletedJob` records. Not an approved lifecycle.
+export type ProviderJobs = {
+  open: CurrentJobPost[];
+  inProgress: { task: Task; seekers: WorkerProfile[] }[];
+  completed: { job: CompletedJob; seeker: WorkerProfile }[];
+};
+
 // A photo placed in a profile frame (the profile photo or the cover), with
 // the framing its owner chose. `zoom` (at least 1) scales the photo past
 // "just fills the frame"; `offsetX`/`offsetY` move its centre by a fraction

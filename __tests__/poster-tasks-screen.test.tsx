@@ -1,6 +1,7 @@
-import { fireEvent, render } from "@testing-library/react-native";
+import { render } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
-import PosterTasksScreen from "../app/(poster)/tasks";
+import MyJobsRoute from "../app/(poster)/tasks";
+import { tasks } from "@/data/mock";
 
 jest.mock("expo-router", () => ({
   useRouter: jest.fn(),
@@ -8,26 +9,21 @@ jest.mock("expo-router", () => ({
 
 const mockUseRouter = useRouter as jest.Mock;
 
-describe("PosterTasksScreen (My Jobs)", () => {
-  it("still renders its own page content after being restricted to left/right safe-area edges", async () => {
-    mockUseRouter.mockReturnValue({ push: jest.fn() });
-
-    const { getByText } = await render(<PosterTasksScreen />);
-
-    expect(getByText("Compare offers safely.")).toBeTruthy();
-    expect(getByText("My tasks")).toBeTruthy();
+describe("My Jobs route", () => {
+  beforeEach(() => {
+    mockUseRouter.mockReturnValue({ push: jest.fn(), replace: jest.fn() });
   });
 
-  it("links to task status and support inside the Provider shell, not the standalone routes", async () => {
-    const push = jest.fn();
-    mockUseRouter.mockReturnValue({ push });
+  it("renders the Provider's My Jobs with their own jobs", async () => {
+    const { getByText } = await render(<MyJobsRoute />);
 
-    const { getByRole } = await render(<PosterTasksScreen />);
+    expect(getByText("My Jobs")).toBeTruthy();
+    expect(getByText(tasks[0].title)).toBeTruthy();
+  });
 
-    await fireEvent.press(getByRole("button", { name: "View task timeline" }));
-    expect(push).toHaveBeenCalledWith("/(poster)/task-status");
+  it("does not render the Provider shell's header itself — that's owned by the (poster) layout", async () => {
+    const { queryByLabelText } = await render(<MyJobsRoute />);
 
-    await fireEvent.press(getByRole("button", { name: "Report an issue" }));
-    expect(push).toHaveBeenCalledWith("/(poster)/support");
+    expect(queryByLabelText("Open navigation menu")).toBeNull();
   });
 });

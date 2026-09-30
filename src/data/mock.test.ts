@@ -9,6 +9,7 @@ import {
   getEligibleReferrals,
   getJobsWithResponses,
   getMarketplaceProfile,
+  getProviderJobs,
   getResponseWithJob,
   jobResponses,
   tasks,
@@ -224,5 +225,50 @@ describe("getMarketplaceProfile", () => {
 
   it("returns undefined for an unknown id", () => {
     expect(getMarketplaceProfile("not-a-real-id")).toBeUndefined();
+  });
+});
+
+describe("getProviderJobs", () => {
+  it("puts only jobs still collecting Responses in Open, each with its real Response count", () => {
+    const { open } = getProviderJobs();
+
+    expect(open.length).toBeGreaterThan(0);
+    for (const { task, responseCount } of open) {
+      expect(["open", "offer received"]).toContain(task.status);
+      expect(responseCount).toBe(
+        jobResponses.filter((response) => response.taskId === task.id).length,
+      );
+    }
+  });
+
+  it("puts accepted jobs in In progress with the Job Seekers who accepted them", () => {
+    const hired = { ...tasks[0], id: "x1", status: "hired" as const };
+    const { inProgress, open } = getProviderJobs(
+      [hired],
+      [{ taskId: "x1", seekerId: workers[0].id }],
+    );
+
+    expect(open).toEqual([]);
+    expect(inProgress).toEqual([{ task: hired, seekers: [workers[0]] }]);
+  });
+
+  it("never lists a job in more than one tab, and drops statuses it doesn't show", () => {
+    const statuses = ["draft", "cancelled", "disputed", "completed"] as const;
+    const { open, inProgress } = getProviderJobs(
+      statuses.map((status, index) => ({ ...tasks[0], id: `s${index}`, status })),
+    );
+
+    expect(open).toEqual([]);
+    expect(inProgress).toEqual([]);
+  });
+
+  it("lists only jobs the current user provided as Completed, newest first, with who did each", () => {
+    const { completed } = getProviderJobs();
+    const provided = completedJobs.filter((job) => job.providerId === CURRENT_USER_ID);
+
+    expect(completed.map(({ job }) => job)).toEqual([...provided].reverse());
+    for (const { job, seeker } of completed) {
+      expect(seeker.id).toBe(job.seekerId);
+    }
   });
 });
