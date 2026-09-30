@@ -190,6 +190,12 @@ previous-work preview and Refer Someone eligibility), and
 recalculated from the jobs a profile lists. Like the rest of that file, these
 are mock shapes, not backend contracts.
 
+My Jobs (`src/features/marketplace/my-jobs/`) groups the Provider's jobs as
+`ProviderJobs` — Open, In progress, Completed — using prototype `TaskStatus`
+mappings plus `AcceptedJobRequest` (a job request the Job Seeker accepted,
+per #12–13). It shows no lifecycle actions and no "waiting for the Job Seeker
+to accept" stage, because those behaviors are still undefined (see below).
+
 **This is documentation, not a rename mandate.** The legacy names above are
 still what the code actually uses today, and that's deliberate — renaming all
 of them is a broad, separate change with real risk (dozens of files, route

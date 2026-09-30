@@ -1,4 +1,5 @@
 import type {
+  AcceptedJobRequest,
   Category,
   CompletedJob,
   CompletedReferralJob,
@@ -10,6 +11,7 @@ import type {
   Offer,
   ProfileSection,
   ProfileVisibility,
+  ProviderJobs,
   SeekerFeedback,
   Task,
   TimelineEvent,
@@ -675,6 +677,26 @@ function isCurrentJobPost(task: Task) {
   return task.status === "open" || task.status === "offer received";
 }
 
+// The current user's open posts, each with its (private) Responses count —
+// shared by the Profile's Current Job Posts and My Jobs' Open tab.
+function currentJobPostsOf(ownTasks: Task[]): CurrentJobPost[] {
+  return ownTasks.filter(isCurrentJobPost).map((task) => ({
+    task,
+    responseCount: jobResponses.filter((response) => response.taskId === task.id).length,
+  }));
+}
+
+// Prototype mapping, not an approved lifecycle rule: after a Job Seeker has
+// accepted, the job is underway until it's completed. How completion is
+// confirmed is undefined, so nothing here moves a job to Completed.
+function isInProgress(task: Task) {
+  return (
+    task.status === "hired" ||
+    task.status === "in progress" ||
+    task.status === "completion requested"
+  );
+}
+
 function newestFirst(jobs: CompletedJob[]) {
   return [...jobs].reverse();
 }
@@ -699,13 +721,7 @@ function buildProfile(person: WorkerProfile, details: ProfileDetails): Marketpla
     canHelpWith: person.categories,
     // `tasks` are the signed-in account's own posts; nobody else's job posts
     // are modelled yet, so other profiles have no current posts.
-    currentJobPosts:
-      person.id === CURRENT_USER_ID
-        ? tasks.filter(isCurrentJobPost).map((task): CurrentJobPost => ({
-            task,
-            responseCount: jobResponses.filter((response) => response.taskId === task.id).length,
-          }))
-        : [],
+    currentJobPosts: person.id === CURRENT_USER_ID ? currentJobPostsOf(tasks) : [],
     jobsAsProvider: newestFirst(completedJobs.filter((job) => job.providerId === person.id)),
     jobsAsSeeker: newestFirst(completedJobs.filter((job) => job.seekerId === person.id)),
     sectionVisibility: details.sectionVisibility,
@@ -729,6 +745,40 @@ export function getMarketplaceProfile(id: string): MarketplaceProfile | undefine
   const details = profileDetails.find((candidate) => candidate.id === id);
   if (!person || !details) return undefined;
   return buildProfile(person, details);
+}
+
+// Job requests the current Provider sent that the Job Seeker accepted — the
+// legacy `offers` list already has Arman (w3) accepted on t3.
+export const acceptedJobRequests: AcceptedJobRequest[] = [{ taskId: "t3", seekerId: "w3" }];
+
+// The current Provider's jobs for My Jobs: open posts, jobs a Job Seeker has
+// accepted, and completed jobs (newest first). Explicit inputs keep it
+// testable, matching `getJobsWithResponses`.
+export function getProviderJobs(
+  ownTasks: Task[] = tasks,
+  accepted: AcceptedJobRequest[] = acceptedJobRequests,
+  completed: CompletedJob[] = completedJobs,
+): ProviderJobs {
+  const workerById = (id: string) => workers.find((worker) => worker.id === id);
+
+  return {
+    open: currentJobPostsOf(ownTasks),
+    inProgress: ownTasks.filter(isInProgress).map((task) => ({
+      task,
+      seekers: accepted
+        .filter((request) => request.taskId === task.id)
+        .flatMap((request) => {
+          const seeker = workerById(request.seekerId);
+          return seeker ? [seeker] : [];
+        }),
+    })),
+    completed: newestFirst(completed.filter((job) => job.providerId === CURRENT_USER_ID)).flatMap(
+      (job) => {
+        const seeker = workerById(job.seekerId);
+        return seeker ? [{ job, seeker }] : [];
+      },
+    ),
+  };
 }
 
 export const taskTimeline: TimelineEvent[] = [
