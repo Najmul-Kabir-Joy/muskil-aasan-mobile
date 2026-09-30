@@ -719,6 +719,11 @@ export function getCurrentUserProfile(): MarketplaceProfile {
 
 // Anyone's profile by account id, for the Public Profile route. Undefined for
 // an unknown id so the route can show a not-found state.
+//
+// Prototype only: this returns hidden sections and items too, and the screen
+// leaves them out for public viewers. That's UX, not privacy — a real backend
+// must never send hidden content to anyone but its owner (see
+// docs/engineering/security.md).
 export function getMarketplaceProfile(id: string): MarketplaceProfile | undefined {
   const person = workers.find((candidate) => candidate.id === id);
   const details = profileDetails.find((candidate) => candidate.id === id);

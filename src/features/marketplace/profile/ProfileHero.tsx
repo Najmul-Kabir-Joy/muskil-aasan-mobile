@@ -4,7 +4,12 @@ import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-na
 import Svg, { Circle, Path } from "react-native-svg";
 import { COVER_HEIGHT } from "@/features/marketplace/profile/photoFraming";
 import { ProfileBio } from "@/features/marketplace/profile/ProfileBio";
-import type { ProfileSide, ProfileViewer } from "@/features/marketplace/profile/profileHelpers";
+import {
+  areaWithCity,
+  firstNameOf,
+  type ProfileSide,
+  type ProfileViewer,
+} from "@/features/marketplace/profile/profileHelpers";
 import { ProfilePhotoView } from "@/features/marketplace/profile/ProfilePhotoView";
 import { SeekerAvatar } from "@/features/marketplace/responses/SeekerAvatar";
 import { BRAND_NAME } from "@/shared/constants/brand";
@@ -13,7 +18,8 @@ import type { ProfilePhoto } from "@/types/domain";
 
 const AVATAR_SIZE = 88;
 const AVATAR_RING = 4;
-const HIT_SLOP = { top: 6, bottom: 6, left: 6, right: 6 };
+// Brings the 30–36pt round controls (pencils, Share, Back) to at least 44pt.
+const HIT_SLOP = 8;
 
 /**
  * The profile's identity block from the finalized Profile Stitch designs:
@@ -158,8 +164,7 @@ export function ProfileHero({
         </Text>
         <View style={styles.areaRow}>
           <MaterialIcons name="location-on" size={16} color={colors.primary} />
-          {/* Dhaka is the confirmed launch city; areas are neighborhoods. */}
-          <Text style={styles.areaText}>{area}, Dhaka</Text>
+          <Text style={styles.areaText}>{areaWithCity(area)}</Text>
         </View>
         {/* Keyed by side so an unsaved edit of one side's bio never carries
             over to the other side's. */}
@@ -167,7 +172,7 @@ export function ProfileHero({
 
         <View style={styles.captionRow}>
           <MaterialIcons name="visibility" size={14} color={colors.primary} />
-          <ViewCaption viewer={viewer} side={side} firstName={name.split(" ")[0] ?? name} />
+          <ViewCaption viewer={viewer} side={side} firstName={firstNameOf(name)} />
         </View>
       </View>
     </View>

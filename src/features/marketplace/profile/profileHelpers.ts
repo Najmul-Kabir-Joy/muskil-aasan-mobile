@@ -36,6 +36,17 @@ export function jobVisibilityOn(job: CompletedJob, side: ProfileSide): ProfileVi
   return side === "provider" ? job.providerVisibility : job.seekerVisibility;
 }
 
+// "Nadia" from "Nadia Rahman".
+export function firstNameOf(name: string) {
+  return name.split(" ")[0] ?? name;
+}
+
+// "Mirpur, Dhaka" — accounts store a neighborhood; Dhaka is the confirmed
+// launch city.
+export function areaWithCity(area: string) {
+  return `${area}, Dhaka`;
+}
+
 // "4.7", "5.0" — ratings always show one decimal place.
 export function formatRating(rating: number) {
   return rating.toFixed(1);

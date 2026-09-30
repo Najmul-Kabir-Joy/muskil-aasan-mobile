@@ -1,5 +1,7 @@
 import {
+  areaWithCity,
   categoryIconFor,
+  firstNameOf,
   completedJobsLabel,
   formatRating,
   isShownTo,
@@ -66,5 +68,16 @@ describe("categoryIconFor", () => {
 
   it("falls back to a generic icon for a label outside the category list", () => {
     expect(categoryIconFor("Not a category")).toBe("work-outline");
+  });
+});
+
+describe("names and places", () => {
+  it("uses the first word of a name as the first name", () => {
+    expect(firstNameOf("Nadia Rahman")).toBe("Nadia");
+    expect(firstNameOf("Rafiq")).toBe("Rafiq");
+  });
+
+  it("shows an area with the launch city", () => {
+    expect(areaWithCity("Mirpur 10")).toBe("Mirpur 10, Dhaka");
   });
 });

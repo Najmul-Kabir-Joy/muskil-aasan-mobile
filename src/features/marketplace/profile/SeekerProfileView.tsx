@@ -24,7 +24,8 @@ import type {
 } from "@/types/domain";
 
 const MAX_STARS = 5;
-const HIT_SLOP = { top: 8, bottom: 8, left: 8, right: 8 };
+// Brings the header's text links ("Manage >", "Add Skill") to about 44pt tall.
+const HIT_SLOP = { top: 14, bottom: 14, left: 8, right: 8 };
 
 /**
  * The Seeker side of a profile: Seeker Reputation (its own rating, never

@@ -7,6 +7,8 @@ import { PhotoEditorModal, type PhotoSlot } from "@/features/marketplace/profile
 import { pickProfilePhoto } from "@/features/marketplace/profile/pickProfilePhoto";
 import { ProfileHero } from "@/features/marketplace/profile/ProfileHero";
 import {
+  areaWithCity,
+  firstNameOf,
   jobVisibilityOn,
   withJobVisibility,
   type ProfileSide,
@@ -130,7 +132,7 @@ export function MarketplaceProfileScreen({
     const sideLabel = side === "provider" ? "Provider Profile" : "Seeker Profile";
     try {
       await Share.share({
-        message: `${profile.name} — ${sideLabel} on ${BRAND_NAME}\n${profile.area}, Dhaka`,
+        message: `${profile.name} — ${sideLabel} on ${BRAND_NAME}\n${areaWithCity(profile.area)}`,
       });
     } catch {
       Alert.alert("Couldn't open sharing", "Please try again.");
@@ -179,7 +181,7 @@ export function MarketplaceProfileScreen({
           {side === "provider" ? (
             <ProviderProfileView
               viewer={viewer}
-              firstName={profile.name.split(" ")[0] ?? profile.name}
+              firstName={firstNameOf(profile.name)}
               rating={profile.providerRating}
               currentJobPosts={profile.currentJobPosts}
               previousJobs={jobsAsProvider}

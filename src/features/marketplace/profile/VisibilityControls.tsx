@@ -4,7 +4,8 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, fonts, radius, spacing } from "@/theme/tokens";
 import type { ProfileVisibility } from "@/types/domain";
 
-const HIT_SLOP = { top: 10, bottom: 10, left: 6, right: 6 };
+// Brings the small text pills and links to about 44pt tall.
+const HIT_SLOP = { top: 14, bottom: 14, left: 6, right: 6 };
 
 /**
  * Owner-only "Public ▾" / "Hidden ▾" control on a profile section header.

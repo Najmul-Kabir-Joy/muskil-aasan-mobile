@@ -24,7 +24,8 @@ import type {
   RatingSummary,
 } from "@/types/domain";
 
-const HIT_SLOP = { top: 8, bottom: 8, left: 8, right: 8 };
+// Brings the header's text links ("Manage >", "Add Skill") to about 44pt tall.
+const HIT_SLOP = { top: 14, bottom: 14, left: 8, right: 8 };
 
 /**
  * The Provider side of a profile: Provider Reputation (stars only), Current
