@@ -85,9 +85,14 @@ the explicit non-example after the list.
 24. Profile content is either Public or Hidden (MVP). Hidden content stays
     visible to its owner, marked as hidden, and never shows to anyone else.
     Hiding a rated item never removes its rating from the aggregate.
-25. The Provider Profile / Seeker Profile switch on a profile only changes
-    which side of that one person is shown. It is not the app-mode switch —
-    Job Provider / Job Seeker mode is switched from the navigation drawer.
+25. A profile has no Provider / Seeker switch of its own. Your own profile
+    shows the side that matches your current app mode (Job Provider →
+    Provider Profile, Job Seeker → Seeker Profile); mode is switched from
+    the navigation drawer. Someone else's profile shows the side its entry
+    point is about (e.g. a Response opens the Seeker side).
+26. Profile edits happen in place on the profile — no separate Edit Profile
+    screen: the owner changes their profile photo and cover photo (with
+    cropping) and their bio directly on it.
 
 **Confirmed requirement ≠ implementation detail.** For example, #11-13 confirm
 that a provider-chooses-then-seeker-accepts flow exists at a high level — they

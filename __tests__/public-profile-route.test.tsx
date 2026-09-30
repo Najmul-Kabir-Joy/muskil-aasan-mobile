@@ -38,18 +38,18 @@ describe("Public Profile route", () => {
 
     expect(getByText(worker.name)).toBeTruthy();
     expect(queryByText("Owner View")).toBeNull();
-    expect(queryByRole("button", { name: "Edit Profile" })).toBeNull();
+    expect(queryByRole("button", { name: "Edit profile photo" })).toBeNull();
+    expect(queryByRole("button", { name: "Edit cover photo" })).toBeNull();
+    expect(queryByRole("button", { name: "Edit bio" })).toBeNull();
   });
 
   it("opens the Seeker side when view=seeker", async () => {
     mockUseLocalSearchParams.mockReturnValue({ id: workers[0].id, view: "seeker" });
 
-    const { getByText, getByRole } = await renderRoute();
+    const { getByText, queryByText } = await renderRoute();
 
     expect(getByText("Seeker Reputation")).toBeTruthy();
-    expect(getByRole("button", { name: "Seeker Profile" }).props.accessibilityState).toEqual(
-      expect.objectContaining({ selected: true }),
-    );
+    expect(queryByText("Provider Reputation")).toBeNull();
   });
 
   it("falls back to the Provider side for a missing or unknown view", async () => {

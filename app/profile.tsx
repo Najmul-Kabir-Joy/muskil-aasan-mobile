@@ -2,5 +2,7 @@ import { MarketplaceProfileScreen } from "@/features/marketplace/profile/Marketp
 import { getCurrentUserProfile } from "@/data/mock";
 
 export default function ProfileRoute() {
-  return <MarketplaceProfileScreen profile={getCurrentUserProfile()} viewer="owner" />;
+  return (
+    <MarketplaceProfileScreen profile={getCurrentUserProfile()} viewer="owner" side="provider" />
+  );
 }

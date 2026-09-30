@@ -183,13 +183,30 @@ export type CurrentJobPost = {
   responseCount: number;
 };
 
+// A photo placed in a profile frame (the profile photo or the cover), with
+// the framing its owner chose. `zoom` (at least 1) scales the photo past
+// "just fills the frame"; `offsetX`/`offsetY` move its centre by a fraction
+// of the frame's width/height, so the same framing renders at any size.
+export type ProfilePhoto = {
+  uri: string;
+  width: number;
+  height: number;
+  zoom: number;
+  offsetX: number;
+  offsetY: number;
+};
+
 // One account's marketplace identity. The same person has a Provider side
-// and a Seeker side — the profile's Provider/Seeker switch only chooses
-// which side is shown; it is not the Job Provider / Job Seeker app mode.
+// and a Seeker side; which one a profile shows comes from context (your own
+// profile follows your current Job Provider / Job Seeker mode), never from a
+// switch on the profile itself.
 export type MarketplaceProfile = {
   id: string;
   name: string;
   area: string;
+  // Shared by both sides — one account, one photo and cover.
+  profilePhoto: ProfilePhoto | null;
+  coverPhoto: ProfilePhoto | null;
   providerBio: string;
   seekerBio: string;
   providerRating: RatingSummary;

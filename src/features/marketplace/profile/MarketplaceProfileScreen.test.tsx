@@ -1,4 +1,5 @@
 import { fireEvent, render } from "@testing-library/react-native";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import type { ReactElement } from "react";
 import { Share } from "react-native";
@@ -11,7 +12,14 @@ jest.mock("expo-router", () => ({
   useRouter: jest.fn(),
 }));
 
+jest.mock("expo-image-picker", () => ({
+  launchImageLibraryAsync: jest.fn(),
+}));
+
 const mockUseRouter = useRouter as jest.Mock;
+const mockLaunchLibrary = ImagePicker.launchImageLibraryAsync as jest.Mock;
+
+const PICKED_PHOTO = { uri: "file:///photos/nadia.jpg", width: 1200, height: 800 };
 
 // The profile's sheets read safe-area insets, which need a provider — see
 // ProviderDrawer.test.tsx for the same pattern.
@@ -83,6 +91,8 @@ const PROFILE: MarketplaceProfile = {
   id: "w7",
   name: "Nadia Rahman",
   area: "Mirpur",
+  profilePhoto: null,
+  coverPhoto: null,
   providerBio: "Looking for reliable help for home projects.",
   seekerBio: "Happy to help with appliance troubleshooting and errands.",
   providerRating: { rating: 4.7, ratingCount: 18 },
@@ -111,11 +121,12 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
     push = jest.fn();
     replace = jest.fn();
     mockUseRouter.mockReturnValue({ push, replace, back: jest.fn() });
+    mockLaunchLibrary.mockReset();
   });
 
-  it("renders the Provider view by default: identity, Provider Reputation, current and previous job posts", async () => {
-    const { getByText, getByRole } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" />,
+  it("renders the Provider side: identity, Provider Reputation, current and previous job posts", async () => {
+    const { getByText } = await renderWithSafeArea(
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
     );
 
     expect(getByText("Nadia Rahman")).toBeTruthy();
@@ -125,56 +136,35 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
     expect(getByText("Provider Reputation")).toBeTruthy();
     expect(getByText("Current Job Posts")).toBeTruthy();
     expect(getByText(/^Previous Job Posts/)).toBeTruthy();
-    expect(getByRole("button", { name: "Provider Profile" }).props.accessibilityState).toEqual(
-      expect.objectContaining({ selected: true }),
-    );
+    expect(getByText(/for Job Provider mode/)).toBeTruthy();
   });
 
-  it("renders the Seeker view: Seeker Reputation, Can Help With, Previous Work & Feedback", async () => {
-    const { getByText, getByRole, queryByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" initialSide="seeker" />,
+  it("renders the Seeker side: Seeker Reputation, Can Help With, Previous Work & Feedback", async () => {
+    const { getByText, queryByText } = await renderWithSafeArea(
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="seeker" />,
     );
 
     expect(getByText("Seeker Reputation")).toBeTruthy();
     expect(getByText("Can Help With")).toBeTruthy();
     expect(getByText("Previous Work & Feedback")).toBeTruthy();
     expect(getByText(PROFILE.seekerBio)).toBeTruthy();
+    expect(getByText(/for Job Seeker mode/)).toBeTruthy();
     expect(queryByText("Current Job Posts")).toBeNull();
-    expect(getByRole("button", { name: "Seeker Profile" }).props.accessibilityState).toEqual(
-      expect.objectContaining({ selected: true }),
-    );
   });
 
-  it("the profile-view switch moves between the Provider and Seeker sides of the same account", async () => {
-    const { getByText, getByRole, queryByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" />,
+  it("has no Provider / Seeker switch — the side comes from the app mode, switched in the drawer", async () => {
+    const { queryByRole, queryByText } = await renderWithSafeArea(
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
     );
 
-    await fireEvent.press(getByRole("button", { name: "Seeker Profile" }));
-    expect(getByText("Seeker Reputation")).toBeTruthy();
-    expect(queryByText("Provider Reputation")).toBeNull();
-    expect(getByText("Nadia Rahman")).toBeTruthy();
-
-    await fireEvent.press(getByRole("button", { name: "Provider Profile" }));
-    expect(getByText("Provider Reputation")).toBeTruthy();
+    expect(queryByRole("button", { name: "Seeker Profile" })).toBeNull();
+    expect(queryByRole("button", { name: "Provider Profile" })).toBeNull();
     expect(queryByText("Seeker Reputation")).toBeNull();
-  });
-
-  it("switching the profile view never changes the app's Job Provider / Job Seeker mode", async () => {
-    const { getByRole } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" />,
-    );
-
-    await fireEvent.press(getByRole("button", { name: "Seeker Profile" }));
-    await fireEvent.press(getByRole("button", { name: "Provider Profile" }));
-
-    expect(replace).not.toHaveBeenCalled();
-    expect(push).not.toHaveBeenCalled();
   });
 
   it("shows the Provider Rating on its own, with its rating count", async () => {
     const { getByText, getByLabelText, queryByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
     );
 
     expect(getByLabelText("Provider Rating: 4.7 out of 5")).toBeTruthy();
@@ -185,7 +175,7 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
 
   it("shows the Seeker Rating on its own, with its completed-jobs context", async () => {
     const { getByText, getByLabelText, queryByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" initialSide="seeker" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="seeker" />,
     );
 
     expect(getByLabelText("Seeker Rating: 4.9 out of 5")).toBeTruthy();
@@ -196,7 +186,7 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
 
   it("lists current job posts with Responses (not Offers) and links to Responses and My Jobs", async () => {
     const { getByText, getByRole, queryByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
     );
 
     expect(getByText(tasks[0].title)).toBeTruthy();
@@ -215,7 +205,7 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
 
   it("lists previous job posts with a star rating only — no written feedback on the Provider side", async () => {
     const { getByText, getAllByText, queryByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
     );
 
     expect(getByText(PROVIDER_PUBLIC_JOB.title)).toBeTruthy();
@@ -229,7 +219,7 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
 
   it("shows Can Help With using the app-wide categories", async () => {
     const { getByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" initialSide="seeker" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="seeker" />,
     );
 
     expect(getByText("Repair")).toBeTruthy();
@@ -238,7 +228,7 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
 
   it("shows previous Seeker work with stars, written feedback, and neutral attribution only", async () => {
     const { getByText, getAllByText, queryByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" initialSide="seeker" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="seeker" />,
     );
 
     expect(getByText(SEEKER_PUBLIC_JOB.title)).toBeTruthy();
@@ -248,22 +238,130 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
     expect(queryByText(/Hired by/)).toBeNull();
   });
 
-  it("shows Edit Profile, which opens the prototype placeholder rather than an invented form", async () => {
-    const { getByRole } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" />,
+  it("edits in place: pencils on both photos and the bio, and no separate Edit Profile screen", async () => {
+    const { getByRole, queryByRole } = await renderWithSafeArea(
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
     );
 
-    await fireEvent.press(getByRole("button", { name: "Edit Profile" }));
+    expect(getByRole("button", { name: "Edit profile photo" })).toBeTruthy();
+    expect(getByRole("button", { name: "Edit cover photo" })).toBeTruthy();
+    expect(getByRole("button", { name: "Edit bio" })).toBeTruthy();
+    expect(queryByRole("button", { name: "Edit Profile" })).toBeNull();
+    expect(push).not.toHaveBeenCalled();
+  });
 
-    expect(push).toHaveBeenCalledWith({
-      pathname: "/(poster)/coming-soon",
-      params: { title: "Edit Profile" },
-    });
+  it("the profile-photo pencil opens the photo library, then the crop editor, and Save shows the photo", async () => {
+    mockLaunchLibrary.mockResolvedValue({ canceled: false, assets: [PICKED_PHOTO] });
+    const { getByRole, getByText, queryByText, toJSON } = await renderWithSafeArea(
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
+    );
+
+    await fireEvent.press(getByRole("button", { name: "Edit profile photo" }));
+
+    expect(mockLaunchLibrary).toHaveBeenCalledWith(
+      expect.objectContaining({ mediaTypes: ["images"] }),
+    );
+    expect(getByText("Profile photo")).toBeTruthy();
+    expect(getByText("Drag to reposition · Pinch to zoom")).toBeTruthy();
+    // Nothing saved yet, so there's nothing to remove.
+    expect(queryByText("Remove photo")).toBeNull();
+
+    await fireEvent.press(getByRole("button", { name: "Zoom in" }));
+    expect(getByText("125%")).toBeTruthy();
+    await fireEvent.press(getByRole("button", { name: "Save" }));
+
+    expect(queryByText("Profile photo")).toBeNull();
+    expect(imageUris(toJSON())).toEqual([PICKED_PHOTO.uri]);
+  });
+
+  it("the cover pencil frames the cover as a wide banner, separately from the profile photo", async () => {
+    mockLaunchLibrary.mockResolvedValue({ canceled: false, assets: [PICKED_PHOTO] });
+    const { getByRole, getByText, getByLabelText } = await renderWithSafeArea(
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
+    );
+
+    await fireEvent.press(getByRole("button", { name: "Edit cover photo" }));
+
+    expect(getByText("Cover photo")).toBeTruthy();
+    expect(getByLabelText(/^Cover photo preview/)).toBeTruthy();
+  });
+
+  it("backing out of the photo library changes nothing", async () => {
+    mockLaunchLibrary.mockResolvedValue({ canceled: true, assets: null });
+    const { getByRole, queryByText } = await renderWithSafeArea(
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
+    );
+
+    await fireEvent.press(getByRole("button", { name: "Edit profile photo" }));
+
+    expect(queryByText("Profile photo")).toBeNull();
+  });
+
+  it("with a photo already set, the pencil reopens the editor on it, where it can be removed", async () => {
+    const { getByRole, queryByText, toJSON } = await renderWithSafeArea(
+      <MarketplaceProfileScreen
+        profile={{
+          ...PROFILE,
+          profilePhoto: { ...PICKED_PHOTO, zoom: 1.5, offsetX: 0, offsetY: 0 },
+        }}
+        viewer="owner"
+        side="provider"
+      />,
+    );
+
+    await fireEvent.press(getByRole("button", { name: "Edit profile photo" }));
+
+    expect(mockLaunchLibrary).not.toHaveBeenCalled();
+    expect(queryByText("150%")).toBeTruthy();
+    await fireEvent.press(getByRole("button", { name: "Remove photo" }));
+
+    expect(queryByText("Profile photo")).toBeNull();
+    expect(imageUris(toJSON())).toEqual([]);
+  });
+
+  it("edits the bio inline and saves it, for the side being shown only", async () => {
+    const { getByRole, getByLabelText, getByText, queryByText } = await renderWithSafeArea(
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
+    );
+
+    await fireEvent.press(getByRole("button", { name: "Edit bio" }));
+    await fireEvent.changeText(getByLabelText("Bio"), "  Posting small home jobs in Mirpur.  ");
+    expect(getByText("38/160")).toBeTruthy();
+    await fireEvent.press(getByRole("button", { name: "Save" }));
+
+    expect(getByText("Posting small home jobs in Mirpur.")).toBeTruthy();
+    expect(queryByText(PROFILE.providerBio)).toBeNull();
+  });
+
+  it("cancelling a bio edit keeps the original bio", async () => {
+    const { getByRole, getByLabelText, getByText, queryByLabelText } = await renderWithSafeArea(
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
+    );
+
+    await fireEvent.press(getByRole("button", { name: "Edit bio" }));
+    await fireEvent.changeText(getByLabelText("Bio"), "Something else");
+    await fireEvent.press(getByRole("button", { name: "Cancel" }));
+
+    expect(queryByLabelText("Bio")).toBeNull();
+    expect(getByText(PROFILE.providerBio)).toBeTruthy();
+  });
+
+  it("invites the owner to add a bio when there isn't one", async () => {
+    const { getByRole, getByText } = await renderWithSafeArea(
+      <MarketplaceProfileScreen
+        profile={{ ...PROFILE, providerBio: "" }}
+        viewer="owner"
+        side="provider"
+      />,
+    );
+
+    expect(getByText("Add a short bio so people know who you are.")).toBeTruthy();
+    expect(getByRole("button", { name: "Add bio" })).toBeTruthy();
   });
 
   it("shows hidden items to the owner, clearly marked as hidden, with a way to make them public", async () => {
     const { getByText, getByRole } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
     );
 
     expect(getByText(PROVIDER_HIDDEN_JOB.title)).toBeTruthy();
@@ -279,7 +377,7 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
 
   it("shows hidden Seeker work to the owner, marked as hidden", async () => {
     const { getByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" initialSide="seeker" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="seeker" />,
     );
 
     expect(getByText(SEEKER_HIDDEN_JOB.title)).toBeTruthy();
@@ -289,7 +387,7 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
 
   it("hiding an item changes only its visibility — the aggregate rating it contributes to stays the same", async () => {
     const { getByText, getAllByText, getByRole, getByLabelText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
     );
 
     await fireEvent.press(
@@ -305,7 +403,7 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
 
   it("can hide a whole section from the public, and marks it as hidden for the owner", async () => {
     const { getByRole, getByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
     );
 
     await fireEvent.press(getByRole("button", { name: "Provider Reputation visibility: Public" }));
@@ -318,7 +416,7 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
 
   it("Add Skill adds a category from the app-wide list to Can Help With (local only)", async () => {
     const { getByRole, getByText, queryByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" initialSide="seeker" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="seeker" />,
     );
 
     expect(queryByText("Cleaning")).toBeNull();
@@ -332,7 +430,7 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
   it("Share uses the platform share sheet with public profile text only", async () => {
     const shareSpy = jest.spyOn(Share, "share").mockResolvedValue({ action: "sharedAction" });
     const { getByRole } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="owner" side="provider" />,
     );
 
     await fireEvent.press(getByRole("button", { name: "Share profile" }));
@@ -357,20 +455,22 @@ describe("MarketplaceProfileScreen — My Profile (owner)", () => {
       canHelpWith: ["Repair", "Tutor", "Delivery", "Design", "Photo", "Admin", "Cleaning"],
     };
 
-    const { getByText, getByRole } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={longProfile} viewer="owner" />,
+    const provider = await renderWithSafeArea(
+      <MarketplaceProfileScreen profile={longProfile} viewer="owner" side="provider" />,
     );
 
-    expect(getByText(longProfile.name).props.numberOfLines).toBeUndefined();
+    expect(provider.getByText(longProfile.name).props.numberOfLines).toBeUndefined();
     // Two lines, then ellipsis — a job title can't push the budget off the card.
-    expect(getByText(longTitle).props.numberOfLines).toBe(2);
-    expect(getByText("Active • 1 Response")).toBeTruthy();
+    expect(provider.getByText(longTitle).props.numberOfLines).toBe(2);
+    expect(provider.getByText("Active • 1 Response")).toBeTruthy();
 
-    await fireEvent.press(getByRole("button", { name: "Seeker Profile" }));
-    expect(getByText(longProfile.seekerBio).props.numberOfLines).toBeUndefined();
-    expect(getByText(`“${longComment}”`).props.numberOfLines).toBeUndefined();
+    const seeker = await renderWithSafeArea(
+      <MarketplaceProfileScreen profile={longProfile} viewer="owner" side="seeker" />,
+    );
+    expect(seeker.getByText(longProfile.seekerBio).props.numberOfLines).toBeUndefined();
+    expect(seeker.getByText(`“${longComment}”`).props.numberOfLines).toBeUndefined();
     for (const label of longProfile.canHelpWith) {
-      expect(getByText(label)).toBeTruthy();
+      expect(seeker.getByText(label)).toBeTruthy();
     }
   });
 });
@@ -387,7 +487,7 @@ describe("MarketplaceProfileScreen — Public Profile", () => {
 
   it("Provider view shows only public content and no owner controls", async () => {
     const { getByText, queryByText, queryByRole } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="public" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="public" side="provider" />,
     );
 
     expect(getByText("Provider Reputation")).toBeTruthy();
@@ -410,7 +510,7 @@ describe("MarketplaceProfileScreen — Public Profile", () => {
 
   it("Seeker view shows public work and feedback only, and no owner controls", async () => {
     const { getByText, queryByText, queryByRole } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="public" initialSide="seeker" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="public" side="seeker" />,
     );
 
     expect(getByText("Seeker Reputation")).toBeTruthy();
@@ -435,6 +535,7 @@ describe("MarketplaceProfileScreen — Public Profile", () => {
           sectionVisibility: { ...PROFILE.sectionVisibility, previousJobPosts: "hidden" },
         }}
         viewer="public"
+        side="provider"
       />,
     );
 
@@ -445,7 +546,7 @@ describe("MarketplaceProfileScreen — Public Profile", () => {
 
   it("keeps the aggregate rating public even when rated items are hidden", async () => {
     const { getByLabelText, getByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="public" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="public" side="provider" />,
     );
 
     expect(getByLabelText("Provider Rating: 4.7 out of 5")).toBeTruthy();
@@ -454,7 +555,7 @@ describe("MarketplaceProfileScreen — Public Profile", () => {
 
   it("offers a Back action, since it's opened from another screen", async () => {
     const { getByRole } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={PROFILE} viewer="public" />,
+      <MarketplaceProfileScreen profile={PROFILE} viewer="public" side="provider" />,
     );
 
     await fireEvent.press(getByRole("button", { name: "Back" }));
@@ -471,7 +572,7 @@ describe("MarketplaceProfileScreen — Public Profile", () => {
     );
 
     const { queryByText } = await renderWithSafeArea(
-      <MarketplaceProfileScreen profile={profile} viewer="public" initialSide="seeker" />,
+      <MarketplaceProfileScreen profile={profile} viewer="public" side="seeker" />,
     );
 
     expect(reviewerNames.length).toBeGreaterThan(0);
@@ -495,11 +596,7 @@ describe("MarketplaceProfileScreen — no unapproved trust, verification or paym
     ["public", "seeker"],
   ] as const)("%s %s view", async (viewer, side) => {
     const { toJSON } = await renderWithSafeArea(
-      <MarketplaceProfileScreen
-        profile={getCurrentUserProfile()}
-        viewer={viewer}
-        initialSide={side}
-      />,
+      <MarketplaceProfileScreen profile={getCurrentUserProfile()} viewer={viewer} side={side} />,
     );
 
     const visibleText = collectText(toJSON());
@@ -510,7 +607,8 @@ describe("MarketplaceProfileScreen — no unapproved trust, verification or paym
   });
 });
 
-type JsonNode = { children?: (JsonNode | string)[] | null } | string | null;
+type JsonNode =
+  { props?: Record<string, unknown>; children?: (JsonNode | string)[] | null } | string | null;
 
 // Every string rendered as text — the words a user could actually read.
 function collectText(node: JsonNode | JsonNode[]): string[] {
@@ -518,4 +616,14 @@ function collectText(node: JsonNode | JsonNode[]): string[] {
   if (typeof node === "string") return [node];
   if (Array.isArray(node)) return node.flatMap(collectText);
   return (node.children ?? []).flatMap(collectText);
+}
+
+// The `uri` of every photo rendered on screen.
+function imageUris(node: JsonNode | JsonNode[]): string[] {
+  if (node === null || typeof node === "string") return [];
+  if (Array.isArray(node)) return node.flatMap(imageUris);
+  const source = node.props?.source;
+  const uri =
+    typeof source === "object" && source !== null && "uri" in source ? source.uri : undefined;
+  return [...(typeof uri === "string" ? [uri] : []), ...(node.children ?? []).flatMap(imageUris)];
 }

@@ -21,7 +21,7 @@ describe("Profile routes", () => {
     mockUseRouter.mockReturnValue({ replace: jest.fn(), push: jest.fn(), back: jest.fn() });
   });
 
-  it("the Provider Profile tab shows the signed-in account's own profile, in owner view", async () => {
+  it("the Provider Profile tab shows the signed-in account's own Provider profile, in owner view", async () => {
     const { getByText, getByRole, queryByRole } = await render(
       <SafeAreaProvider initialMetrics={METRICS}>
         <ProviderProfileRoute />
@@ -30,7 +30,10 @@ describe("Profile routes", () => {
 
     expect(getByText(getCurrentUserProfile().name)).toBeTruthy();
     expect(getByText("Owner View")).toBeTruthy();
-    expect(getByRole("button", { name: "Edit Profile" })).toBeTruthy();
+    // Job Provider mode → the Provider side, with no in-page side switch.
+    expect(getByText("Provider Reputation")).toBeTruthy();
+    expect(queryByRole("button", { name: "Seeker Profile" })).toBeNull();
+    expect(getByRole("button", { name: "Edit profile photo" })).toBeTruthy();
     // No Back action on the tab itself — that's only for someone else's profile.
     expect(queryByRole("button", { name: "Back" })).toBeNull();
   });

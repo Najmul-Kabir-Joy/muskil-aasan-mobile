@@ -7,8 +7,8 @@ type IconName = keyof typeof MaterialIcons.glyphMap;
 // Who is looking at a profile: the account owner, or anyone else.
 export type ProfileViewer = "owner" | "public";
 
-// Which side of the one account the profile is showing. Switching this never
-// changes the app's Job Provider / Job Seeker mode.
+// Which side of the one account the profile is showing — your own profile
+// follows your current Job Provider / Job Seeker mode.
 export type ProfileSide = "provider" | "seeker";
 
 // Hidden content stays visible to its owner (marked as hidden) and never

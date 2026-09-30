@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Alert, ScrollView, Share, StyleSheet, View } from "react-native";
 import type { Edges } from "react-native-safe-area-context";
 import { CanHelpWithSheet } from "@/features/marketplace/profile/CanHelpWithSheet";
+import { PhotoEditorModal, type PhotoSlot } from "@/features/marketplace/profile/PhotoEditorModal";
+import { pickProfilePhoto } from "@/features/marketplace/profile/pickProfilePhoto";
 import { ProfileHero } from "@/features/marketplace/profile/ProfileHero";
 import {
   jobVisibilityOn,
@@ -19,6 +21,7 @@ import { colors, spacing } from "@/theme/tokens";
 import type {
   CompletedJob,
   MarketplaceProfile,
+  ProfilePhoto,
   ProfileSection,
   ProfileVisibility,
 } from "@/types/domain";
@@ -31,14 +34,15 @@ type VisibilityTarget =
 /**
  * The finalized MuSkill Aasan Profile — one screen for all four Stitch
  * designs ("My Profile" / "Public Profile" × Provider / Seeker). `viewer`
- * decides Owner vs Public; the in-page switch decides which side of this one
- * account is shown and never changes the app's Job Provider / Job Seeker
- * mode.
+ * decides Owner vs Public; `side` decides which side of this one account is
+ * shown, and comes from context rather than a switch on the page: your own
+ * profile follows your current Job Provider / Job Seeker mode.
  *
- * Owner-only: Edit Profile, the "Owner View" marker, section and item
- * Public/Hidden controls, "Add Skill", and hidden content (marked as
- * hidden). Public viewers see public content only. Visibility and skill
- * edits are local prototype state — nothing is persisted.
+ * Owner-only: in-place editing of the profile photo, cover photo and bio
+ * (no separate Edit Profile screen), the "Owner View" marker, section and
+ * item Public/Hidden controls, "Add Skill", and hidden content (marked as
+ * hidden). Public viewers see public content only. All edits are local
+ * prototype state — nothing is persisted.
  *
  * Renders only page content: inside the Provider shell the global header,
  * drawer and bottom navigation belong to `app/(poster)/_layout.tsx`.
@@ -46,17 +50,28 @@ type VisibilityTarget =
 export function MarketplaceProfileScreen({
   profile,
   viewer,
-  initialSide = "provider",
+  side,
   edges,
 }: {
   profile: MarketplaceProfile;
   viewer: ProfileViewer;
-  initialSide?: ProfileSide;
+  side: ProfileSide;
   edges?: Edges;
 }) {
   const router = useRouter();
   const isOwner = viewer === "owner";
-  const [side, setSide] = useState<ProfileSide>(initialSide);
+  const [photos, setPhotos] = useState<Record<PhotoSlot, ProfilePhoto | null>>({
+    profile: profile.profilePhoto,
+    cover: profile.coverPhoto,
+  });
+  const [photoEditor, setPhotoEditor] = useState<{
+    slot: PhotoSlot;
+    photo: ProfilePhoto;
+  } | null>(null);
+  const [bios, setBios] = useState<Record<ProfileSide, string>>({
+    provider: profile.providerBio,
+    seeker: profile.seekerBio,
+  });
   const [sectionVisibility, setSectionVisibility] = useState(profile.sectionVisibility);
   const [jobsAsProvider, setJobsAsProvider] = useState(profile.jobsAsProvider);
   const [jobsAsSeeker, setJobsAsSeeker] = useState(profile.jobsAsSeeker);
@@ -86,6 +101,23 @@ export function MarketplaceProfileScreen({
       setJobVisibility(visibilityTarget.side, visibilityTarget.job.id, visibility);
     }
     setVisibilitySheetOpen(false);
+  }
+
+  // With a photo already set, the pencil opens the editor on it (adjust,
+  // replace or remove); with none, it goes straight to the photo library.
+  async function editPhoto(slot: PhotoSlot) {
+    const current = photos[slot];
+    if (current) {
+      setPhotoEditor({ slot, photo: current });
+      return;
+    }
+    const picked = await pickProfilePhoto();
+    if (picked) setPhotoEditor({ slot, photo: picked });
+  }
+
+  function savePhoto(slot: PhotoSlot, photo: ProfilePhoto | null) {
+    setPhotos((current) => ({ ...current, [slot]: photo }));
+    setPhotoEditor(null);
   }
 
   function toggleSkill(label: string) {
@@ -125,25 +157,21 @@ export function MarketplaceProfileScreen({
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         <ProfileHero
           name={profile.name}
           area={profile.area}
-          bio={side === "provider" ? profile.providerBio : profile.seekerBio}
+          bio={bios[side]}
+          profilePhoto={photos.profile}
+          coverPhoto={photos.cover}
           viewer={viewer}
           side={side}
-          onChangeSide={setSide}
           onShare={handleShare}
-          onEditProfile={
-            isOwner
-              ? () =>
-                  router.push({
-                    pathname: "/(poster)/coming-soon",
-                    params: { title: "Edit Profile" },
-                  })
-              : undefined
-          }
+          onEditProfilePhoto={() => editPhoto("profile")}
+          onEditCoverPhoto={() => editPhoto("cover")}
+          onSaveBio={(bio) => setBios((current) => ({ ...current, [side]: bio }))}
           onBack={isOwner ? undefined : () => router.back()}
         />
 
@@ -195,6 +223,16 @@ export function MarketplaceProfileScreen({
             onToggle={toggleSkill}
             onClose={() => setSkillsSheetOpen(false)}
           />
+          {photoEditor ? (
+            <PhotoEditorModal
+              slot={photoEditor.slot}
+              photo={photoEditor.photo}
+              canRemove={photos[photoEditor.slot] !== null}
+              onSave={(photo) => savePhoto(photoEditor.slot, photo)}
+              onRemove={() => savePhoto(photoEditor.slot, null)}
+              onCancel={() => setPhotoEditor(null)}
+            />
+          ) : null}
         </>
       ) : null}
     </Screen>

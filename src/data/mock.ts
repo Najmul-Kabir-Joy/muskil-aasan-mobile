@@ -684,6 +684,10 @@ function buildProfile(person: WorkerProfile, details: ProfileDetails): Marketpla
     id: person.id,
     name: person.name,
     area: person.area,
+    // No photos in this prototype's data — only what an owner picks during
+    // a session.
+    profilePhoto: null,
+    coverPhoto: null,
     providerBio: details.providerBio,
     seekerBio: details.seekerBio,
     providerRating: details.providerRating,
