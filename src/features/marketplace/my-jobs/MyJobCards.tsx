@@ -1,6 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { firstNameOf, formatRating } from "@/features/marketplace/profile/profileHelpers";
 import { SeekerAvatar } from "@/features/marketplace/responses/SeekerAvatar";
 import { ratingCountLabel } from "@/features/marketplace/responses/ratingCountLabel";
 import { colors, fonts, radius, shadows, spacing } from "@/theme/tokens";
@@ -105,7 +106,7 @@ export function InProgressJobCard({
         <MaterialIcons name="check-circle" size={15} color={colors.primary} />
         <Text style={styles.footerText}>
           {seekers.length === 1
-            ? `${firstName(seekers[0]?.name ?? "")} accepted your job request.`
+            ? `${firstNameOf(seekers[0]?.name ?? "")} accepted your job request.`
             : "Your job request was accepted."}
         </Text>
       </View>
@@ -150,7 +151,7 @@ export function CompletedJobCard({
       <PersonRow label="Done by" seeker={seeker} onViewProfile={onViewSeeker} />
       <View
         accessible
-        accessibilityLabel={`Rating you received: ${job.providerRating.toFixed(1)} out of 5`}
+        accessibilityLabel={`Rating you received: ${formatRating(job.providerRating)} out of 5`}
         style={styles.receivedRow}
       >
         <Text style={styles.footerText}>Rating you received</Text>
@@ -163,15 +164,11 @@ export function CompletedJobCard({
               color={colors.secondary}
             />
           ))}
-          <Text style={styles.ratingValue}>{job.providerRating.toFixed(1)}</Text>
+          <Text style={styles.ratingValue}>{formatRating(job.providerRating)}</Text>
         </View>
       </View>
     </View>
   );
-}
-
-function firstName(name: string) {
-  return name.split(" ")[0] ?? name;
 }
 
 function CardTopRow({ pill, trailing }: { pill: ReactNode; trailing?: ReactNode }) {
@@ -276,7 +273,6 @@ function PersonRow({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`View ${seeker.name}'s profile`}
-        hitSlop={HIT_SLOP}
         onPress={onViewProfile}
         style={styles.linkButton}
       >
@@ -460,10 +456,13 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     justifyContent: "space-between",
   },
+  // Full 44pt tap height; the person row is taller than that anyway.
   linkButton: {
     alignItems: "center",
     flexDirection: "row",
     gap: spacing.xxs,
+    minHeight: 44,
+    paddingHorizontal: spacing.xs,
   },
   linkText: {
     color: colors.primary,

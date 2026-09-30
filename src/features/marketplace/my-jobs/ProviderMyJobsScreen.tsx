@@ -62,7 +62,12 @@ export function ProviderMyJobsScreen({
 } = {}) {
   const router = useRouter();
   const [tab, setTab] = useState<MyJobsTab>(initialTab);
-  const total = jobs.open.length + jobs.inProgress.length + jobs.completed.length;
+  const counts: Record<MyJobsTab, number> = {
+    open: jobs.open.length,
+    inProgress: jobs.inProgress.length,
+    completed: jobs.completed.length,
+  };
+  const total = counts.open + counts.inProgress + counts.completed;
 
   function viewSeeker(seeker: WorkerProfile) {
     router.push({
@@ -71,15 +76,11 @@ export function ProviderMyJobsScreen({
     });
   }
 
-  const tabs: { id: MyJobsTab; label: string; count: number }[] = [
-    { id: "open", label: "Open", count: jobs.open.length },
-    { id: "inProgress", label: "In progress", count: jobs.inProgress.length },
-    { id: "completed", label: "Completed", count: jobs.completed.length },
+  const tabs: { id: MyJobsTab; label: string }[] = [
+    { id: "open", label: "Open" },
+    { id: "inProgress", label: "In progress" },
+    { id: "completed", label: "Completed" },
   ];
-  const isEmpty =
-    (tab === "open" && jobs.open.length === 0) ||
-    (tab === "inProgress" && jobs.inProgress.length === 0) ||
-    (tab === "completed" && jobs.completed.length === 0);
 
   return (
     <ScrollScreen edges={edges}>
@@ -114,7 +115,7 @@ export function ProviderMyJobsScreen({
               <Pressable
                 key={option.id}
                 accessibilityRole="tab"
-                accessibilityLabel={`${option.label}, ${option.count}`}
+                accessibilityLabel={`${option.label}, ${counts[option.id]}`}
                 accessibilityState={{ selected }}
                 onPress={() => setTab(option.id)}
                 style={[styles.tab, selected && styles.tabSelected]}
@@ -127,7 +128,7 @@ export function ProviderMyJobsScreen({
                 </Text>
                 <View style={[styles.tabCount, selected && styles.tabCountSelected]}>
                   <Text style={[styles.tabCountText, selected && styles.tabCountTextSelected]}>
-                    {option.count}
+                    {counts[option.id]}
                   </Text>
                 </View>
               </Pressable>
@@ -136,7 +137,7 @@ export function ProviderMyJobsScreen({
         </View>
 
         <View style={styles.list}>
-          {isEmpty ? (
+          {counts[tab] === 0 ? (
             <EmptyTab tab={tab} onPostJob={() => router.push("/(poster)/post-task")} />
           ) : null}
 
