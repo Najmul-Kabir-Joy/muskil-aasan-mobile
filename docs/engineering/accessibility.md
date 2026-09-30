@@ -7,9 +7,8 @@ usable UI overlap heavily here.
 
 ## Shared interactive primitives already handle this
 
-`PrimaryButton`, `ActionButton`, `SelectableChip`, and `RoleSwitch`'s pills
-(in `src/shared/components/ui.tsx` and `src/features/marketplace/components.tsx`)
-already set `accessibilityRole="button"` and the relevant
+`PrimaryButton`, `ActionButton` and `SelectableChip` (in
+`src/shared/components/ui.tsx`) already set `accessibilityRole="button"` and the relevant
 `accessibilityState` (`disabled`, `selected`) internally. Building a new
 interactive control on `Pressable` should follow the same pattern — set the
 role and state on the component itself, not ad hoc in every screen that uses

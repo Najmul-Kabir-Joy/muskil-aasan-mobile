@@ -168,19 +168,19 @@ preferred terms:
 | ---------------------- | ----------------------------------- | ------------------------------------------------------------------------ |
 | Job Provider           | poster                              | `Role = "poster"`, route group `app/(poster)/`, `PosterHomeScreen`, etc. |
 | Job Seeker             | worker / jobSeeker                  | `Role = "jobSeeker"`, route group `app/(worker)/`, `WorkerProfile` type  |
-| Job                    | task                                | `Task` type, `TaskCard`, `TaskStatus`, `data/mock.ts`'s `tasks`          |
-| Response / Application | offer                               | `Offer` type, `OfferCard`, `OfferStatus`                                 |
+| Job                    | task                                | `Task` type, `TaskStatus`, `data/mock.ts`'s `tasks`                      |
+| Response / Application | offer                               | `Offer` type, `OfferStatus`                                              |
 
 `JobResponse` (`src/types/domain.ts`), added for the Provider Responses feature
 (`src/features/marketplace/responses/`), is the current preferred-terminology
 shape for a Job Seeker's response to a job. It is deliberately separate from
 the legacy `Offer` type (which models a bid — `amount`, `estimatedTime`,
 `status` — none of which apply to a plain response) rather than overloading
-`Offer`'s fields. `Offer`/`OfferCard` remain in place for the Job Seeker's own
-Offers screen (`app/(worker)/offers.tsx`), which still uses them — this is
-not a signal to migrate it. The Provider's My Jobs route
-(`app/(poster)/tasks.tsx`) no longer uses them; it renders the My Jobs
-screen described below.
+`Offer`'s fields. No screen uses `Offer` any more: the Provider's My Jobs
+and the Job Seeker's Applications (both described below) replaced the last
+Offer-based screens. The legacy `Offer`/`OfferStatus` types and `offers` mock
+data are left in place, unused, rather than removed as part of an unrelated
+change.
 
 The Profile feature (`src/features/marketplace/profile/`) adds its own
 prototype shapes in `src/types/domain.ts`: `MarketplaceProfile` (one
@@ -198,6 +198,20 @@ My Jobs (`src/features/marketplace/my-jobs/`, rendered by
 mappings plus `AcceptedJobRequest` (a job request the Job Seeker accepted,
 per #12–13). It shows no lifecycle actions and no "waiting for the Job Seeker
 to accept" stage, because those behaviors are still undefined (see below).
+
+The Job Seeker experience (`src/features/marketplace/seeker/`, rendered by
+`app/(worker)/` — Home, Applications, Saved, Profile) adds
+`SeekerApplication` / `SeekerApplicationStage`: one of the current user's own
+Responses, at one of the confirmed steps only (#9–13) — Response sent, job
+request received (which they must accept), job request accepted. Completed
+work comes from `CompletedJob` records. It deliberately has no declining,
+withdrawing, "not selected", expiry, contact or payment step, since those are
+undefined. A Response is a single private message, the only Response field
+the prototype has; the final application fields are still undefined. Saved
+Jobs and Applications are local prototype state
+(`SeekerActivityProvider`, owned by the `(worker)` layout) that resets on a
+mode switch — not a backend contract. The Home feed is newest first and
+unranked; it has no "Nearby" filter or recommendations (both undefined).
 
 **This is documentation, not a rename mandate.** The legacy names above are
 still what the code actually uses today, and that's deliberate — renaming all
