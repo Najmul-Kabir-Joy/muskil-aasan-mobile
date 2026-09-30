@@ -135,6 +135,90 @@ export type JobWithResponses = {
   responses: JobResponse[];
 };
 
+// Whether a profile section or item shows to other people. The MVP has
+// exactly two states: hidden content stays visible to its owner (marked as
+// hidden) and never renders for anyone else. See
+// docs/engineering/domain-and-terminology.md.
+export type ProfileVisibility = "public" | "hidden";
+
+// A completed MuSkill Aasan job between one Job Provider and one Job Seeker.
+// The one record behind both the Provider's "Previous Job Posts" and the
+// Seeker's "Previous Work & Feedback", so the same job never exists twice.
+// The two sides' ratings are separate: the Provider receives stars only; the
+// Seeker receives stars plus written feedback. Each side controls, on their
+// own profile, whether the job shows publicly.
+export type CompletedJob = {
+  id: string;
+  title: string;
+  area: string;
+  // Display date, e.g. "12 Oct" — a display string like `JobResponse`'s
+  // `receivedAgo`, not a real Date.
+  completedOn: string;
+  providerId: string;
+  seekerId: string;
+  providerRating: number;
+  seekerFeedback: Omit<SeekerFeedback, "jobTitle">;
+  providerVisibility: ProfileVisibility;
+  seekerVisibility: ProfileVisibility;
+};
+
+// A star rating averaged over `ratingCount` ratings. Stored rather than
+// recomputed from the jobs a profile lists: a profile shows only some of a
+// person's history, and hiding a job never removes its rating from the
+// average.
+export type RatingSummary = {
+  rating: number;
+  ratingCount: number;
+};
+
+// The profile sections that carry their own Public/Hidden control, per the
+// finalized Profile Stitch designs.
+export type ProfileSection =
+  "providerReputation" | "previousJobPosts" | "seekerReputation" | "previousWork";
+
+// One of the current user's own open job posts, as the Provider Profile
+// shows it — with only a count of its (private) Responses.
+export type CurrentJobPost = {
+  task: Task;
+  responseCount: number;
+};
+
+// A photo placed in a profile frame (the profile photo or the cover), with
+// the framing its owner chose. `zoom` (at least 1) scales the photo past
+// "just fills the frame"; `offsetX`/`offsetY` move its centre by a fraction
+// of the frame's width/height, so the same framing renders at any size.
+export type ProfilePhoto = {
+  uri: string;
+  width: number;
+  height: number;
+  zoom: number;
+  offsetX: number;
+  offsetY: number;
+};
+
+// One account's marketplace identity. The same person has a Provider side
+// and a Seeker side; which one a profile shows comes from context (your own
+// profile follows your current Job Provider / Job Seeker mode), never from a
+// switch on the profile itself.
+export type MarketplaceProfile = {
+  id: string;
+  name: string;
+  area: string;
+  // Shared by both sides — one account, one photo and cover.
+  profilePhoto: ProfilePhoto | null;
+  coverPhoto: ProfilePhoto | null;
+  providerBio: string;
+  seekerBio: string;
+  providerRating: RatingSummary;
+  seekerRating: RatingSummary & { completedJobs: number };
+  // Labels from the app-wide `categories` list — never a separate taxonomy.
+  canHelpWith: string[];
+  currentJobPosts: CurrentJobPost[];
+  jobsAsProvider: CompletedJob[];
+  jobsAsSeeker: CompletedJob[];
+  sectionVisibility: Record<ProfileSection, ProfileVisibility>;
+};
+
 export type Offer = {
   id: string;
   taskId: string;

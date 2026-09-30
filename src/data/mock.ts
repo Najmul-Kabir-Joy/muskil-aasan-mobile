@@ -1,10 +1,16 @@
 import type {
   Category,
+  CompletedJob,
   CompletedReferralJob,
+  CurrentJobPost,
   EligibleReferral,
   JobResponse,
   JobWithResponses,
+  MarketplaceProfile,
   Offer,
+  ProfileSection,
+  ProfileVisibility,
+  SeekerFeedback,
   Task,
   TimelineEvent,
   WorkerProfile,
@@ -56,6 +62,23 @@ export const categories: Category[] = [
   { id: "catering", label: "Catering", icon: "CT", example: "Snacks for an office meeting" },
   { id: "other", label: "Other", icon: "OT", example: "Something else? Just describe it." },
 ];
+
+// The prototype's signed-in account — the same Nadia Rahman the Provider
+// shell's drawer and Home greeting show. One account: this is her Seeker side
+// (Seeker Rating, Can Help With); her Provider side lives in
+// `currentUserProfileDetails` below.
+export const CURRENT_USER_ID = "w7";
+
+const currentUser: WorkerProfile = {
+  id: CURRENT_USER_ID,
+  name: "Nadia Rahman",
+  rating: 4.9,
+  ratingCount: 21,
+  completedJobs: 24,
+  area: "Mirpur",
+  verification: "unverified",
+  categories: ["Repair", "Tutor", "Delivery", "Design", "Photo"],
+};
 
 export const workers: WorkerProfile[] = [
   {
@@ -118,6 +141,7 @@ export const workers: WorkerProfile[] = [
     verification: "pending",
     categories: ["Repair"],
   },
+  currentUser,
 ];
 
 export const tasks: Task[] = [
@@ -199,6 +223,207 @@ export function getActiveJob(): Task | null {
   return tasks.find((task) => task.status !== "completed") ?? null;
 }
 
+// Completed MuSkill Aasan jobs between accounts in `workers`, oldest first —
+// `getEligibleReferrals` relies on that order to pick each Seeker's most
+// recent job. Each record backs both its Provider's Previous Job Posts and
+// its Seeker's Previous Work & Feedback, and each Response's previous-work
+// preview below is one of these, so no job is written down twice.
+const groceryPickup: CompletedJob = {
+  id: "cj1",
+  title: "Grocery delivery & urgent pickup",
+  area: "Mirpur 2",
+  completedOn: "11 Aug",
+  providerId: "w5",
+  seekerId: CURRENT_USER_ID,
+  providerRating: 5,
+  seekerFeedback: {
+    rating: 4,
+    comment: "Delivery took a bit longer than expected due to rain, but items arrived safely.",
+  },
+  providerVisibility: "public",
+  seekerVisibility: "hidden",
+};
+
+const kitchenShelfMounting: CompletedJob = {
+  id: "cj2",
+  title: "Kitchen shelf mounting",
+  area: "Mirpur 10",
+  completedOn: "14 Aug",
+  providerId: CURRENT_USER_ID,
+  seekerId: "w1",
+  providerRating: 4,
+  seekerFeedback: {
+    rating: 4,
+    comment: "All three shelves are level and sturdy. Took a little longer than planned.",
+  },
+  providerVisibility: "hidden",
+  seekerVisibility: "public",
+};
+
+const logoDesign: CompletedJob = {
+  id: "cj3",
+  title: "Logo design for home bakery",
+  area: "Remote",
+  completedOn: "2 Sep",
+  providerId: CURRENT_USER_ID,
+  seekerId: "w3",
+  providerRating: 5,
+  seekerFeedback: {
+    rating: 5,
+    comment: "Understood what the bakery needed and shared two strong options quickly.",
+  },
+  providerVisibility: "public",
+  seekerVisibility: "public",
+};
+
+const mathTutoring: CompletedJob = {
+  id: "cj4",
+  title: "Class 8 math tutoring",
+  area: "Dhanmondi",
+  completedOn: "8 Sep",
+  providerId: "w3",
+  seekerId: "w2",
+  providerRating: 5,
+  seekerFeedback: {
+    rating: 5,
+    comment: "Explained concepts clearly and was very patient with my son.",
+  },
+  providerVisibility: "public",
+  seekerVisibility: "public",
+};
+
+const physicsCoaching: CompletedJob = {
+  id: "cj5",
+  title: "Physics & math coaching (Grade 8)",
+  area: "Pallabi",
+  completedOn: "18 Sep",
+  providerId: "w6",
+  seekerId: CURRENT_USER_ID,
+  providerRating: 5,
+  seekerFeedback: {
+    rating: 5,
+    comment: "Great tutor! Helped my daughter understand geometry concepts easily.",
+  },
+  providerVisibility: "public",
+  seekerVisibility: "public",
+};
+
+const waterPumpInstallation: CompletedJob = {
+  id: "cj6",
+  title: "Water pump installation",
+  area: "Dhanmondi",
+  completedOn: "20 Sep",
+  providerId: "w2",
+  seekerId: "w4",
+  providerRating: 4,
+  seekerFeedback: {
+    rating: 4,
+    comment: "Solid work, arrived a little later than planned but finished the same day.",
+  },
+  providerVisibility: "public",
+  seekerVisibility: "public",
+};
+
+const pipeLeakFix: CompletedJob = {
+  id: "cj7",
+  title: "Emergency plumbing pipe leak fix",
+  area: "Mirpur 10",
+  completedOn: "28 Sep",
+  providerId: CURRENT_USER_ID,
+  seekerId: "w1",
+  providerRating: 5,
+  seekerFeedback: {
+    rating: 5,
+    comment: "Came within the hour and stopped the leak before it reached the flat below.",
+  },
+  providerVisibility: "public",
+  seekerVisibility: "public",
+};
+
+const bathroomLightRepair: CompletedJob = {
+  id: "cj8",
+  title: "Bathroom light fixture repair",
+  area: "Banani",
+  completedOn: "30 Sep",
+  providerId: "w3",
+  seekerId: "w6",
+  providerRating: 5,
+  seekerFeedback: {
+    rating: 4,
+    comment: "Good work, would recommend for small electrical fixes.",
+  },
+  providerVisibility: "public",
+  seekerVisibility: "public",
+};
+
+const fanRegulatorFix: CompletedJob = {
+  id: "cj9",
+  title: "Ceiling fan regulator fix",
+  area: "Mirpur 10",
+  completedOn: "3 Oct",
+  providerId: "w2",
+  seekerId: CURRENT_USER_ID,
+  providerRating: 5,
+  seekerFeedback: {
+    rating: 5,
+    comment: "Arrived on time and fixed everything properly. Very polite and thorough.",
+  },
+  providerVisibility: "public",
+  seekerVisibility: "public",
+};
+
+const exhaustFanFix: CompletedJob = {
+  id: "cj10",
+  title: "Kitchen exhaust fan fix",
+  area: "Banani",
+  completedOn: "5 Oct",
+  providerId: "w3",
+  seekerId: "w5",
+  providerRating: 5,
+  seekerFeedback: {
+    rating: 5,
+    comment: "Very thorough, explained what was wrong before fixing it.",
+  },
+  providerVisibility: "public",
+  seekerVisibility: "public",
+};
+
+const ceilingFanRepair: CompletedJob = {
+  id: "cj11",
+  title: "Ceiling fan repair",
+  area: "Mirpur",
+  completedOn: "12 Oct",
+  providerId: CURRENT_USER_ID,
+  seekerId: "w1",
+  providerRating: 5,
+  seekerFeedback: {
+    rating: 5,
+    comment: "Fixed it quickly and cleaned up after. Would call again.",
+  },
+  providerVisibility: "public",
+  seekerVisibility: "public",
+};
+
+export const completedJobs: CompletedJob[] = [
+  groceryPickup,
+  kitchenShelfMounting,
+  logoDesign,
+  mathTutoring,
+  physicsCoaching,
+  waterPumpInstallation,
+  pipeLeakFix,
+  bathroomLightRepair,
+  fanRegulatorFix,
+  exhaustFanFix,
+  ceilingFanRepair,
+];
+
+// The Seeker-side feedback of a completed job, in the shape a Response's
+// previous-work preview uses.
+function seekerFeedbackFrom(job: CompletedJob): SeekerFeedback {
+  return { jobTitle: job.title, ...job.seekerFeedback };
+}
+
 // Job Seeker responses to the current Provider's own jobs (`tasks`),
 // visible only to that job's owner — see docs/engineering/domain-and-
 // terminology.md's Offer/Response distinction for why this isn't `Offer`.
@@ -210,11 +435,7 @@ export const jobResponses: JobResponse[] = [
     message:
       "I can come this afternoon with my ladder and toolkit — I've serviced a few AC units in Mirpur before.",
     receivedAgo: "25m ago",
-    previousWork: {
-      jobTitle: "Ceiling fan repair",
-      rating: 5,
-      comment: "Fixed it quickly and cleaned up after. Would call again.",
-    },
+    previousWork: seekerFeedbackFrom(ceilingFanRepair),
   },
   {
     id: "r2",
@@ -223,11 +444,7 @@ export const jobResponses: JobResponse[] = [
     message:
       "I can check the gas pressure and clean the filter today evening if that works for you.",
     receivedAgo: "1h ago",
-    previousWork: {
-      jobTitle: "Water pump installation",
-      rating: 4,
-      comment: "Solid work, arrived a little later than planned but finished the same day.",
-    },
+    previousWork: seekerFeedbackFrom(waterPumpInstallation),
   },
   {
     id: "r3",
@@ -236,11 +453,7 @@ export const jobResponses: JobResponse[] = [
     message:
       "Available now — I specialize in split AC servicing and can bring a spare filter just in case.",
     receivedAgo: "2h ago",
-    previousWork: {
-      jobTitle: "Kitchen exhaust fan fix",
-      rating: 5,
-      comment: "Very thorough, explained what was wrong before fixing it.",
-    },
+    previousWork: seekerFeedbackFrom(exhaustFanFix),
   },
   {
     id: "r4",
@@ -249,11 +462,7 @@ export const jobResponses: JobResponse[] = [
     message:
       "I can come by tomorrow morning with a full servicing kit if today doesn't work for you.",
     receivedAgo: "3h ago",
-    previousWork: {
-      jobTitle: "Bathroom light fixture repair",
-      rating: 4,
-      comment: "Good work, would recommend for small electrical fixes.",
-    },
+    previousWork: seekerFeedbackFrom(bathroomLightRepair),
   },
   {
     id: "r5",
@@ -262,11 +471,7 @@ export const jobResponses: JobResponse[] = [
     message:
       "I've taught NCTB physics for three years and can start this weekend. Happy to share a sample lesson plan first.",
     receivedAgo: "4h ago",
-    previousWork: {
-      jobTitle: "Class 8 math tutoring",
-      rating: 5,
-      comment: "Explained concepts clearly and was very patient with my son.",
-    },
+    previousWork: seekerFeedbackFrom(mathTutoring),
   },
 ];
 
@@ -363,12 +568,12 @@ export const communityTasks: Task[] = [
 // The current Provider's (Nadia's) history of jobs completed with specific
 // Job Seekers — this is the only source of Refer Someone eligibility. A
 // worker with no entry here cannot be referred, regardless of their rating
-// or categories. See `getEligibleReferrals` below and
-// docs/engineering/domain-and-terminology.md.
-export const completedReferralJobs: CompletedReferralJob[] = [
-  { workerId: "w1", jobTitle: "Ceiling fan repair" },
-  { workerId: "w3", jobTitle: "Logo design for home bakery" },
-];
+// or categories. Derived from `completedJobs` (oldest first) so it can't
+// drift from the Previous Job Posts on her profile. See
+// `getEligibleReferrals` below and docs/engineering/domain-and-terminology.md.
+export const completedReferralJobs: CompletedReferralJob[] = completedJobs
+  .filter((job) => job.providerId === CURRENT_USER_ID)
+  .map((job) => ({ workerId: job.seekerId, jobTitle: job.title }));
 
 // Derives who the current Provider may refer from completedReferralJobs
 // rather than hardcoding eligibility in a screen or component. A worker can
@@ -389,6 +594,141 @@ export function getEligibleReferrals(
     const worker = workers.find((candidate) => candidate.id === workerId);
     return worker ? [{ worker, jobTitle }] : [];
   }).flat();
+}
+
+// The parts of a profile that don't already live on the person's
+// `WorkerProfile` (name, area, Seeker Rating, Can Help With) or come from
+// their jobs.
+type ProfileDetails = Pick<
+  MarketplaceProfile,
+  "id" | "providerBio" | "seekerBio" | "providerRating" | "sectionVisibility"
+>;
+
+const ALL_SECTIONS_PUBLIC: Record<ProfileSection, ProfileVisibility> = {
+  providerReputation: "public",
+  previousJobPosts: "public",
+  seekerReputation: "public",
+  previousWork: "public",
+};
+
+const currentUserProfileDetails: ProfileDetails = {
+  id: CURRENT_USER_ID,
+  providerBio:
+    "Always happy to help and connect with people nearby. Looking for reliable help for home projects.",
+  seekerBio:
+    "Electrical engineering undergrad & Mirpur neighbor. Happy to assist local families with home appliance troubleshooting, coaching, and errands.",
+  providerRating: { rating: 4.7, ratingCount: 18 },
+  sectionVisibility: ALL_SECTIONS_PUBLIC,
+};
+
+const profileDetails: ProfileDetails[] = [
+  {
+    id: "w1",
+    providerBio: "Mirpur local. I post the odd job when a repair needs two people.",
+    seekerBio:
+      "Fixing fans, fittings and small household repairs around Mirpur. I bring my own tools.",
+    providerRating: { rating: 0, ratingCount: 0 },
+    sectionVisibility: ALL_SECTIONS_PUBLIC,
+  },
+  {
+    id: "w2",
+    providerBio: "Busy parent in Dhanmondi. I post errands and home jobs when I can't get to them.",
+    seekerBio: "Tutor for classes 6–10, and happy to help with data entry and admin work.",
+    providerRating: { rating: 4.5, ratingCount: 2 },
+    sectionVisibility: ALL_SECTIONS_PUBLIC,
+  },
+  {
+    id: "w3",
+    providerBio: "I post the occasional home or tutoring job for my family.",
+    seekerBio: "Freelance designer and photographer in Banani. Logos, social posts, event photos.",
+    providerRating: { rating: 5, ratingCount: 3 },
+    sectionVisibility: ALL_SECTIONS_PUBLIC,
+  },
+  {
+    id: "w4",
+    providerBio: "",
+    seekerBio: "Electrician and pump fitter covering Mirpur and nearby areas.",
+    providerRating: { rating: 0, ratingCount: 0 },
+    sectionVisibility: ALL_SECTIONS_PUBLIC,
+  },
+  {
+    id: "w5",
+    providerBio: "I post small errands when work keeps me busy.",
+    seekerBio: "Home electrical work and appliance repair in Mirpur 10.",
+    providerRating: { rating: 5, ratingCount: 1 },
+    sectionVisibility: ALL_SECTIONS_PUBLIC,
+  },
+  {
+    id: "w6",
+    providerBio: "Parent in Mirpur. I sometimes look for a tutor or a helping hand.",
+    seekerBio: "Small repairs and fittings — reliable and on time.",
+    providerRating: { rating: 5, ratingCount: 1 },
+    sectionVisibility: ALL_SECTIONS_PUBLIC,
+  },
+  currentUserProfileDetails,
+];
+
+// Prototype mapping, not an approved lifecycle rule: a post is "current"
+// while it's still collecting Responses. See
+// docs/engineering/domain-and-terminology.md.
+function isCurrentJobPost(task: Task) {
+  return task.status === "open" || task.status === "offer received";
+}
+
+function newestFirst(jobs: CompletedJob[]) {
+  return [...jobs].reverse();
+}
+
+function buildProfile(person: WorkerProfile, details: ProfileDetails): MarketplaceProfile {
+  return {
+    id: person.id,
+    name: person.name,
+    area: person.area,
+    // No photos in this prototype's data — only what an owner picks during
+    // a session.
+    profilePhoto: null,
+    coverPhoto: null,
+    providerBio: details.providerBio,
+    seekerBio: details.seekerBio,
+    providerRating: details.providerRating,
+    seekerRating: {
+      rating: person.rating,
+      ratingCount: person.ratingCount,
+      completedJobs: person.completedJobs,
+    },
+    canHelpWith: person.categories,
+    // `tasks` are the signed-in account's own posts; nobody else's job posts
+    // are modelled yet, so other profiles have no current posts.
+    currentJobPosts:
+      person.id === CURRENT_USER_ID
+        ? tasks.filter(isCurrentJobPost).map((task): CurrentJobPost => ({
+            task,
+            responseCount: jobResponses.filter((response) => response.taskId === task.id).length,
+          }))
+        : [],
+    jobsAsProvider: newestFirst(completedJobs.filter((job) => job.providerId === person.id)),
+    jobsAsSeeker: newestFirst(completedJobs.filter((job) => job.seekerId === person.id)),
+    sectionVisibility: details.sectionVisibility,
+  };
+}
+
+// The signed-in account's own profile — what the Profile tab shows.
+export function getCurrentUserProfile(): MarketplaceProfile {
+  return buildProfile(currentUser, currentUserProfileDetails);
+}
+
+// Anyone's profile by account id, for the Public Profile route. Undefined for
+// an unknown id so the route can show a not-found state.
+//
+// Prototype only: this returns hidden sections and items too, and the screen
+// leaves them out for public viewers. That's UX, not privacy — a real backend
+// must never send hidden content to anyone but its owner (see
+// docs/engineering/security.md).
+export function getMarketplaceProfile(id: string): MarketplaceProfile | undefined {
+  const person = workers.find((candidate) => candidate.id === id);
+  const details = profileDetails.find((candidate) => candidate.id === id);
+  if (!person || !details) return undefined;
+  return buildProfile(person, details);
 }
 
 export const taskTimeline: TimelineEvent[] = [

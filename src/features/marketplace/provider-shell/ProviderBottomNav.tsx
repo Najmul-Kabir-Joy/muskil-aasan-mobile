@@ -54,6 +54,9 @@ const POST_JOB_ROUTE_NAME = "post-task";
 // to when a tab is pressed.
 const ACTIVE_TAB_ALIASES: Record<string, string> = {
   "response-detail": "responses",
+  // Someone's public profile keeps Profile highlighted, as the finalized
+  // "Public Profile" Stitch designs show.
+  "public-profile": "profile",
 };
 
 function useReducedMotionPreference(): boolean {

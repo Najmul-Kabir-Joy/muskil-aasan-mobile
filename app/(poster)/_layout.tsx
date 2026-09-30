@@ -46,6 +46,7 @@ export default function PosterTabsLayout() {
         <Tabs.Screen name="support" options={{ title: "Support" }} />
         <Tabs.Screen name="coming-soon" options={{ title: "Coming soon" }} />
         <Tabs.Screen name="response-detail" options={{ title: "Response Detail" }} />
+        <Tabs.Screen name="public-profile" options={{ title: "Public Profile" }} />
       </Tabs>
       <ProviderDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </>

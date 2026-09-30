@@ -2,9 +2,16 @@ export const colors = {
   primary: "#059669",
   primaryDark: "#047857",
   primarySoft: "#D1FAE5",
+  // Stronger mint than `primarySoft` — the profile's Edit Profile action and
+  // its "N active" count pill, per the finalized Profile Stitch designs
+  // (`primary-fixed`).
+  primaryLight: "#6EE7B7",
   secondary: "#F59E0B",
   secondaryDark: "#B45309",
   secondarySoft: "#FEF3C7",
+  // Between `secondary` and `secondarySoft` — the lighter tail segment of a
+  // rating bar (Profile reputation cards).
+  secondaryLight: "#FCD34D",
   tertiary: "#0D9488",
   tertiaryDark: "#0F766E",
   tertiarySoft: "#CCFBF1",
@@ -18,6 +25,11 @@ export const colors = {
   muted: "#64748B",
   border: "#E2E8F0",
   surface: "#EEF2FF",
+  // A more saturated `surface` for small count pills that sit on a white
+  // card (e.g. "18 ratings received").
+  surfaceStrong: "#E2E7FF",
+  // Dimmed backdrop behind modal sheets and the drawer (`text` at 55%).
+  scrim: "rgba(15, 23, 42, 0.55)",
 };
 
 export const fonts = {
@@ -88,6 +100,15 @@ export const shadows = {
     shadowRadius: 20,
     elevation: 3,
   },
+  // Barely-there lift for cards sitting on `appBg` — the Profile Stitch
+  // designs' `shadow-sm`, lighter than `card`.
+  subtle: {
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
+    elevation: 1,
+  },
   // Elevated Post Job FAB, per the "Bottom Navigation / Job Provider
   // (Attached to Screen)" Stitch design's `.fab-shadow` spec.
   fab: {
@@ -113,4 +134,7 @@ export const shadows = {
 // surface wants the same "hero illustration" treatment.
 export const gradients = {
   hero: ["#F2F3FF", "#EAEDFF", "#E2E7FF"] as const,
+  // Profile cover banner — primary into tertiary, per the finalized Profile
+  // Stitch designs (`from-primary to-tertiary`).
+  profileCover: [colors.primaryDark, colors.tertiaryDark] as const,
 };

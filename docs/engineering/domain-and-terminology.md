@@ -78,6 +78,21 @@ the explicit non-example after the list.
     see `PROTOTYPE_DEFAULT_ROUTE` in `src/shared/constants/routes.ts`). This
     is a prototype navigation default, not a statement that Job Provider is
     the real product's default mode long-term.
+23. Every account has two separate reputations — a Provider Rating and a
+    Seeker Rating — that are never combined. Provider Ratings are stars only
+    (no public written feedback in the MVP); Seeker Ratings are stars plus
+    written feedback, shown without identifying who wrote it.
+24. Profile content is either Public or Hidden (MVP). Hidden content stays
+    visible to its owner, marked as hidden, and never shows to anyone else.
+    Hiding a rated item never removes its rating from the aggregate.
+25. A profile has no Provider / Seeker switch of its own. Your own profile
+    shows the side that matches your current app mode (Job Provider →
+    Provider Profile, Job Seeker → Seeker Profile); mode is switched from
+    the navigation drawer. Someone else's profile shows the side its entry
+    point is about (e.g. a Response opens the Seeker side).
+26. Profile edits happen in place on the profile — no separate Edit Profile
+    screen: the owner changes their profile photo and cover photo (with
+    cropping) and their bio directly on it.
 
 **Confirmed requirement ≠ implementation detail.** For example, #11-13 confirm
 that a provider-chooses-then-seeker-accepts flow exists at a high level — they
@@ -102,7 +117,8 @@ confirmed requirement above as deciding any of them:
 - refunds
 - disputes
 - NID verification / identity verification requirements
-- ratings/reviews
+- ratings/reviews beyond #23–24 (who can rate whom and when, how the
+  aggregate is calculated, editing or disputing a rating)
 - matching/recommendation rules
 - platform fees
 - precise location privacy rules
@@ -163,6 +179,16 @@ the legacy `Offer` type (which models a bid — `amount`, `estimatedTime`,
 `Offer`'s fields. `Offer`/`OfferCard` remain in place for the screens that
 already use them (`app/(poster)/tasks.tsx`, the Job Seeker's own `Offer`
 screens) — this is not a signal to migrate them.
+
+The Profile feature (`src/features/marketplace/profile/`) adds its own
+prototype shapes in `src/types/domain.ts`: `MarketplaceProfile` (one
+account's Provider and Seeker sides), `CompletedJob` (one completed job
+between a Provider and a Seeker — the single record behind the Provider's
+Previous Job Posts, the Seeker's Previous Work & Feedback, each Response's
+previous-work preview and Refer Someone eligibility), and
+`ProfileVisibility`. Aggregate ratings are stored `RatingSummary` values, not
+recalculated from the jobs a profile lists. Like the rest of that file, these
+are mock shapes, not backend contracts.
 
 **This is documentation, not a rename mandate.** The legacy names above are
 still what the code actually uses today, and that's deliberate — renaming all
