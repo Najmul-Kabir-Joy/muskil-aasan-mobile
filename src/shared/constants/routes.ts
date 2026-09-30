@@ -5,8 +5,9 @@
 // A Job Provider preference lands here — the existing "poster" prototype area.
 export const PROTOTYPE_PROVIDER_ROUTE = "/(poster)";
 
-// A Job Seeker preference lands here — the existing "worker" prototype area.
-export const PROTOTYPE_SEEKER_ROUTE = "/(worker)/jobs";
+// A Job Seeker preference lands here — the Job Seeker shell ("worker" route
+// group), whose default destination is its Home.
+export const PROTOTYPE_SEEKER_ROUTE = "/(worker)";
 
 // No preference recorded (skipped, deferred, or an existing user with
 // nothing on record) defaults to Job Provider — a deliberate product

@@ -202,6 +202,27 @@ export type ProviderJobs = {
   completed: { job: CompletedJob; seeker: WorkerProfile }[];
 };
 
+// Where one of the current Job Seeker's own Responses stands, as the
+// prototype's Applications shows it. Only the confirmed steps exist: the
+// Response was sent; the Provider chose them and sent a job request, which
+// they must accept; they accepted it. NOT an approved lifecycle — declining,
+// rejection, expiry, withdrawal and completion confirmation are undefined,
+// so none of them exist here. Completed work comes from `CompletedJob`
+// records, not from this.
+export type SeekerApplicationStage = "responseSent" | "jobRequest" | "accepted";
+
+// One Job the current Job Seeker responded to, with their private Response
+// message (the only Response field the prototype has — the final
+// application fields are undefined). Prototype state, not a backend contract.
+export type SeekerApplication = {
+  id: string;
+  job: Task;
+  message: string;
+  // Relative display time, like `JobResponse.receivedAgo`.
+  sentAgo: string;
+  stage: SeekerApplicationStage;
+};
+
 // A photo placed in a profile frame (the profile photo or the cover), with
 // the framing its owner chose. `zoom` (at least 1) scales the photo past
 // "just fills the frame"; `offsetX`/`offsetY` move its centre by a fraction

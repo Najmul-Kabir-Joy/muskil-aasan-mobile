@@ -1,18 +1,18 @@
 import { Tabs } from "expo-router";
 import { useState } from "react";
-import { ProviderAppHeader } from "@/features/marketplace/components";
-import { ProviderBottomNav } from "@/features/marketplace/provider-shell/ProviderBottomNav";
-import { ProviderDrawer } from "@/features/marketplace/provider-shell/ProviderDrawer";
+import { AppDrawer } from "@/features/marketplace/app-shell/AppDrawer";
+import { ProviderBottomNav } from "@/features/marketplace/app-shell/ProviderBottomNav";
+import { AppShellHeader } from "@/features/marketplace/components";
 
 /**
  * Owns the persistent Job Provider app shell — the shared top app bar, the
  * notched bottom navigation with the elevated Post Job action, and the
  * navigation drawer the header's hamburger button opens — for every
  * authenticated Provider screen. Individual screens must not render
- * `ProviderAppHeader`, a nav bar, or a drawer themselves; only their own
- * page content. See `src/features/marketplace/provider-shell/`.
+ * `AppShellHeader`, a nav bar, or a drawer themselves; only their own
+ * page content. See `src/features/marketplace/app-shell/`.
  *
- * Drawer open/close state is owned here (not by `ProviderAppHeader` or by
+ * Drawer open/close state is owned here (not by `AppShellHeader` or by
  * individual screens) so there is exactly one drawer instance, reachable
  * identically from every screen in this layout.
  *
@@ -29,7 +29,7 @@ export default function PosterTabsLayout() {
         backBehavior="history"
         screenOptions={{
           headerShown: true,
-          header: () => <ProviderAppHeader onOpenMenu={() => setDrawerOpen(true)} />,
+          header: () => <AppShellHeader onOpenMenu={() => setDrawerOpen(true)} />,
         }}
         tabBar={(props) => <ProviderBottomNav {...props} />}
       >
@@ -48,7 +48,7 @@ export default function PosterTabsLayout() {
         <Tabs.Screen name="response-detail" options={{ title: "Response Detail" }} />
         <Tabs.Screen name="public-profile" options={{ title: "Public Profile" }} />
       </Tabs>
-      <ProviderDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <AppDrawer mode="provider" visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </>
   );
 }

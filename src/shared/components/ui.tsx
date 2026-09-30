@@ -46,7 +46,7 @@ export function Screen({
  * default). Screens rendered inside a persistent shell that already handles
  * an edge itself (e.g. a Provider tab screen, whose top/bottom insets are
  * owned by the shared header and bottom navigation) should pass a narrower
- * list — see `src/features/marketplace/provider-shell/`.
+ * list — see `src/features/marketplace/app-shell/`.
  */
 export function ScrollScreen({ children, edges }: { children: ReactNode; edges?: Edges }) {
   return (

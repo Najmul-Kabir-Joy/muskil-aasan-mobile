@@ -20,7 +20,7 @@ describe("Provider tabs layout", () => {
     // the Responses list it was opened from.
     await render(
       // The shell's drawer reads safe-area insets, which need a provider —
-      // see ProviderDrawer.test.tsx.
+      // see AppDrawer.test.tsx.
       <SafeAreaProvider
         initialMetrics={{
           frame: { x: 0, y: 0, width: 390, height: 844 },

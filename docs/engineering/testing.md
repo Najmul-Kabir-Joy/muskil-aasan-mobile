@@ -61,7 +61,8 @@ jest.mock("expo-router", () => ({ useRouter: jest.fn() }));
 ```
 
 Then assert on the mock in each test. See
-`src/features/marketplace/components.test.tsx` (RoleSwitch) for the pattern.
+`src/features/marketplace/app-shell/AppDrawer.test.tsx` (the mode switch uses
+`replace`, not `push`) for the pattern.
 This is a boundary mock, not an implementation-detail mock — it's the same
 category as mocking network/storage.
 
@@ -109,9 +110,9 @@ category as mocking network/storage.
   storage, native modules) — not the function you're actually testing.
 - Reference examples: `src/shared/components/ui.test.tsx` (component
   rendering and accessibility behavior),
-  `src/features/marketplace/status.test.ts` (pure domain-mapping functions),
-  `src/features/marketplace/components.test.tsx` (navigation behavior via an
-  `expo-router` boundary mock), `__tests__/welcome-screen.test.tsx` (a route
+  `src/features/marketplace/seeker/seekerActivity.test.ts` (pure prototype
+  state functions), `src/features/marketplace/app-shell/AppDrawer.test.tsx`
+  (navigation behavior via an `expo-router` boundary mock), `__tests__/welcome-screen.test.tsx` (a route
   file's test, kept in the root-level `__tests__/` per the exception above).
 
 ## Before installing a testing dependency

@@ -141,7 +141,7 @@ describe("OnboardingScreen", () => {
     expect(replace).toHaveBeenCalledWith("/(poster)");
   });
 
-  it("Job Seeker preference routes to the seeker prototype destination", async () => {
+  it("Job Seeker preference routes to the Job Seeker Home", async () => {
     const replace = jest.fn();
     mockUseRouter.mockReturnValue({ replace });
     const { getByRole } = await reachPreferenceScreenFromGetStarted(render);
@@ -149,7 +149,7 @@ describe("OnboardingScreen", () => {
     await fireEvent.press(getByRole("button", { name: /I'd like to help/ }));
     await fireEvent.press(getByRole("button", { name: "Finish" }));
 
-    expect(replace).toHaveBeenCalledWith("/(worker)/jobs");
+    expect(replace).toHaveBeenCalledWith("/(worker)");
   });
 
   it("'I'm not sure yet' defaults to the Job Provider destination", async () => {

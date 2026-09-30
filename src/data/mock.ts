@@ -12,6 +12,7 @@ import type {
   ProfileSection,
   ProfileVisibility,
   ProviderJobs,
+  SeekerApplication,
   SeekerFeedback,
   Task,
   TimelineEvent,
@@ -566,6 +567,142 @@ export const communityTasks: Task[] = [
     remote: true,
   },
 ];
+
+// Open jobs other Job Providers have posted, as the Job Seeker Home feed
+// lists them (newest first). Starts with the same Community Jobs the
+// Provider Home shows, so one job never exists twice. The feed isn't ranked
+// or matched to the viewer — matching/recommendation rules are undefined.
+export const seekerFeedJobs: Task[] = [
+  ...communityTasks,
+  {
+    id: "c4",
+    title: "Fix a leaking kitchen tap",
+    category: "Plumbing",
+    budget: "৳500",
+    area: "Mirpur 1",
+    timing: "Today",
+    status: "open",
+    urgent: true,
+    offerCount: 0,
+    description: "The kitchen tap drips all day. Probably needs a new washer or cartridge.",
+    postedBy: { name: "Jasim Uddin", area: "Mirpur 1" },
+    postedAgo: "3 hours ago",
+  },
+  {
+    id: "c5",
+    title:
+      "Weekly English conversation practice for a Class 10 student preparing for O-level speaking exams",
+    category: "Tutor",
+    budget: "৳8,000/mo",
+    area: "Bashundhara R/A",
+    timing: "Sun & Tue evenings",
+    status: "open",
+    urgent: false,
+    offerCount: 0,
+    description:
+      "My son is confident with grammar but freezes when speaking. Looking for someone patient to practise everyday conversation, presentations and past speaking-exam topics with him, twice a week at home. Must be comfortable with a teenager who is shy at first.",
+    postedBy: { name: "Sadia Islam", area: "Bashundhara R/A" },
+    postedAgo: "5 hours ago",
+  },
+  {
+    id: "c6",
+    title: "Design a one-page menu card for a small café",
+    category: "Design",
+    budget: "৳1,800",
+    area: "Remote",
+    timing: "Within 3 days",
+    status: "open",
+    urgent: false,
+    offerCount: 0,
+    description:
+      "Twelve items with prices, our logo and a warm, simple look. Printable A4 file needed.",
+    postedBy: { name: "Arman Hossain", area: "Banani" },
+    postedAgo: "yesterday",
+    remote: true,
+  },
+  {
+    id: "c7",
+    title: "Help shift a 3-bedroom household",
+    category: "Moving",
+    budget: "৳18,500",
+    area: "Old Dhaka (Puran Dhaka) → Bashundhara R/A",
+    timing: "Friday, all day",
+    status: "open",
+    urgent: false,
+    offerCount: 0,
+    description:
+      "Packing, loading and unloading furniture and boxes. The truck is already booked; we need four extra hands.",
+    postedBy: { name: "Kamal Hossain", area: "Mirpur" },
+    postedAgo: "2 days ago",
+  },
+];
+
+// Jobs the current user responded to as a Job Seeker that aren't in the
+// open feed any more.
+const tableFanRepair: Task = {
+  id: "s1",
+  title: "Repair a table fan and two switchboards",
+  category: "Repair",
+  budget: "৳900",
+  area: "Mirpur 2",
+  timing: "Tomorrow morning",
+  status: "open",
+  urgent: false,
+  offerCount: 0,
+  description: "The table fan hums but doesn't spin, and two bedroom switchboards are loose.",
+  postedBy: { name: "Shirin Akter", area: "Mirpur 10" },
+  postedAgo: "2 days ago",
+};
+
+const documentDelivery: Task = {
+  id: "s2",
+  title: "Deliver signed documents from Motijheel to Gulshan 2",
+  category: "Delivery",
+  budget: "৳450",
+  area: "Motijheel → Gulshan 2",
+  timing: "Today by 4 PM",
+  status: "hired",
+  urgent: true,
+  offerCount: 0,
+  description: "One sealed envelope. Collect from our office reception and hand it over in person.",
+  postedBy: { name: "Rafiq Islam", area: "Mirpur" },
+  postedAgo: "yesterday",
+};
+
+// The current user's own Responses as a Job Seeker, one per stage the
+// prototype shows (see `SeekerApplicationStage`). The one on c3 is still in
+// the open feed, so Home shows that job as already responded to.
+export const seekerApplications: SeekerApplication[] = [
+  {
+    id: "a1",
+    job: tableFanRepair,
+    message:
+      "I live nearby in Mirpur and can bring my own tools. I've fixed a few fans like this before.",
+    sentAgo: "2 days ago",
+    stage: "jobRequest",
+  },
+  {
+    id: "a2",
+    job: documentDelivery,
+    message: "I work near Motijheel and have a motorbike, so I can pick it up right after lunch.",
+    sentAgo: "yesterday",
+    stage: "accepted",
+  },
+  {
+    id: "a3",
+    job: communityTasks[2],
+    message:
+      "I type quickly in both Bangla and English and can send the finished document by Saturday.",
+    sentAgo: "2 hours ago",
+    stage: "responseSent",
+  },
+];
+
+// Work the current user completed as a Job Seeker, newest first — the same
+// records as their Seeker Profile's Previous Work & Feedback.
+export function getSeekerCompletedJobs(completed: CompletedJob[] = completedJobs): CompletedJob[] {
+  return newestFirst(completed.filter((job) => job.seekerId === CURRENT_USER_ID));
+}
 
 // The current Provider's (Nadia's) history of jobs completed with specific
 // Job Seekers — this is the only source of Refer Someone eligibility. A

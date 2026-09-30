@@ -1,33 +1,18 @@
 import { fireEvent, render } from "@testing-library/react-native";
-import { useRouter } from "expo-router";
-import {
-  CommunityPostCard,
-  ProviderAppHeader,
-  RoleSwitch,
-  TaskCard,
-} from "@/features/marketplace/components";
-import { communityTasks, tasks } from "@/data/mock";
+import { AppShellHeader, CommunityPostCard } from "@/features/marketplace/components";
+import { communityTasks } from "@/data/mock";
 import { BRAND_NAME } from "@/shared/constants/brand";
 
-// Mock at the expo-router module boundary (per docs/engineering/testing.md)
-// rather than mounting a real navigation tree, since the only behavior under
-// test is *which router method* RoleSwitch calls.
-jest.mock("expo-router", () => ({
-  useRouter: jest.fn(),
-}));
-
-const mockUseRouter = useRouter as jest.Mock;
-
-describe("ProviderAppHeader", () => {
+describe("AppShellHeader", () => {
   it("shows the brand and a static location, with no logo icon", async () => {
-    const { getByText } = await render(<ProviderAppHeader />);
+    const { getByText } = await render(<AppShellHeader />);
 
     expect(getByText(BRAND_NAME)).toBeTruthy();
     expect(getByText("Mirpur, Dhaka")).toBeTruthy();
   });
 
   it("has a notification button and a navigation-menu button, and no profile button", async () => {
-    const { getByLabelText, queryByLabelText } = await render(<ProviderAppHeader />);
+    const { getByLabelText, queryByLabelText } = await render(<AppShellHeader />);
 
     expect(getByLabelText("Notifications")).toBeTruthy();
     expect(getByLabelText("Open navigation menu")).toBeTruthy();
@@ -35,90 +20,26 @@ describe("ProviderAppHeader", () => {
   });
 
   it("the navigation-menu button is tappable without crashing when no handler is given", async () => {
-    const { getByLabelText } = await render(<ProviderAppHeader />);
+    const { getByLabelText } = await render(<AppShellHeader />);
 
     await fireEvent.press(getByLabelText("Open navigation menu"));
   });
 
   it("the navigation-menu button opens the drawer via the provided onOpenMenu handler", async () => {
     const onOpenMenu = jest.fn();
-    const { getByLabelText } = await render(<ProviderAppHeader onOpenMenu={onOpenMenu} />);
+    const { getByLabelText } = await render(<AppShellHeader onOpenMenu={onOpenMenu} />);
 
     await fireEvent.press(getByLabelText("Open navigation menu"));
     expect(onOpenMenu).toHaveBeenCalledTimes(1);
   });
 
   it("does not show a fake unread-notification badge — there's no real unread state yet", async () => {
-    const { getByLabelText } = await render(<ProviderAppHeader />);
+    const { getByLabelText } = await render(<AppShellHeader />);
 
     const icon = getByLabelText("Notifications");
     // The notification icon should be the only thing in its wrapper — no
     // extra dot/badge view alongside it.
     expect(icon.parent?.children.length).toBe(1);
-  });
-});
-
-describe("RoleSwitch", () => {
-  it("replaces the route when switching to job seeker mode, instead of pushing", async () => {
-    const replace = jest.fn();
-    const push = jest.fn();
-    mockUseRouter.mockReturnValue({ replace, push });
-
-    const { getByText } = await render(<RoleSwitch active="poster" />);
-    await fireEvent.press(getByText("Job seeker"));
-
-    expect(replace).toHaveBeenCalledWith("/(worker)/jobs");
-    expect(push).not.toHaveBeenCalled();
-  });
-
-  it("replaces the route when switching to poster mode, instead of pushing", async () => {
-    const replace = jest.fn();
-    const push = jest.fn();
-    mockUseRouter.mockReturnValue({ replace, push });
-
-    const { getByText } = await render(<RoleSwitch active="jobSeeker" />);
-    await fireEvent.press(getByText("Poster mode"));
-
-    expect(replace).toHaveBeenCalledWith("/(poster)");
-    expect(push).not.toHaveBeenCalled();
-  });
-});
-
-describe("TaskCard", () => {
-  const task = tasks[0];
-
-  it("navigates to the href the caller passes, not a hardcoded route", async () => {
-    const replace = jest.fn();
-    const push = jest.fn();
-    mockUseRouter.mockReturnValue({ replace, push });
-
-    const { getByRole } = await render(
-      <TaskCard task={task} cta="View job" href="/(worker)/offers" />,
-    );
-    await fireEvent.press(getByRole("button", { name: "View job" }));
-
-    expect(push).toHaveBeenCalledWith("/(worker)/offers");
-  });
-
-  it("calls the caller's onPress instead of navigating when no href is given", async () => {
-    const onPress = jest.fn();
-
-    const { getByRole } = await render(<TaskCard task={task} cta="View job" onPress={onPress} />);
-    await fireEvent.press(getByRole("button", { name: "View job" }));
-
-    expect(onPress).toHaveBeenCalledTimes(1);
-  });
-
-  it("renders no CTA button when the caller passes neither href nor onPress", async () => {
-    const { queryByRole } = await render(<TaskCard task={task} />);
-
-    expect(queryByRole("button")).toBeNull();
-  });
-
-  it("still renders offerCount as offers, unaffected by the community feed's separate responseCount", async () => {
-    const { getByText } = await render(<TaskCard task={task} />);
-
-    expect(getByText(`${task.offerCount} offers`)).toBeTruthy();
   });
 });
 

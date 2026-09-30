@@ -52,13 +52,16 @@ hooks, and types that only make sense for that feature (e.g. `jobs`,
 other way around, and features should not import from each other — if two
 features need the same thing, that's a signal to move it into `shared/`.
 
-`src/features/marketplace/` is the first (and currently only) feature
-directory. It holds the domain-specific UI and pure logic tied to the
-prototype's task/offer/category/role concepts (`RoleSwitch`, `TaskCard`,
-`OfferCard`, `CategoryTile`, `statusTone`, `verificationLabel`) — used by both
-`app/(poster)/` and `app/(worker)/`, since both route groups interact with the
-same underlying marketplace domain. It is **not** approved product
-terminology or lifecycle — see
+`src/features/marketplace/` is the main feature directory. It holds the
+domain-specific UI and pure logic for both app modes — used by both
+`app/(poster)/` (Job Provider) and `app/(worker)/` (Job Seeker), since both
+route groups interact with the same underlying marketplace domain:
+`app-shell/` (each mode's bottom navigation and the drawer holding the one
+global mode switch; the shared header is `AppShellHeader` in
+`components.tsx`), `home/`,
+`responses/`, `my-jobs/`, `post-job/` and `profile/` for the Provider side
+and the shared Profile, and `seeker/` for the Job Seeker's Home, Applications
+and Saved. None of it is approved product terminology or lifecycle — see
 [domain-and-terminology.md](./domain-and-terminology.md).
 
 Create a new `src/features/<name>/` directory only when a feature actually

@@ -14,7 +14,7 @@ const mockUseRouter = useRouter as jest.Mock;
 
 // The screen always mounts ReferSomeoneSheet/CommunityJobOverflowSheet
 // (hidden until opened), both of which read insets via
-// `useSafeAreaInsets()` — see ProviderDrawer.test.tsx for the same pattern.
+// `useSafeAreaInsets()` — see AppDrawer.test.tsx for the same pattern.
 function renderHome(element: ReactElement) {
   return render(
     <SafeAreaProvider

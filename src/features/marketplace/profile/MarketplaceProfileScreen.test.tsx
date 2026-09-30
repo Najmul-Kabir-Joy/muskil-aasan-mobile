@@ -22,7 +22,7 @@ const mockLaunchLibrary = ImagePicker.launchImageLibraryAsync as jest.Mock;
 const PICKED_PHOTO = { uri: "file:///photos/nadia.jpg", width: 1200, height: 800 };
 
 // The profile's sheets read safe-area insets, which need a provider — see
-// ProviderDrawer.test.tsx for the same pattern.
+// AppDrawer.test.tsx for the same pattern.
 function renderWithSafeArea(element: ReactElement) {
   return render(
     <SafeAreaProvider

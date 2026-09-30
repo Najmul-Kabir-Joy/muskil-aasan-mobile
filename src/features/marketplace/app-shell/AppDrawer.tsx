@@ -15,7 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Badge } from "@/shared/components/ui";
 import { BRAND_NAME } from "@/shared/constants/brand";
-import { PROTOTYPE_SEEKER_ROUTE } from "@/shared/constants/routes";
+import { PROTOTYPE_PROVIDER_ROUTE, PROTOTYPE_SEEKER_ROUTE } from "@/shared/constants/routes";
 import { colors, fonts, radius, shadows, spacing } from "@/theme/tokens";
 
 const DRAWER_WIDTH_RATIO = 0.84;
@@ -24,7 +24,7 @@ const OPEN_ANIMATION_MS = 300;
 const CLOSE_ANIMATION_MS = 240;
 
 // Prototype/mock user identity — the same "Nadia Rahman, Mirpur" identity
-// the Profile tab (`getCurrentUserProfile`) and ProviderAppHeader use. No
+// the Profile tab (`getCurrentUserProfile`) and AppShellHeader use. No
 // real phone number exists anywhere in the app, so it's shown masked,
 // matching the Stitch design's own masked-phone treatment. See
 // docs/engineering/domain-and-terminology.md.
@@ -35,47 +35,78 @@ const CURRENT_USER = {
   maskedPhone: "+880 17••••••••",
 };
 
+// The app's one global mode. One account acts as both; the drawer is where
+// it switches (never a switch on a screen or on Profile).
+export type AppMode = "provider" | "seeker";
+
+type IconName = keyof typeof MaterialIcons.glyphMap;
+
 type DrawerRoute = { kind: "route"; href: string } | { kind: "comingSoon"; title: string };
 
 function comingSoon(title: string): DrawerRoute {
   return { kind: "comingSoon", title };
 }
 
-const SECONDARY_ACTIONS: {
+// Where each mode's shell lives, and how its drawer describes the mode.
+const MODES: Record<
+  AppMode,
+  { basePath: string; home: string; title: string; subtitle: string; icon: IconName }
+> = {
+  provider: {
+    basePath: "/(poster)",
+    home: PROTOTYPE_PROVIDER_ROUTE,
+    title: "Job Provider",
+    subtitle: "I need help",
+    icon: "person-search",
+  },
+  seeker: {
+    basePath: "/(worker)",
+    home: PROTOTYPE_SEEKER_ROUTE,
+    title: "Job Seeker",
+    subtitle: "I want to help & earn",
+    icon: "work",
+  },
+};
+
+type DrawerRow = {
   key: string;
   label: string;
-  icon: keyof typeof MaterialIcons.glyphMap;
+  icon: IconName;
   destination: DrawerRoute;
   statusBadge?: { label: string; tone: "warning" };
-}[] = [
-  {
-    key: "saved-jobs",
-    label: "Saved Jobs",
-    icon: "bookmark",
-    destination: comingSoon("Saved Jobs"),
-  },
-  {
-    key: "identity-setup",
-    label: "Identity Setup",
-    icon: "badge",
-    destination: comingSoon("Identity Setup"),
-    statusBadge: { label: "Not added", tone: "warning" },
-  },
-  {
-    key: "job-interests",
-    label: "Job Interests",
-    icon: "interests",
-    destination: comingSoon("Job Interests"),
-  },
-];
-
-const ACCOUNT_ROWS: {
-  key: string;
-  label: string;
-  icon: keyof typeof MaterialIcons.glyphMap;
-  destination: DrawerRoute;
   trailingValue?: string;
-}[] = [
+};
+
+// Saved is a primary bottom-navigation destination in Job Seeker mode, so
+// the Seeker drawer doesn't repeat it.
+function secondaryActions(mode: AppMode): DrawerRow[] {
+  const rows: DrawerRow[] = [
+    {
+      key: "identity-setup",
+      label: "Identity Setup",
+      icon: "badge",
+      destination: comingSoon("Identity Setup"),
+      statusBadge: { label: "Not added", tone: "warning" },
+    },
+    {
+      key: "job-interests",
+      label: "Job Interests",
+      icon: "interests",
+      destination: comingSoon("Job Interests"),
+    },
+  ];
+  if (mode === "provider") {
+    rows.unshift({
+      key: "saved-jobs",
+      label: "Saved Jobs",
+      icon: "bookmark",
+      destination: comingSoon("Saved Jobs"),
+    });
+  }
+  return rows;
+}
+
+const ACCOUNT_ROWS: DrawerRow[] = [
   {
     key: "personal-info",
     label: "Personal Information",
@@ -97,37 +128,44 @@ const ACCOUNT_ROWS: {
   },
 ];
 
-const SUPPORT_ROWS: {
-  key: string;
-  label: string;
-  icon: keyof typeof MaterialIcons.glyphMap;
-  destination: DrawerRoute;
-}[] = [
-  {
-    key: "help-support",
-    label: "Help & Support",
-    icon: "help-outline",
-    destination: { kind: "route", href: "/(poster)/support" },
-  },
-  {
-    key: "terms",
-    label: "Terms & Conditions",
-    icon: "description",
-    destination: comingSoon("Terms & Conditions"),
-  },
-  {
-    key: "privacy",
-    label: "Privacy Policy",
-    icon: "policy",
-    destination: comingSoon("Privacy Policy"),
-  },
-];
+// Help & Support opens the existing (legacy prototype) report screen only
+// in Job Provider mode; that screen's copy is about task status and
+// payments, which the Job Seeker experience doesn't show, so Seeker mode
+// gets the coming-soon placeholder instead.
+function supportRows(mode: AppMode): DrawerRow[] {
+  return [
+    {
+      key: "help-support",
+      label: "Help & Support",
+      icon: "help-outline",
+      destination:
+        mode === "provider"
+          ? { kind: "route", href: "/(poster)/support" }
+          : comingSoon("Help & Support"),
+    },
+    {
+      key: "terms",
+      label: "Terms & Conditions",
+      icon: "description",
+      destination: comingSoon("Terms & Conditions"),
+    },
+    {
+      key: "privacy",
+      label: "Privacy Policy",
+      icon: "policy",
+      destination: comingSoon("Privacy Policy"),
+    },
+  ];
+}
 
 /**
- * The canonical Job Provider navigation drawer — "Drawer / Job Provider
- * (Variant A — Clean Grouped Flow)" in Stitch. Opened/closed by
- * `app/(poster)/_layout.tsx`, which owns `visible`/`onClose`; this component
- * only renders content and the slide/overlay animation.
+ * The navigation drawer for both app modes — "Drawer / Job Provider
+ * (Variant A — Clean Grouped Flow)" in Stitch, with the Job Seeker drawer as
+ * its counterpart. `mode` is the shell it's opened from: that mode shows as
+ * ACTIVE and the other is the one-tap switch (the app's only mode switch).
+ * Opened/closed by the mode's layout (`app/(poster)/_layout.tsx` or
+ * `app/(worker)/_layout.tsx`), which owns `visible`/`onClose`; this
+ * component only renders content and the slide/overlay animation.
  *
  * Uses a plain RN `Modal` (transparent, `onRequestClose`) rather than a
  * drawer-navigation dependency — it's the smallest primitive that already
@@ -138,7 +176,17 @@ const SUPPORT_ROWS: {
  * of the closing animation — its own `visible` prop would otherwise dismiss
  * it instantly and cut the slide-out off before it can play.
  */
-export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+export function AppDrawer({
+  mode,
+  visible,
+  onClose,
+}: {
+  mode: AppMode;
+  visible: boolean;
+  onClose: () => void;
+}) {
+  const current = MODES[mode];
+  const other = MODES[mode === "provider" ? "seeker" : "provider"];
   const router = useRouter();
   // Read once here, in the normal app tree, rather than via a <SafeAreaView>
   // rendered inside the Modal below — a Modal renders into its own native
@@ -215,18 +263,23 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
     if (destination.kind === "route") {
       router.push(destination.href);
     } else {
-      router.push({ pathname: "/(poster)/coming-soon", params: { title: destination.title } });
+      router.push({
+        pathname: `${current.basePath}/coming-soon`,
+        params: { title: destination.title },
+      });
     }
   }
 
   function handleViewProfile() {
     onClose();
-    router.push("/(poster)/profile");
+    router.push(`${current.basePath}/profile`);
   }
 
-  function handleSwitchToJobSeeker() {
+  // `replace`, not `push`: switching modes swaps the whole shell, and
+  // shouldn't stack an ever-growing back history of mode switches.
+  function handleSwitchMode() {
     onClose();
-    router.replace(PROTOTYPE_SEEKER_ROUTE);
+    router.replace(other.home);
   }
 
   function handleLogOut() {
@@ -312,14 +365,14 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
                   <View style={[styles.modeRow, styles.modeRowActive]}>
                     <View style={styles.modeRowLeft}>
                       <View style={[styles.modeIcon, styles.modeIconActive]}>
-                        <MaterialIcons name="person-search" size={20} color={colors.primary} />
+                        <MaterialIcons name={current.icon} size={20} color={colors.primary} />
                       </View>
                       <View style={styles.modeTextColumn}>
                         <View style={styles.modeTitleRow}>
-                          <Text style={styles.modeTitleActive}>Job Provider</Text>
+                          <Text style={styles.modeTitleActive}>{current.title}</Text>
                           <Badge label="ACTIVE" tone="success" />
                         </View>
-                        <Text style={styles.modeSubtitle}>I need help</Text>
+                        <Text style={styles.modeSubtitle}>{current.subtitle}</Text>
                       </View>
                     </View>
                     <View style={styles.activeCheck}>
@@ -329,17 +382,17 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
 
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Switch to Job Seeker"
-                    onPress={handleSwitchToJobSeeker}
+                    accessibilityLabel={`Switch to ${other.title}`}
+                    onPress={handleSwitchMode}
                     style={styles.modeRow}
                   >
                     <View style={styles.modeRowLeft}>
                       <View style={styles.modeIcon}>
-                        <MaterialIcons name="work" size={20} color={colors.muted} />
+                        <MaterialIcons name={other.icon} size={20} color={colors.muted} />
                       </View>
                       <View style={styles.modeTextColumn}>
-                        <Text style={styles.modeTitle}>Job Seeker</Text>
-                        <Text style={styles.modeSubtitle}>I want to help &amp; earn</Text>
+                        <Text style={styles.modeTitle}>{other.title}</Text>
+                        <Text style={styles.modeSubtitle}>{other.subtitle}</Text>
                       </View>
                     </View>
                     <View style={styles.switchPill}>
@@ -353,7 +406,7 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
 
               {/* Secondary actions */}
               <View style={styles.rowCard}>
-                {SECONDARY_ACTIONS.map((item, index) => (
+                {secondaryActions(mode).map((item, index) => (
                   <Pressable
                     key={item.key}
                     accessibilityRole="button"
@@ -404,7 +457,7 @@ export function ProviderDrawer({ visible, onClose }: { visible: boolean; onClose
               <View style={styles.section}>
                 <Text style={styles.sectionLabel}>Support &amp; Legal</Text>
                 <View style={styles.rowCard}>
-                  {SUPPORT_ROWS.map((item, index) => (
+                  {supportRows(mode).map((item, index) => (
                     <Pressable
                       key={item.key}
                       accessibilityRole="button"

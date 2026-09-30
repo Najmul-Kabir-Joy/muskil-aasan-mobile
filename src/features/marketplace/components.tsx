@@ -1,51 +1,50 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { statusTone, verificationLabel } from "@/features/marketplace/status";
-import { ActionButton, Badge, CaptionText, PrimaryButton } from "@/shared/components/ui";
+import { Badge, CaptionText } from "@/shared/components/ui";
 import { BRAND_NAME } from "@/shared/constants/brand";
 import { colors, fonts, radius, shadows, spacing } from "@/theme/tokens";
-import type { Category, Offer, Task } from "@/types/domain";
+import type { Category, Task } from "@/types/domain";
 
 // Prototype/mock marketplace UI — tied to src/types/domain.ts's prototype
 // shapes, not approved product requirements. See
 // docs/engineering/domain-and-terminology.md.
 
 /**
- * Shared Job Provider app-shell top bar — brand, dummy location display, a
+ * The shared app-shell top bar — brand, dummy location display, a
  * notification icon, and a navigation-menu (hamburger) icon. Rendered once
- * by `app/(poster)/_layout.tsx` as the persistent header for every
- * authenticated Provider screen, not re-rendered per screen — see
- * `src/features/marketplace/provider-shell/`. Location and notifications
- * are static prototype display only — see
+ * by each mode's layout (`app/(poster)/_layout.tsx` for Job Provider,
+ * `app/(worker)/_layout.tsx` for Job Seeker) as the persistent header for
+ * every screen in that shell, not re-rendered per screen — see
+ * `src/features/marketplace/app-shell/`. Location and notifications are
+ * static prototype display only — see
  * docs/engineering/domain-and-terminology.md.
  *
  * Profile intentionally has no button here — it's a bottom-navigation
- * destination now (`ProviderBottomNav`). The hamburger button opens the
- * Provider drawer (`ProviderDrawer`) — its open/close state is owned by
- * `app/(poster)/_layout.tsx`, not this component, so `onOpenMenu` is
- * required to actually do anything; without it the button is inert.
+ * destination in both modes. The hamburger button opens the mode's drawer
+ * (`AppDrawer`) — its open/close state is owned by the layout, not this
+ * component, so `onOpenMenu` is required to actually do anything; without
+ * it the button is inert.
  *
- * Owns its own top safe-area inset, since it now sits directly under the
+ * Owns its own top safe-area inset, since it sits directly under the
  * status bar as the layout's header rather than inside each screen's own
  * safe-area-padded content.
  */
-export function ProviderAppHeader({ onOpenMenu }: { onOpenMenu?: () => void }) {
+export function AppShellHeader({ onOpenMenu }: { onOpenMenu?: () => void }) {
   return (
-    <SafeAreaView edges={["top"]} style={styles.providerTopBarSafeArea}>
-      <View style={styles.providerTopBar}>
-        <View style={styles.providerBrandColumn}>
-          <Text style={styles.providerBrandName}>{BRAND_NAME}</Text>
-          <View style={styles.providerLocationRow}>
+    <SafeAreaView edges={["top"]} style={styles.shellTopBarSafeArea}>
+      <View style={styles.shellTopBar}>
+        <View style={styles.shellBrandColumn}>
+          <Text style={styles.shellBrandName}>{BRAND_NAME}</Text>
+          <View style={styles.shellLocationRow}>
             <MaterialIcons name="location-on" size={14} color={colors.primary} />
-            <Text style={styles.providerLocationText}>Mirpur, Dhaka</Text>
+            <Text style={styles.shellLocationText}>Mirpur, Dhaka</Text>
             <MaterialIcons name="expand-more" size={14} color={colors.muted} />
           </View>
         </View>
-        <View style={styles.providerTopBarActions}>
-          <View style={styles.providerNotificationButton}>
+        <View style={styles.shellTopBarActions}>
+          <View style={styles.shellNotificationButton}>
             <MaterialIcons
               accessibilityLabel="Notifications"
               name="notifications"
@@ -57,7 +56,7 @@ export function ProviderAppHeader({ onOpenMenu }: { onOpenMenu?: () => void }) {
             accessibilityRole="button"
             accessibilityLabel="Open navigation menu"
             onPress={onOpenMenu}
-            style={styles.providerMenuButton}
+            style={styles.shellMenuButton}
           >
             <MaterialIcons name="menu" size={24} color={colors.text} />
           </Pressable>
@@ -67,91 +66,12 @@ export function ProviderAppHeader({ onOpenMenu }: { onOpenMenu?: () => void }) {
   );
 }
 
-/**
- * Top-level poster/job-seeker mode switch. Uses `router.replace` (not
- * `push`) so repeatedly switching modes doesn't stack an unbounded back
- * history — see docs/engineering/git-workflow.md history for context.
- */
-export function RoleSwitch({ active }: { active: "poster" | "jobSeeker" }) {
-  const router = useRouter();
-  return (
-    <View style={styles.roleSwitch}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ selected: active === "poster" }}
-        onPress={() => router.replace("/(poster)")}
-        style={[styles.rolePill, active === "poster" && styles.rolePillActive]}
-      >
-        <Text style={[styles.roleText, active === "poster" && styles.roleTextActive]}>
-          Poster mode
-        </Text>
-      </Pressable>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ selected: active === "jobSeeker" }}
-        onPress={() => router.replace("/(worker)/jobs")}
-        style={[styles.rolePill, active === "jobSeeker" && styles.rolePillActive]}
-      >
-        <Text style={[styles.roleText, active === "jobSeeker" && styles.roleTextActive]}>
-          Job seeker
-        </Text>
-      </Pressable>
-    </View>
-  );
-}
-
 export function CategoryTile({ category }: { category: Category }) {
   return (
     <View style={styles.categoryTile}>
       <Text style={styles.categoryIcon}>{category.icon}</Text>
       <Text style={styles.cardTitle}>{category.label}</Text>
       <CaptionText>{category.example}</CaptionText>
-    </View>
-  );
-}
-
-/**
- * Renders its footer CTA via `href` (navigation, handled by `PrimaryButton`)
- * or `onPress` (a caller-owned local action, handled by `ActionButton`) —
- * never both, and never a default. TaskCard is used by both poster and job
- * seeker screens, so it must not decide a top-level route on its callers'
- * behalf; see docs/engineering/domain-and-terminology.md — job details is
- * not a defined flow yet, so a caller with no real destination should pass
- * neither prop rather than be given an invented one.
- */
-export function TaskCard({
-  task,
-  cta = "View task",
-  href,
-  onPress,
-}: {
-  task: Task;
-  cta?: string;
-  href?: string;
-  onPress?: () => void;
-}) {
-  return (
-    <View style={styles.card}>
-      <View style={styles.cardTopRow}>
-        <Badge label={task.category} />
-        <Badge label={task.status} tone={statusTone(task.status)} />
-      </View>
-      <Text style={styles.cardTitle}>{task.title}</Text>
-      <CaptionText>{task.description}</CaptionText>
-      <View style={styles.signalRow}>
-        <Text style={styles.price}>{task.budget}</Text>
-        <Text style={styles.signal}>{task.area}</Text>
-        <Text style={styles.signal}>{task.timing}</Text>
-        {task.urgent ? <Badge label="Urgent" tone="danger" /> : null}
-      </View>
-      <View style={styles.cardFooter}>
-        <CaptionText>{task.offerCount} offers</CaptionText>
-        {href ? (
-          <PrimaryButton label={cta} href={href} tone="secondary" />
-        ) : onPress ? (
-          <ActionButton label={cta} onPress={onPress} tone="secondary" />
-        ) : null}
-      </View>
     </View>
   );
 }
@@ -308,36 +228,11 @@ export function CommunityPostCard({
   );
 }
 
-export function OfferCard({ offer }: { offer: Offer }) {
-  return (
-    <View style={styles.card}>
-      <View style={styles.cardTopRow}>
-        <View>
-          <Text style={styles.cardTitle}>{offer.worker.name}</Text>
-          <CaptionText>
-            {offer.worker.rating} rating · {offer.worker.completedJobs} jobs · {offer.worker.area}
-          </CaptionText>
-        </View>
-        <Badge
-          label={verificationLabel(offer.worker.verification)}
-          tone={offer.worker.verification === "verified" ? "success" : "warning"}
-        />
-      </View>
-      <Text style={styles.offerMessage}>{offer.message}</Text>
-      <View style={styles.signalRow}>
-        <Text style={styles.price}>{offer.amount}</Text>
-        <Text style={styles.signal}>{offer.estimatedTime}</Text>
-        <Badge label={offer.status} tone={offer.status === "accepted" ? "success" : "neutral"} />
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  providerTopBarSafeArea: {
+  shellTopBarSafeArea: {
     backgroundColor: colors.card,
   },
-  providerTopBar: {
+  shellTopBar: {
     alignItems: "center",
     backgroundColor: colors.card,
     borderBottomColor: colors.border,
@@ -347,64 +242,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: spacing.md,
   },
-  providerBrandColumn: {
+  shellBrandColumn: {
     gap: spacing.xxs,
   },
-  providerBrandName: {
+  shellBrandName: {
     color: colors.primary,
     fontFamily: fonts.extraBold,
     fontSize: 20,
     letterSpacing: -0.3,
   },
-  providerLocationRow: {
+  shellLocationRow: {
     alignItems: "center",
     flexDirection: "row",
     gap: spacing.xxs,
   },
-  providerLocationText: {
+  shellLocationText: {
     color: colors.muted,
     fontFamily: fonts.semiBold,
     fontSize: 12,
   },
-  providerTopBarActions: {
+  shellTopBarActions: {
     alignItems: "center",
     flexDirection: "row",
     gap: spacing.xs,
   },
-  providerNotificationButton: {
+  shellNotificationButton: {
     alignItems: "center",
     height: 36,
     justifyContent: "center",
     width: 36,
   },
-  providerMenuButton: {
+  shellMenuButton: {
     alignItems: "center",
     height: 36,
     justifyContent: "center",
     width: 36,
-  },
-  roleSwitch: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.pill,
-    flexDirection: "row",
-    flexShrink: 1,
-    padding: spacing.xs,
-  },
-  rolePill: {
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  rolePillActive: {
-    backgroundColor: colors.primary,
-  },
-  roleText: {
-    color: colors.muted,
-    fontFamily: fonts.bold,
-    fontSize: 11,
-  },
-  roleTextActive: {
-    color: colors.card,
   },
   categoryTile: {
     backgroundColor: colors.card,
@@ -422,53 +294,11 @@ const styles = StyleSheet.create({
     fontFamily: fonts.extraBold,
     fontSize: 16,
   },
-  card: {
-    backgroundColor: colors.card,
-    borderColor: colors.border,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    gap: spacing.md,
-    padding: spacing.lg,
-    ...shadows.card,
-  },
-  cardTopRow: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: spacing.sm,
-    justifyContent: "space-between",
-  },
   cardTitle: {
     color: colors.text,
     fontFamily: fonts.extraBold,
     fontSize: 17,
     lineHeight: 23,
-  },
-  signalRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-  },
-  price: {
-    color: colors.primary,
-    fontFamily: fonts.extraBold,
-    fontSize: 20,
-  },
-  signal: {
-    color: colors.muted,
-    fontFamily: fonts.semiBold,
-    fontSize: 13,
-  },
-  cardFooter: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  offerMessage: {
-    color: colors.text,
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    lineHeight: 21,
   },
   communityCard: {
     backgroundColor: colors.card,
