@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(15, 23, 42, 0.55)",
+    backgroundColor: colors.scrim,
   },
   drawer: {
     position: "absolute",

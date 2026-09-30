@@ -28,6 +28,8 @@ export const colors = {
   // A more saturated `surface` for small count pills that sit on a white
   // card (e.g. "18 ratings received").
   surfaceStrong: "#E2E7FF",
+  // Dimmed backdrop behind modal sheets and the drawer (`text` at 55%).
+  scrim: "rgba(15, 23, 42, 0.55)",
 };
 
 export const fonts = {

@@ -112,7 +112,7 @@ export function CommunityJobOverflowSheet({
 
 const styles = StyleSheet.create({
   root: {
-    backgroundColor: "rgba(15, 23, 42, 0.55)",
+    backgroundColor: colors.scrim,
     flex: 1,
     justifyContent: "flex-end",
   },
