@@ -14,7 +14,7 @@ const mockUseRouter = useRouter as jest.Mock;
 // The route renders `ProviderHomeScreen`, which always mounts the Refer
 // Someone / overflow sheets (hidden until opened) — both read insets via
 // `useSafeAreaInsets()`, so tests need a `SafeAreaProvider` ancestor. See
-// src/features/marketplace/provider-shell/ProviderDrawer.test.tsx for the
+// src/features/marketplace/app-shell/AppDrawer.test.tsx for the
 // same pattern.
 function renderRoute(element: ReactElement) {
   return render(

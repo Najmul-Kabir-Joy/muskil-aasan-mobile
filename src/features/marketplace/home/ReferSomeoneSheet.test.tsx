@@ -6,7 +6,7 @@ import { communityTasks, workers } from "@/data/mock";
 import type { EligibleReferral } from "@/types/domain";
 
 // `ReferSomeoneSheet` reads insets via `useSafeAreaInsets()`, which throws
-// without a `SafeAreaProvider` ancestor — see ProviderDrawer.test.tsx for
+// without a `SafeAreaProvider` ancestor — see AppDrawer.test.tsx for
 // the same pattern.
 function renderSheet(element: ReactElement) {
   return render(

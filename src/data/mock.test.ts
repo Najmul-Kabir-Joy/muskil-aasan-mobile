@@ -11,7 +11,10 @@ import {
   getMarketplaceProfile,
   getProviderJobs,
   getResponseWithJob,
+  getSeekerCompletedJobs,
   jobResponses,
+  seekerApplications,
+  seekerFeedJobs,
   tasks,
   workers,
 } from "@/data/mock";
@@ -270,5 +273,49 @@ describe("getProviderJobs", () => {
     for (const { job, seeker } of completed) {
       expect(seeker.id).toBe(job.seekerId);
     }
+  });
+});
+
+describe("Job Seeker data", () => {
+  it("the Seeker feed lists other people's Jobs, each with a Provider, in the app-wide categories", () => {
+    const validLabels = categories.map((category) => category.label);
+    const ownTaskIds = tasks.map((task) => task.id);
+
+    for (const job of seekerFeedJobs) {
+      expect(validLabels).toContain(job.category);
+      expect(job.postedBy).toBeDefined();
+      expect(ownTaskIds).not.toContain(job.id);
+    }
+  });
+
+  it("the Seeker feed has unique ids and includes the Community Jobs rather than copies of them", () => {
+    const ids = seekerFeedJobs.map((job) => job.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const job of communityTasks) {
+      expect(seekerFeedJobs).toContain(job);
+    }
+  });
+
+  it("a Remote job is always flagged remote, so the Remote filter can find it", () => {
+    for (const job of seekerFeedJobs) {
+      if (/remote/i.test(job.area)) expect(job.remote).toBe(true);
+    }
+  });
+
+  it("the prototype Applications cover each known stage once, each with a Provider and a message", () => {
+    expect(seekerApplications.map((application) => application.stage).sort()).toEqual(
+      ["accepted", "jobRequest", "responseSent"].sort(),
+    );
+    for (const application of seekerApplications) {
+      expect(application.job.postedBy).toBeDefined();
+      expect(application.message.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("completed Seeker work is the current user's, newest first — the same records as their profile", () => {
+    const completed = getSeekerCompletedJobs();
+
+    expect(completed.every((job) => job.seekerId === CURRENT_USER_ID)).toBe(true);
+    expect(completed).toEqual(getCurrentUserProfile().jobsAsSeeker);
   });
 });

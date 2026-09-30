@@ -2,7 +2,7 @@ import type { Edges } from "react-native-safe-area-context";
 import { AppHeader, EmptyState, ScrollScreen } from "@/shared/components/ui";
 
 /**
- * Generic placeholder for Provider drawer destinations that don't have a
+ * Generic placeholder for drawer destinations (both modes) that don't have a
  * finalized screen yet (Saved Jobs, Identity Setup, Job Interests, Personal
  * Information, Location/Area, Notifications, Terms & Conditions, Privacy
  * Policy). One reusable screen parameterized by title, rather than inventing

@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
-import { ComingSoonScreen } from "@/features/marketplace/provider-shell/ComingSoonScreen";
+import { ComingSoonScreen } from "@/features/marketplace/app-shell/ComingSoonScreen";
 
 export default function ProviderComingSoonRoute() {
   const { title } = useLocalSearchParams<{ title?: string }>();
