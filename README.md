@@ -1,5 +1,9 @@
 # Muskill Asaan Mobile
 
+> **Proprietary source-available code — all rights reserved.** This project
+> is not open source. Viewing the code does not grant permission to reuse,
+> modify, redistribute, or deploy it. See [LICENSE](LICENSE).
+
 Expo + React Native prototype for the Muskill Asaan micro-job marketplace
 (Bangladesh, initially Dhaka).
 
@@ -57,3 +61,17 @@ npm run typecheck          # tsc --noEmit
 npm test                     # Jest unit/component tests
 npm run test:coverage           # Jest with coverage report
 ```
+
+## License and permitted use
+
+Copyright (c) 2026 Md. Najmul Kabir. All rights reserved.
+
+This is proprietary, source-available software, **not open-source software**.
+Access to the code is provided for inspection and evaluation only. No
+permission is granted to run, copy, modify, redistribute, or deploy it
+without the copyright holder's prior written authorization, except as
+permitted by applicable law or GitHub's Terms of Service.
+
+The setup commands above are for the repository owner and authorized
+contributors; they do not grant additional rights. See [LICENSE](LICENSE)
+for the full notice.
